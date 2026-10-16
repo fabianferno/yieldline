@@ -29,7 +29,7 @@ for (let p = 0; p < maxPages && url; p++) {
 const market = [...agg.entries()]
   .map(([seller, a]) => ({ seller, calls: a.calls, usdc: +a.usdc.toFixed(6), payers: a.payers.size, first: a.first, last: a.last }))
   .sort((x, y) => y.usdc - x.usdc);
-writeState("market", market);
+await writeState("market", market);
 console.log(`Arc x402 market: ${market.length} sellers, ${market.reduce((s, m) => s + m.calls, 0)} paid calls`);
 
 // Candidates: meaningful revenue, mix of single-payer and multi-payer sellers.

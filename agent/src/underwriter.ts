@@ -3,7 +3,7 @@ import type { Address } from "viem";
 import { lienInfo, poolState, probe402 } from "./chain.js";
 import { runAgent, MODEL, type Tool } from "./llm.js";
 import { revenueProfile } from "./revenue.js";
-import { recordDecision, readState, writeState, type Decision } from "./store.js";
+import { putOffer, recordDecision, type Decision } from "./store.js";
 import { anchorDecision } from "./decisions.js";
 
 export type UnderwritingDecision = {
@@ -145,7 +145,7 @@ export async function underwrite(seller: Address, endpoint: string) {
     if (d.advanceUsdc > pool.limits.autoApproveLimitUsdc) notes.push("above auto-approve limit"), (d.decision = "escalate");
   }
 
-  const rec: Decision = recordDecision({
+  const rec: Decision = await recordDecision({
     agent: "underwriter",
     subject: seller,
     action: d.decision,
@@ -164,9 +164,7 @@ export async function underwrite(seller: Address, endpoint: string) {
     decisionHash: rec.hash,
     createdAt: rec.at,
   };
-  const offers = readState<Offer[]>("offers", []);
-  offers.push(offer);
-  writeState("offers", offers);
+  await putOffer(offer);
   const anchorTx = await anchorDecision(rec, "underwriter");
   return { offer, decision: rec, guardrailNotes: notes, anchorTx };
 }

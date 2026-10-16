@@ -1,17 +1,20 @@
-// Append-only local logs (events + agent decisions). Decisions are also hash-anchored on chain via LenderPool.logDecision.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+// Offers, agent decisions and small state blobs, on top of the kv adapter (Redis on Vercel, files locally).
+// Decisions are also hash-anchored on chain via logDecision; the stored record is the full trace behind that hash.
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { keccak256, toHex } from "viem";
-import { ROOT } from "./config.js";
+import { DATA, kv } from "./kv.js";
+import type { Offer } from "./underwriter.js";
 
-export const DATA = process.env.VERCEL ? "/tmp/horos" : resolve(ROOT, "agent/data");
-mkdirSync(DATA, { recursive: true });
+export { DATA };
 
-const jsonl = (file: string) => resolve(DATA, file);
 const ser = (v: unknown) => JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x));
 
+/** Local operational log only (not shown in the product). */
 export function recordEvent(e: Record<string, unknown>) {
-  appendFileSync(jsonl("events.jsonl"), ser({ at: new Date().toISOString(), ...e }) + "\n");
+  try {
+    appendFileSync(resolve(DATA, "events.jsonl"), ser({ at: new Date().toISOString(), ...e }) + "\n");
+  } catch {}
 }
 
 export type Decision = {
@@ -26,36 +29,81 @@ export type Decision = {
   rationale: string;
   hash: `0x${string}`;
   txHash?: string;
+  pool?: string;
 };
 
-export function recordDecision(d: Omit<Decision, "id" | "at" | "hash">): Decision {
+export async function recordDecision(d: Omit<Decision, "id" | "at" | "hash">): Promise<Decision> {
   const at = new Date().toISOString();
   const body = { at, ...d };
   const hash = keccak256(toHex(ser(body)));
   const full: Decision = { id: hash.slice(0, 10), hash, ...body };
-  appendFileSync(jsonl("decisions.jsonl"), ser(full) + "\n");
+  await kv.hset("decisions", hash, full);
   return full;
 }
 
-export function patchDecision(hash: string, patch: Partial<Decision>) {
-  const all = readJsonl<Decision>("decisions.jsonl").map((d) => (d.hash === hash ? { ...d, ...patch } : d));
-  writeFileSync(jsonl("decisions.jsonl"), all.map(ser).join("\n") + "\n");
+export async function patchDecision(hash: string, patch: Partial<Decision>) {
+  const d = await kv.hget<Decision>("decisions", hash);
+  if (d) await kv.hset("decisions", hash, { ...d, ...patch });
 }
 
-export function readJsonl<T>(file: string): T[] {
-  const p = jsonl(file);
-  if (!existsSync(p)) return [];
-  return readFileSync(p, "utf8")
-    .split("\n")
-    .filter(Boolean)
-    .map((l) => JSON.parse(l));
+export async function getDecision(hash: string) {
+  return kv.hget<Decision>("decisions", hash);
 }
 
-export function readState<T>(name: string, fallback: T): T {
-  const p = jsonl(`${name}.json`);
+export async function listDecisions() {
+  return (await kv.hvals<Decision>("decisions")).sort((a, b) => b.at.localeCompare(a.at));
+}
+
+// ---------------------------------------------------------------- offers
+
+let migrated = false;
+/** One-time move of the legacy local offers.json array (and decisions.jsonl) into the kv store. */
+async function migrateLegacy() {
+  if (migrated || kv.backend !== "files") return;
+  migrated = true;
+  const legacy = resolve(DATA, "offers.json");
+  if (existsSync(legacy) && !existsSync(resolve(DATA, "h-offers.json"))) {
+    for (const o of JSON.parse(readFileSync(legacy, "utf8")) as Offer[]) await kv.hset("offers", o.id, o);
+  }
+  const dl = resolve(DATA, "decisions.jsonl");
+  if (existsSync(dl) && !existsSync(resolve(DATA, "h-decisions.json"))) {
+    for (const line of readFileSync(dl, "utf8").split("\n").filter(Boolean)) {
+      const d = JSON.parse(line) as Decision;
+      await kv.hset("decisions", d.hash, d);
+    }
+  }
+}
+
+export async function putOffer(o: Offer) {
+  await migrateLegacy();
+  await kv.hset("offers", o.id, o);
+}
+
+export async function listOffers() {
+  await migrateLegacy();
+  return (await kv.hvals<Offer>("offers")).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function getOffer(idOrHash: string) {
+  await migrateLegacy();
+  const direct = await kv.hget<Offer>("offers", idOrHash);
+  if (direct) return direct;
+  const o = (await listOffers()).find((x) => x.decisionHash === idOrHash);
+  if (!o) throw new Error(`offer ${idOrHash} not found`);
+  return o;
+}
+
+// ---------------------------------------------------------------- small state blobs
+
+export async function readState<T>(name: string, fallback: T): Promise<T> {
+  return (await kv.get<T>(`state-${name}`)) ?? (kv.backend === "files" ? legacyState(name, fallback) : fallback);
+}
+
+function legacyState<T>(name: string, fallback: T): T {
+  const p = resolve(DATA, `${name}.json`);
   return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : fallback;
 }
 
-export function writeState(name: string, v: unknown) {
-  writeFileSync(jsonl(`${name}.json`), ser(v));
+export async function writeState(name: string, v: unknown) {
+  await kv.set(`state-${name}`, v);
 }

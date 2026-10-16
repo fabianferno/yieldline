@@ -46,11 +46,11 @@ export async function anchorDecision(d: Decision, who: "underwriter" | "monitor"
     });
     const { publicClient } = await import("./config.js");
     await publicClient.waitForTransactionReceipt({ hash });
-    patchDecision(d.hash, { txHash: hash });
+    await patchDecision(d.hash, { txHash: hash });
     return hash;
   }
   const r = await tx.logDecision(who, d.subject as Address, `${d.agent}.${d.action}`, d.hash, uri);
-  patchDecision(d.hash, { txHash: r.txHash });
+  await patchDecision(d.hash, { txHash: r.txHash });
   return r.txHash;
 }
 

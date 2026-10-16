@@ -22,7 +22,7 @@ const ZERO = "0x0000000000000000000000000000000000000000";
 //   3. the seller's own wallet
 let cache: { at: number; v: Address } | null = null;
 export async function payTo(): Promise<Address> {
-  const override = process.env.SELLER_PAYTO_OVERRIDE ?? readState<{ payTo?: Address }>(`seller-${SELLER}`, {}).payTo;
+  const override = process.env.SELLER_PAYTO_OVERRIDE ?? (await readState<{ payTo?: Address }>(`seller-${SELLER}`, {})).payTo;
   if (override) return override as Address;
   if (cache && Date.now() - cache.at < 5_000) return cache.v;
   const splitter = (await publicClient.readContract({

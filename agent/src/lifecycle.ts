@@ -5,26 +5,17 @@ import LienRegistry from "./abi/LienRegistry.js";
 import { ADDR, publicClient, toUnits } from "./config.js";
 import { probe402, tx } from "./chain.js";
 import { anchorDecision } from "./decisions.js";
-import { readState, recordDecision, writeState } from "./store.js";
+import { getOffer, putOffer, recordDecision } from "./store.js";
+
+export { getOffer };
 import type { Offer } from "./underwriter.js";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export function getOffer(id: string) {
-  const offers = readState<Offer[]>("offers", []);
-  const o = offers.find((x) => x.id === id || x.decisionHash === id);
-  if (!o) throw new Error(`offer ${id} not found`);
-  return o;
-}
-
-function saveOffer(o: Offer) {
-  const offers = readState<Offer[]>("offers", []).map((x) => (x.id === o.id ? o : x));
-  writeState("offers", offers);
-}
 
 /** Step 1 (seller accepts): deploy the seller's splitter so they can point payTo at it. */
 export async function acceptOffer(id: string) {
-  const o = getOffer(id);
+  const o = await getOffer(id);
   if (o.status !== "offered") throw new Error(`offer ${id} is ${o.status}`);
   const r = await tx.ensureSplitter(o.seller);
   const splitter = (await publicClient.readContract({
@@ -34,13 +25,13 @@ export async function acceptOffer(id: string) {
     args: [o.seller],
   })) as Address;
   Object.assign(o, { status: "accepted", splitter, txs: { ...o.txs, splitter: r.txHash } });
-  saveOffer(o);
+  await putOffer(o);
   return o;
 }
 
 /** Step 2: verify the live x402 endpoint now asks buyers to pay the splitter, then disburse. */
 export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
-  const o = getOffer(id);
+  const o = await getOffer(id);
   if (o.status !== "accepted" || !o.splitter) throw new Error(`offer ${id} must be accepted first`);
 
   let probe = await probe402(o.endpoint);
@@ -51,7 +42,7 @@ export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
   }
   const committed = probe.ok && probe.payTo === o.splitter.toLowerCase();
 
-  const rec = recordDecision({
+  const rec = await recordDecision({
     agent: "underwriter",
     subject: o.seller,
     action: committed ? "fund" : "hold",
@@ -82,22 +73,22 @@ export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
     // Above the pool's auto-approve limit: the contract queued it for the human admin.
     const pid = Number(await publicClient.readContract({ address: ADDR.pool, abi: LenderPool, functionName: "proposalCount" })) - 1;
     Object.assign(o, { status: "pending_human", proposalId: pid, txs: { ...o.txs, proposal: r.txHash } });
-    saveOffer(o);
+    await putOffer(o);
     return { offer: o, funded: false, queuedForHuman: pid, txHash: r.txHash };
   }
   Object.assign(o, { status: "funded", lienId, txs: { ...o.txs, advance: r.txHash } });
-  saveOffer(o);
+  await putOffer(o);
   return { offer: o, funded: true, probe, txHash: r.txHash };
 }
 
 /** Human sign-off. For an escalated underwriting decision: release it as an offer. For a queued on-chain
  *  proposal: execute it with the admin key (LenderPool.approveProposal). */
 export async function humanApprove(id: string, note = "approved by operator") {
-  const o = getOffer(id) as Offer & { proposalId?: number };
+  const o = (await getOffer(id)) as Offer & { proposalId?: number };
   if (o.status === "pending_human" && o.proposalId === undefined) {
     o.status = "offered";
-    saveOffer(o);
-    recordDecision({ agent: "underwriter", subject: o.seller, action: "human_approved", escalated: true, inputs: { offerId: o.id }, output: { note }, rationale: note });
+    await putOffer(o);
+    await recordDecision({ agent: "underwriter", subject: o.seller, action: "human_approved", escalated: true, inputs: { offerId: o.id }, output: { note }, rationale: note });
     return { offer: o };
   }
   if (o.status === "pending_human" && o.proposalId !== undefined) {
@@ -115,7 +106,7 @@ export async function humanApprove(id: string, note = "approved by operator") {
       await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }),
     );
     Object.assign(o, { status: "funded", lienId, txs: { ...o.txs, advance: hash } });
-    saveOffer(o);
+    await putOffer(o);
     return { offer: o, txHash: hash };
   }
   throw new Error(`offer ${id} is ${o.status}; nothing to approve`);
@@ -128,9 +119,9 @@ export async function overrideOffer(
   terms: { advanceUsdc: number; sweepBps: number; feeBps: number; termDays: number },
   note: string,
 ) {
-  const o = getOffer(id);
+  const o = await getOffer(id);
   if (o.status !== "rejected") throw new Error(`offer ${id} is ${o.status}; override applies to agent rejections`);
-  const rec = recordDecision({
+  const rec = await recordDecision({
     agent: "human",
     subject: o.seller,
     action: "override_pilot",
@@ -153,6 +144,6 @@ export async function overrideOffer(
     conditions: [...o.conditions, "operator pilot: agent rejection on record"],
     endpoint: process.env.ENDPOINT ?? o.endpoint,
   };
-  writeState("offers", [...readState<Offer[]>("offers", []), pilot]);
+  await putOffer(pilot);
   return { pilot, anchorTx };
 }

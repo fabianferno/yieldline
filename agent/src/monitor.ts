@@ -8,7 +8,7 @@ import { allLiens, poolState, probe402, splitterStats, tx } from "./chain.js";
 import { ADDR, publicClient, toUnits } from "./config.js";
 import { anchorDecision } from "./decisions.js";
 import { runAgent, MODEL } from "./llm.js";
-import { readState, recordDecision, writeState } from "./store.js";
+import { listOffers, readState, recordDecision, writeState } from "./store.js";
 import type { Offer } from "./underwriter.js";
 import MockUSYCTeller from "./abi/MockUSYCTeller.js";
 
@@ -75,14 +75,14 @@ const submitTreasury = {
 type LienMemory = { lastPayTo?: string; lastLlmAt?: number; lastRepaid?: number; lastAction?: string };
 
 export async function monitorTick(opts: { force?: boolean; quietMinutes?: number } = {}) {
-  const offers = readState<Offer[]>("offers", []);
-  const memory = readState<Record<string, LienMemory>>("monitor-memory", {});
+  const offers = await listOffers();
+  const memory = await readState<Record<string, LienMemory>>("monitor-memory", {});
   const pool = await poolState();
   const liens = (await allLiens()).filter((l) => l.status === "Active" || l.status === "Frozen");
   const results: unknown[] = [];
 
   for (const l of liens) {
-    const offer = [...offers].reverse().find((o) => o.seller.toLowerCase() === l.seller.toLowerCase() && o.lienId === l.id);
+    const offer = offers.find((o) => o.seller.toLowerCase() === l.seller.toLowerCase() && o.lienId === l.id);
     const endpoint = offer?.endpoint;
     const probe = endpoint ? await probe402(endpoint).catch((e) => ({ ok: false as const, error: String(e?.message ?? e) })) : null;
     const stats = await splitterStats(l.payTo);
@@ -149,7 +149,7 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
     mem.lastLlmAt = Date.now();
     mem.lastAction = result.action;
 
-    const rec = recordDecision({
+    const rec = await recordDecision({
       agent: "monitor",
       subject: l.seller,
       action: result.action,
@@ -170,13 +170,13 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
     results.push({ lienId: l.id, decision: result, actionTx, anchorTx });
   }
 
-  writeState("monitor-memory", memory);
+  await writeState("monitor-memory", memory);
   return results;
 }
 
 export async function treasuryTick(opts: { force?: boolean } = {}) {
   const pool = await poolState();
-  const offers = readState<Offer[]>("offers", []);
+  const offers = await listOffers();
   const pipelineUsdc = offers.filter((o) => o.status === "offered" || o.status === "accepted" || o.status === "pending_human")
     .reduce((s, o) => s + o.advanceUsdc, 0);
   const shares = (await publicClient.readContract({
@@ -211,7 +211,7 @@ export async function treasuryTick(opts: { force?: boolean } = {}) {
     submitTool: "submit_decision",
     maxTurns: 2,
   });
-  const rec = recordDecision({
+  const rec = await recordDecision({
     agent: "treasury",
     subject: ADDR.pool,
     action: result.action,

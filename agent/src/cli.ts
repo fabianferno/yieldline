@@ -13,7 +13,7 @@ import type { Address } from "viem";
 import { underwrite } from "./underwriter.js";
 import { acceptOffer, fundOffer, humanApprove, overrideOffer } from "./lifecycle.js";
 import { loop, monitorTick, treasuryTick } from "./monitor.js";
-import { readState, writeState } from "./store.js";
+import { listOffers, writeState } from "./store.js";
 
 const [cmd, ...args] = process.argv.slice(2);
 const force = args.includes("--force");
@@ -40,7 +40,7 @@ switch (cmd) {
     break;
   }
   case "offers":
-    out(readState("offers", []));
+    out(await listOffers());
     break;
   case "monitor":
     out(await monitorTick({ force }));
@@ -52,11 +52,11 @@ switch (cmd) {
     await loop(Number(args[0] ?? 30));
     break;
   case "divert":
-    writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, { payTo: args[0] });
+    await writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, { payTo: args[0] });
     console.log("seller payTo override ->", args[0]);
     break;
   case "restore":
-    writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, {});
+    await writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, {});
     console.log("seller payTo override cleared");
     break;
   default:
