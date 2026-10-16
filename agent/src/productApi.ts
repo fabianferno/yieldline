@@ -110,16 +110,17 @@ productApi.post(
     const applicant = await verifyRequest(req.body, "apply", endpoint);
     const seller = getAddress(payout);
 
+    const enc = await encumbrance(seller);
+    if (enc) throw new HttpError(409, `This revenue address already has live lien #${enc.liveLienId} (${enc.pool}). It can borrow again once that lien closes.`);
+
+    // Product applications only (operator CLI offers have no applicant and do not block a seller applying themselves).
     const open = await Promise.all(
-      (await listOffers()).filter((o) => o.seller.toLowerCase() === seller.toLowerCase() && ACTIVE.includes(o.status)).map(reconcileOffer),
+      (await listOffers()).filter((o) => o.applicant && o.seller.toLowerCase() === seller.toLowerCase() && ACTIVE.includes(o.status)).map(reconcileOffer),
     );
     const live = open.filter((o) => ACTIVE.includes(o.status));
     const mine = live.find((o) => o.applicant?.toLowerCase() === applicant.toLowerCase());
     if (mine) return { id: mine.id, existing: true };
     if (live.length) throw new HttpError(409, "Another account already has an open application for this revenue address.");
-
-    const enc = await encumbrance(seller);
-    if (enc) throw new HttpError(409, `This revenue address already has live lien #${enc.liveLienId} (${enc.pool}). It can borrow again once that lien closes.`);
 
     if ((await kv.incr(`rl:apply:${applicant}`, 3600)) > 3) throw new HttpError(429, "Three applications per hour per account. Try again later.");
     if ((await kv.incr(`rl:apply:all`, 3600)) > 30) throw new HttpError(429, "Horos is reviewing a lot of applications right now. Try again within the hour.");
