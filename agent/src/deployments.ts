@@ -16,7 +16,10 @@ export const deployments = {
       "0x26ff20ff04701d124775675d2282a46eca7c3eac",
       "0x6a2c074215c737c1bd5c2f97312d89d123f3b754"
     ]
-  }
+  },
+  "poolFactory": "0x73a78ceE808221f7fE8731209998A157C98AC6E2",
+  "poolImplementation": "0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647",
+  "corePool": "0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495"
 };
 
 export const circleWalletSet = {
