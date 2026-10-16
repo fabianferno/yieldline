@@ -1,0 +1,92 @@
+// Agent decisions are published on chain: LenderPool.logDecision(subject, kind, hash, uri) where uri carries a
+// compact JSON summary ("horos:v1:" + JSON) and hash = keccak of the full local record (inputs + investigation trace).
+import { decodeEventLog, type Address } from "viem";
+import LenderPool from "./abi/LenderPool.js";
+import LienRegistry from "./abi/LienRegistry.js";
+import { ADDR, EXPLORER } from "./config.js";
+import { tx } from "./chain.js";
+import { patchDecision, type Decision } from "./store.js";
+
+const PREFIX = "horos:v1:";
+
+export function summarize(d: Decision) {
+  const out = (d.output ?? {}) as Record<string, unknown>;
+  const pick = (k: string) => (out[k] === undefined ? undefined : out[k]);
+  return {
+    agent: d.agent,
+    action: d.action,
+    escalated: d.escalated,
+    rationale: d.rationale.slice(0, 1800),
+    terms:
+      d.agent === "underwriter"
+        ? { advanceUsdc: pick("advanceUsdc"), sweepBps: pick("sweepBps"), feeBps: pick("feeBps"), termDays: pick("termDays") }
+        : undefined,
+    riskScore: pick("riskScore"),
+    revenueQuality: pick("revenueQuality"),
+    flags: (pick("flags") as string[] | undefined)?.slice(0, 12),
+    facts: pick("facts"),
+    endpoint: (d.inputs as any)?.endpoint,
+    at: d.at,
+  };
+}
+
+export async function anchorDecision(d: Decision, who: "underwriter" | "monitor" = d.agent === "underwriter" ? "underwriter" : "monitor") {
+  const uri = PREFIX + JSON.stringify(summarize(d));
+  const r = await tx.logDecision(who, d.subject as Address, `${d.agent}.${d.action}`, d.hash, uri);
+  patchDecision(d.hash, { txHash: r.txHash });
+  return r.txHash;
+}
+
+async function getLogs(address: Address) {
+  const items: any[] = [];
+  let params = "";
+  for (let p = 0; p < 30; p++) {
+    const r = await fetch(`${EXPLORER}/api/v2/addresses/${address}/logs${params}`);
+    if (!r.ok) break;
+    const d = await r.json();
+    items.push(...(d.items ?? []));
+    if (!d.next_page_params) break;
+    params = "?" + new URLSearchParams(d.next_page_params).toString();
+  }
+  return items;
+}
+
+function decode(abi: any, log: any) {
+  try {
+    const ev: any = decodeEventLog({ abi, data: log.data, topics: log.topics.filter(Boolean) });
+    return { name: ev.eventName as string, args: ev.args as Record<string, any> };
+  } catch {
+    return null;
+  }
+}
+
+const ser = (v: unknown) => JSON.parse(JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x)));
+
+/** Full public activity feed: agent decisions + pool and registry events, newest first. */
+export async function activity() {
+  const [poolLogs, regLogs] = await Promise.all([getLogs(ADDR.pool), getLogs(ADDR.registry)]);
+  const rows = [
+    ...poolLogs.map((l) => ({ l, ev: decode(LenderPool, l), src: "pool" })),
+    ...regLogs.map((l) => ({ l, ev: decode(LienRegistry, l), src: "registry" })),
+  ]
+    .filter((r) => r.ev && !["RoleGranted", "LimitsUpdated"].includes(r.ev.name))
+    .map(({ l, ev, src }) => {
+      let summary: unknown;
+      if (ev!.name === "Decision" && typeof ev!.args.uri === "string" && ev!.args.uri.startsWith(PREFIX)) {
+        try {
+          summary = JSON.parse(ev!.args.uri.slice(PREFIX.length));
+        } catch {}
+      }
+      return {
+        src,
+        event: ev!.name,
+        args: ser({ ...ev!.args, uri: summary ? undefined : ev!.args.uri }),
+        decision: summary,
+        block: Number(l.block_number),
+        at: l.block_timestamp,
+        tx: l.transaction_hash,
+        txUrl: `${EXPLORER}/tx/${l.transaction_hash}`,
+      };
+    });
+  return rows.sort((a, b) => b.block - a.block);
+}

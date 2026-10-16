@@ -4,6 +4,7 @@ import { lienInfo, poolState, probe402 } from "./chain.js";
 import { runAgent, MODEL, type Tool } from "./llm.js";
 import { revenueProfile } from "./revenue.js";
 import { recordDecision, readState, writeState, type Decision } from "./store.js";
+import { anchorDecision } from "./decisions.js";
 
 export type UnderwritingDecision = {
   decision: "offer" | "reject" | "escalate";
@@ -157,5 +158,6 @@ export async function underwrite(seller: Address, endpoint: string) {
   const offers = readState<Offer[]>("offers", []);
   offers.push(offer);
   writeState("offers", offers);
-  return { offer, decision: rec, guardrailNotes: notes };
+  const anchorTx = await anchorDecision(rec, "underwriter");
+  return { offer, decision: rec, guardrailNotes: notes, anchorTx };
 }

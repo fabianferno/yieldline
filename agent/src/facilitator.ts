@@ -3,7 +3,8 @@
 //   1. Lien-aware settlement: a payment routed to a seller's own wallet while that seller has a live lien
 //      is refused, with the splitter address the buyer should be paying instead.
 //   2. Keeper: after settling into a Horos splitter it calls split() so sweeps happen in real time.
-import express from "express";
+import express, { Router } from "express";
+import { waitUntil } from "@vercel/functions";
 import type { Address } from "viem";
 import { x402Facilitator } from "@x402/core/facilitator";
 import { toFacilitatorEvmSigner } from "@x402/evm";
@@ -11,7 +12,7 @@ import { ExactEvmScheme as ExactFacilitator } from "@x402/evm/exact/facilitator"
 import LienRegistry from "./abi/LienRegistry.js";
 import LenderPool from "./abi/LenderPool.js";
 import RevenueSplitter from "./abi/RevenueSplitter.js";
-import { ADDR, NETWORK, env, operatorAccount, operatorClient, publicClient } from "./config.js";
+import { ADDR, NETWORK, operatorAccount, operatorClient, publicClient } from "./config.js";
 import { recordEvent } from "./store.js";
 
 
@@ -61,7 +62,8 @@ async function keeperSplit(payTo: Address) {
   recordEvent({ kind: "keeper.split", seller, splitter: payTo, txHash: hash });
 }
 
-const app = express();
+export const facilitatorRouter = Router();
+const app = facilitatorRouter;
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/supported", (_req, res) => res.json(facilitator.getSupported()));
@@ -92,7 +94,7 @@ app.post("/settle", async (req, res) => {
         resource: paymentPayload?.resource?.url,
         txHash: out.transaction,
       });
-      keeperSplit(paymentRequirements.payTo).catch((e) => console.error("keeper split failed", e.message));
+      waitUntil(keeperSplit(paymentRequirements.payTo).catch((e) => console.error("keeper split failed", e.message)));
     }
     res.json(out);
   } catch (e: any) {
@@ -100,5 +102,3 @@ app.post("/settle", async (req, res) => {
   }
 });
 
-const port = Number(env("FACILITATOR_PORT", "4020"));
-app.listen(port, () => console.log(`horos facilitator on :${port} (${NETWORK}, signer ${operatorAccount.address})`));

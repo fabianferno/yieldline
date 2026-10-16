@@ -1,0 +1,91 @@
+// Generated from deployments/arc-testnet.json and Circle wallet setup. Wallet ids are not secrets
+// (using them requires CIRCLE_API_KEY + CIRCLE_ENTITY_SECRET).
+export const deployments = {
+  "chainId": 5042002,
+  "usdc": "0x3600000000000000000000000000000000000000",
+  "lienRegistry": "0xD140eED8f20B2157366B36FcC08226d64c16906F",
+  "lenderPool": "0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506",
+  "mockUsycTeller": "0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5",
+  "admin": "0xB4f4211A98F3A5eEc1f0a47ee2Fa00a9f0A65Cb0",
+  "circleWallets": {
+    "underwritingAgent": "0x222e79b48fe1a02cf6dc97c32d2f4899bbcf29e7",
+    "monitorAgent": "0x2e7adb46535ec350bdbd5878401094ba6673c2cc",
+    "seller": "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f",
+    "buyers": [
+      "0x5ee825ba848a0f0389f47f960329d5ff0b10429c",
+      "0x26ff20ff04701d124775675d2282a46eca7c3eac",
+      "0x6a2c074215c737c1bd5c2f97312d89d123f3b754"
+    ]
+  }
+};
+
+export const circleWalletSet = {
+  "walletSetId": "fc90a84f-c903-570b-9b0b-fd3ad87111e0",
+  "wallets": [
+    {
+      "name": "pool-operator",
+      "id": "13d522f0-cf2a-5485-bc5c-a9a00057bcf0",
+      "address": "0xf79fe6974b37ee8fe560c51e28de9c8a03fbffdb"
+    },
+    {
+      "name": "underwriting-agent",
+      "id": "51c46c08-f906-5c64-98cd-e2169e7e1e8f",
+      "address": "0x222e79b48fe1a02cf6dc97c32d2f4899bbcf29e7"
+    },
+    {
+      "name": "monitor-agent",
+      "id": "593a4f1b-cbe1-56a9-9f4f-caeb20d0d131",
+      "address": "0x2e7adb46535ec350bdbd5878401094ba6673c2cc"
+    },
+    {
+      "name": "seller-horos-api",
+      "id": "2f6be543-d6d7-5d8d-9125-e854e98f40de",
+      "address": "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f"
+    },
+    {
+      "name": "buyer-1",
+      "id": "c6ba54cc-457e-593b-bdbc-d651bde992fe",
+      "address": "0x5ee825ba848a0f0389f47f960329d5ff0b10429c"
+    },
+    {
+      "name": "buyer-2",
+      "id": "13b7d26e-52d0-50ac-a1fd-9208e6c7fb68",
+      "address": "0x26ff20ff04701d124775675d2282a46eca7c3eac"
+    },
+    {
+      "name": "buyer-3",
+      "id": "250910e8-45c1-598a-8ea7-29ae69d5c385",
+      "address": "0x6a2c074215c737c1bd5c2f97312d89d123f3b754"
+    },
+    {
+      "name": "extbuyer-1",
+      "id": "645bf92c-b95d-5052-ba23-deb49efbb96e",
+      "address": "0x82361053e984f7acab38b4efea68c099e52e31ee"
+    },
+    {
+      "name": "extbuyer-2",
+      "id": "dbc71378-edfe-5fca-8381-b156ec5be5cc",
+      "address": "0x6ef78aa1cc0bfc3624b32b33ddcbb94446ae2634"
+    },
+    {
+      "name": "extbuyer-3",
+      "id": "b9ac56c7-0095-58ee-8fd3-cccd6fa84e03",
+      "address": "0x25cee880bcc8961151f5c94e99c0e89913c16019"
+    },
+    {
+      "name": "extbuyer-4",
+      "id": "31ed3e57-57dc-5c8a-a1f5-276d57cce74b",
+      "address": "0xa82678d05eedbef6102cb3284da36cd18476039d"
+    },
+    {
+      "name": "extbuyer-5",
+      "id": "3bc788bd-9cc3-5ddd-99f6-c4d0f1d78f9e",
+      "address": "0xdaa1fc2b1c3c4e9ff5f7f61a7257f1746e4c1b10"
+    },
+    {
+      "name": "extbuyer-6",
+      "id": "2b09f9e4-03d5-5ab2-958c-634d1a266978",
+      "address": "0x518f355ea365c940d2320ac015bab86e7c0e4ac2"
+    }
+  ]
+};

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { keccak256, toHex } from "viem";
 import { ROOT } from "./config.js";
 
-export const DATA = resolve(ROOT, "agent/data");
+export const DATA = process.env.VERCEL ? "/tmp/horos" : resolve(ROOT, "agent/data");
 mkdirSync(DATA, { recursive: true });
 
 const jsonl = (file: string) => resolve(DATA, file);

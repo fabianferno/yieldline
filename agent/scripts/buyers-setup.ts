@@ -23,6 +23,7 @@ const res = await circle.createWallets({
 const created = res.data!.wallets!.map((w, i) => ({ name: names[i], id: w.id, address: w.address }));
 state.wallets.push(...created);
 writeFileSync(file, JSON.stringify(state, null, 2));
+console.log("NOTE: re-run the deployments.ts generator to publish new wallets to the app");
 
 for (const w of created) {
   try {
