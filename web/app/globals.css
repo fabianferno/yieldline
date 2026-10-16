@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f3eee4;
+  --paper-2: #ebe4d6;
+  --card: #fbf8f2;
+  --ink: #1c1a17;
+  --ink-2: #57514a;
+  --ink-3: #8b8378;
+  --rule: #d8cfbf;
+  --terra: #b4532a;
+  --olive: #556b2f;
+  --ochre: #b8860b;
+  --blood: #9b2226;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-terra: var(--terra);
+  --color-olive: var(--olive);
+  --color-ochre: var(--ochre);
+  --color-blood: var(--blood);
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.engraved {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.num {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.stone {
+  background:
+    radial-gradient(1200px 400px at 10% -10%, rgba(180, 83, 42, 0.07), transparent 60%),
+    radial-gradient(800px 300px at 100% 0%, rgba(85, 107, 47, 0.06), transparent 60%),
+    var(--paper);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.4s ease-out both;
+}
