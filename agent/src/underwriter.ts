@@ -59,7 +59,10 @@ How to underwrite:
 7. Before an offer, payTo normally points at the seller's own wallet: that is expected, not a red flag. Pointing payTo
    at the splitter is a funding CONDITION, verified on the live endpoint before any USDC is disbursed.
    Payers funded by a public testnet faucet are normal on testnet; a shared faucet funder is not wash evidence.
-8. Advances on testnet are small. Never round up to make a deal happen; a tiny honest advance beats a fake big one.
+8. Sellers discovered by market scan have no endpoint yet; judge the revenue on its merits and make any offer
+   conditional on connecting. Gateway (Nanopayments) receipts are as real as exact receipts; unsettled ones are
+   receivables already owed to the seller.
+9. Advances on testnet are small. Never round up to make a deal happen; a tiny honest advance beats a fake big one.
 
 Finish by calling submit_decision exactly once. The rationale must cite the specific numbers you relied on.`;
 
@@ -89,7 +92,13 @@ export async function underwrite(seller: Address, endpoint: string) {
       name: "probe_live_endpoint",
       description: "Make an unpaid request to the seller's x402 endpoint and decode the 402 challenge (payTo, price, network).",
       input_schema: { type: "object", properties: {}, required: [] },
-      run: () => probe402(endpoint),
+      run: () =>
+        endpoint
+          ? probe402(endpoint)
+          : Promise.resolve({
+              ok: false,
+              note: "No endpoint registered: seller was discovered from on-chain x402 receipts (market scan). Any offer is conditional on the seller connecting and pointing payTo at a Horos splitter.",
+            }),
     },
     {
       name: "submit_decision",
@@ -115,7 +124,7 @@ export async function underwrite(seller: Address, endpoint: string) {
 
   const { result, trace } = await runAgent<UnderwritingDecision>({
     system: SYSTEM,
-    prompt: `Underwrite seller ${seller}. Their x402 endpoint: ${endpoint}. Investigate, then submit your decision.`,
+    prompt: `Underwrite seller ${seller}. Their x402 endpoint: ${endpoint || "none registered (found by market scan of Arc x402 receipts)"}. Investigate, then submit your decision.`,
     tools,
     submitTool: "submit_decision",
   });
