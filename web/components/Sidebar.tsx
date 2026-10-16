@@ -78,7 +78,7 @@ export function Sidebar() {
         </nav>
 
         <div className="mb-1.5 mt-6 px-3 text-[12px] font-medium text-muted">You</div>
-        <nav className="space-y-1">
+        <nav id="tour-you" className="space-y-1">
           {YOU.map(({ href, label, note, icon: Icon }) => (
             <NavItem key={href} href={href} active={isActive(href)}>
               <Icon size={18} />

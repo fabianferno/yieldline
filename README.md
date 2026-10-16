@@ -12,6 +12,18 @@ Built for the Tameion Agents Hackathon (Canteen × Circle). Runs on **Arc testne
 
 ---
 
+## Who uses it
+
+| Who | Where | What they do |
+|---|---|---|
+| **Seller** (an x402 business) | `/borrow` | Apply with their endpoint, watch the agent review their revenue, read the verdict and reasoning, pick a pool whose rules fit, point `payTo` at their splitter, get funded, watch the line repay |
+| **Lender** | `/markets`, `/lend` | Compare pools, deposit USDC for shares (ERC-4626), withdraw whatever is not lent out |
+| **Curator** | `/curate` | Start a pool, set its limits and risk appetite, approve advances above the auto-approve limit, mark defaults with a published reason |
+| **Anyone** | `/lookup`, `/seller/…`, `/activity` | Check whether a seller's revenue is pledged, and read every decision with its reasoning |
+
+Everyone signs in with a **passkey** (Circle Modular Wallets): one Circle smart account on Arc per person, no extension, no
+seed phrase. One account can borrow, lend and curate.
+
 ## Why
 
 x402 sellers (paid APIs, MCP tools, datasets) have revenue that is on-chain, per-call and real-time: the best
@@ -88,22 +100,41 @@ The seller controls `payTo` and can point it back at their own wallet at any tim
   `LenderPool.setTeller` swaps it for the real Teller in one call.
 - **x402 on Arc:** `@x402/*` v2. No public facilitator supports `eip155:5042002` for the exact scheme, so Horos runs its own.
 
+## The pool marketplace
+
+`PoolFactory` lets anyone open a lending pool as its curator. Pools are EIP-1167 clones of `LenderPoolV2`, an ERC-4626
+vault: lenders deposit USDC for shares; fees raise the share price, defaults lower it; withdrawals are capped at free cash.
+The curator holds the human powers for that pool (approve above the auto-approve limit, mark default, set limits within
+the factory's protocol caps) and **cannot withdraw depositors' money**: the contract has no such function. The Horos
+agents hold `AGENT_ROLE` on every pool. Each pool enforces its own **risk appetite** on chain: `advance(...)` reverts if
+the agent's risk score for the seller is above the pool's `maxRiskScore`.
+
+The factory registers every pool as a lender in the one shared `LienRegistry`, so a seller with a live lien in any pool
+is refused by every other pool (`test_crossPoolSecondLienReverts`).
+
+The underwriter decides risk and terms once, pool-agnostic; the seller then sees which pools' rules fit the offer
+(and why the others don't) and picks one.
+
 ## Deployed (Arc testnet, chain 5042002)
 
 | Contract | Address |
 |---|---|
 | LienRegistry | [`0xD140eED8f20B2157366B36FcC08226d64c16906F`](https://explorer.testnet.arc.io/address/0xD140eED8f20B2157366B36FcC08226d64c16906F) |
-| LenderPool | [`0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506`](https://explorer.testnet.arc.io/address/0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506) |
+| LenderPool (v1, operator pilot, closed) | [`0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506`](https://explorer.testnet.arc.io/address/0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506) |
+| PoolFactory | [`0x73a78ceE808221f7fE8731209998A157C98AC6E2`](https://explorer.testnet.arc.io/address/0x73a78ceE808221f7fE8731209998A157C98AC6E2) |
+| LenderPoolV2 (implementation) | [`0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647`](https://explorer.testnet.arc.io/address/0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647) |
+| Pool "Horos Core" (curator: Horos operator, risk ≤ 60) | [`0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495`](https://explorer.testnet.arc.io/address/0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495) |
+| Pool "Steady" (second curator account, created from a fresh key to show anyone can open a pool; risk ≤ 40) | [`0x8E20335558Cf33809585cAc47c4e9D7A22a8ef8f`](https://explorer.testnet.arc.io/address/0x8E20335558Cf33809585cAc47c4e9D7A22a8ef8f) |
 | MockUSYCTeller | [`0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5`](https://explorer.testnet.arc.io/address/0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5) |
 
-All verified on Blockscout. Agent and buyer Circle wallets are listed in `agent/src/deployments.ts`.
+Contracts verified on Blockscout; pools are EIP-1167 clones of the verified implementation. Agent and buyer Circle wallets are listed in `agent/src/deployments.ts`.
 
 ## Repo
 
 ```
-contracts/   Foundry: LienRegistry, RevenueSplitter, LenderPool, MockUSYCTeller (+ tests)
-agent/       TypeScript: x402 facilitator, Horos Lien Oracle seller, agents, CLI, read API
-web/         Next.js: ledger, decision feed, public lien explorer
+contracts/   Foundry: LienRegistry, RevenueSplitter, LenderPoolV2 + PoolFactory, LenderPool (v1), MockUSYCTeller (+ tests)
+agent/       TypeScript: x402 facilitator, Horos Lien Oracle seller, agents, CLI, product + read API
+web/         Next.js: passkey wallets, pools, borrow / lend / curate, decision feed, public lien explorer
 docs/        brief + verified research notes on x402/Arc/Circle
 ```
 
@@ -111,14 +142,16 @@ docs/        brief + verified research notes on x402/Arc/Circle
 
 ```bash
 cp .env.example .env              # Circle API key + entity secret, Anthropic key, deployer + facilitator keys
-cd contracts && forge test        # 7 tests: full loop, double financing, freeze, escalation, limits, default, USYC
+cd contracts && forge test        # 18 tests: v1 loop + v2 pools (shares, defaults, caps, risk gate, cross-pool liens)
 cd ../agent && pnpm i
 pnpm api                          # facilitator + seller + read API on :4021
 pnpm buy 10                       # paid x402 calls from Circle buyer wallets
 pnpm horos underwrite <seller> <endpoint>
 pnpm horos accept <offerId> && pnpm horos fund <offerId>
-pnpm horos loop                   # monitoring + treasury agents
-cd ../web && pnpm i && NEXT_PUBLIC_HOROS_API=http://localhost:4021 pnpm dev
+pnpm horos pools                  # every pool with live accounting
+pnpm horos loop                   # fund-pending + monitoring + treasury agents, every pool
+pnpm test                         # pool matching + signed-request auth
+cd ../web && pnpm i && NEXT_PUBLIC_HOROS_API=http://localhost:4021 NEXT_PUBLIC_CIRCLE_CLIENT_KEY=… pnpm dev
 ```
 
 ## Honest limitations

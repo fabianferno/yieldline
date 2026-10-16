@@ -11,11 +11,12 @@ web
 Primary audience was left to the designer to choose (user said "choose the best yourself"). The choice:
 
 - **Near term: hackathon judges** (Tameion Agents Hackathon, Canteen × Circle; deadline Oct 17 2026, 11:59 PM ET). Judges have about a minute per project, so they need to see quickly that the loop is real: real USDC moving, agents making decisions and giving reasons, and every claim provable on chain. Judging weights: agentic sophistication 30%, traction 30% (real USDC flows; synthetic doesn't count), use of Circle tools 20%, innovation 20%.
-- **Long term, the product's real users:**
-  - **x402 sellers:** businesses earning per-call USDC through x402. They want working capital without a bank, and need to see their credit line, repayment progress and what is pledged.
-  - **Lenders / pool LPs:** they put USDC into the pool and need exposure, repayment pace, idle yield and risk at a glance.
-  - **Anyone extending credit to an x402 business:** they use the public lien lookup to check whether a seller's revenue is already pledged.
-  - **The operator:** the human who approves anything above the auto-approve limit, can override the agent, and alone can mark a default.
+- **The product's users** (each has a self-serve path; one passkey account can hold several roles):
+  - **x402 sellers** (`/borrow`): apply with their endpoint, see the agent's verdict and reasoning, choose a pool whose rules fit, point `payTo` at their splitter, get funded, watch repayment.
+  - **Lenders** (`/markets`, `/lend`): compare pools, deposit USDC for ERC-4626 shares, withdraw free cash.
+  - **Curators** (`/curate`): open a pool through the PoolFactory, set its limits and risk appetite within protocol caps, approve advances above the auto-approve limit, and alone mark defaults. Curators cannot withdraw depositors' funds.
+  - **Anyone extending credit to an x402 business** (`/lookup`, `/seller/…`, `/activity`): checks whether revenue is pledged and reads every decision.
+  - **The Horos operator** is the curator of Pool v1 (the closed pilot) and of "Horos Core", and approves agent escalations.
 
 ## Product Purpose
 
@@ -52,7 +53,9 @@ The collateral is the revenue stream itself, enforced by where payments are rout
 
 ## Capabilities and Constraints
 
-- **Hard limits live in the LenderPool contract, not the prompt:**
+- **Wallets:** passkeys through Circle Modular Wallets (MSCA smart accounts on Arc testnet, Circle bundler/paymaster). Needs `NEXT_PUBLIC_CIRCLE_CLIENT_KEY`.
+- **Pools:** `PoolFactory` clones `LenderPoolV2` (ERC-4626). Pool v1 is the operator pilot, closed to deposits, and labelled so.
+- **Hard limits live in the contracts (factory protocol caps, each pool's own limits), not the prompt:**
   - max advance $10
   - human approval above $5
   - at most 40% of NAV per seller
@@ -77,6 +80,7 @@ All of this is real and on Arc testnet:
 - **Market scan** via Circle Gateway: 102 sellers.
 - **Real seller** 0xa890…6466 (56 days of history, 14 payers): has a $3 offer outstanding.
 - **Treasury:** parked $4.03 in mock USYC.
+- **Pool marketplace:** PoolFactory 0x73a7…C6E2, "Horos Core" 0x4c5e…6495 (seeded with $5 by the operator), "Steady" 0x8E20…ef8f (opened from a fresh key to show permissionless creation; unfunded).
 - **Contracts** (verified on Blockscout):
   - LienRegistry 0xD140…906F
   - LenderPool 0x3655…7506

@@ -43,7 +43,7 @@ export default function Markets() {
 
       {error && !data && <div className="alert alert-error text-[13px]">Can&apos;t reach the Horos API: {error}. Retrying.</div>}
 
-      <section className="panel overflow-hidden">
+      <section id="tour-pools" className="panel overflow-hidden">
         <div className="hidden grid-cols-[minmax(0,2.2fr)_repeat(5,minmax(0,1fr))_24px] gap-4 border-b border-line px-5 py-3 text-[12px] text-muted lg:grid">
           <span>Pool</span>
           <span className="text-right">Deposits</span>

@@ -7,13 +7,15 @@ import { useNextAdapter } from "nextstepjs/adapters/next";
 import { IArrow, IX, PrismCube } from "./icons";
 
 /**
- * First-visit walkthrough of the loop, across the dashboard, the lookup and one seller.
+ * First-visit walkthrough: the pool marketplace, the roles, one pool's rules, the lookup and one seller.
  * Every target is an `id="tour-…"` on the page itself; steps that wait on API data retry the selector.
  */
 const TOUR = "loop";
-const SEEN = "horos.tour.v1";
+const SEEN = "horos.tour.v2";
 const DEMO_SELLER = "/seller/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f";
 const WAIT = { selectorRetryAttempts: 25, selectorRetryDelay: 200 };
+
+const CORE = "/pools/0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495";
 
 const STEPS: Tour[] = [
   {
@@ -24,64 +26,52 @@ const STEPS: Tour[] = [
         title: "Working capital, repaid by the sales it funds",
         content: (
           <>
-            Horos lends USDC to businesses that get paid per call over x402. An agent checks the revenue is real, and every later payment pays
-            a slice of the loan back automatically. Eight stops, about a minute.
+            Horos lends USDC to businesses that get paid per call over x402. An agent checks the revenue is real, lenders fund it through
+            pools, and every later payment pays a slice back automatically. Seven stops, about a minute.
           </>
         ),
       },
       {
-        title: "The loop, live",
+        title: "Pools, run by curators",
         content: (
           <>
-            Read left to right. <b>Underwrite</b>: an agent judges the seller. <b>Advance</b>: the pool sends USDC. <b>Repay</b>: each sale
-            pays a share back. <b>Watch</b>: a monitor checks payments still route correctly. <b>Park</b>: idle cash earns yield.
+            Anyone can start a pool and set how much risk it takes. Lenders deposit USDC into the pools they trust. All pools share one public
+            lien registry, so a seller can&apos;t borrow twice against the same revenue.
           </>
         ),
-        selector: "#tour-loop",
-        side: "bottom",
+        selector: "#tour-pools",
+        side: "top",
         pointerPadding: 6,
         pointerRadius: 14,
-      },
-      {
-        title: "An advance pays itself back",
-        content: (
-          <>
-            The seller points their x402 <span className="mono text-ice">payTo</span> at a splitter. Every payment is divided on arrival: a
-            share to the pool until the cap is reached, the rest to the seller. The bar is real repayment on Arc.
-          </>
-        ),
-        selector: "#tour-advance",
-        side: "bottom",
-        pointerPadding: 8,
-        pointerRadius: 16,
         ...WAIT,
       },
       {
-        title: "Every decision shows its reasoning",
+        title: "One passkey, three roles",
         content: (
           <>
-            Underwriting, monitoring and operator overrides are each written to Arc with the agent&apos;s reasoning. Filter by who decided.
-            Rejections stay on the record too.
+            Sign in with a passkey: it creates a Circle smart account on Arc. <b>Borrow</b> if you sell over x402, <b>Lend</b> to earn the fees
+            sellers pay, <b>Curate</b> to run a pool.
           </>
         ),
-        selector: "#tour-decisions",
-        side: "bottom",
-        pointerPadding: 8,
-        pointerRadius: 12,
-        ...WAIT,
+        selector: "#tour-you",
+        side: "right",
+        pointerPadding: 6,
+        pointerRadius: 14,
+        nextRoute: CORE,
       },
       {
-        title: "Limits the agent can't talk its way past",
+        title: "Rules the agent can't talk its way past",
         content: (
           <>
-            Where the pool&apos;s money is right now, and the hard limits enforced by the contract: maximum advance, human approval above $5,
-            exposure per seller. The prompt can&apos;t override them.
+            Each pool&apos;s limits live in its contract: risk appetite, max advance, curator approval above a size, exposure per seller. The
+            curator can&apos;t move depositors&apos; money, and only the curator can mark a default.
           </>
         ),
-        selector: "#tour-pool",
+        selector: "#tour-rules",
         side: "left-top",
         pointerPadding: 8,
         pointerRadius: 16,
+        prevRoute: "/markets",
         nextRoute: "/lookup",
         ...WAIT,
       },
@@ -89,15 +79,15 @@ const STEPS: Tour[] = [
         title: "Check a seller before you lend",
         content: (
           <>
-            Paste any wallet. You&apos;ll see whether its revenue is already pledged to a lender, its repayment record, and where its payments
-            really come from. Next, one seller up close.
+            Paste any wallet. You&apos;ll see whether its revenue is already pledged, which pool holds the lien, its repayment record, and where
+            its payments really come from.
           </>
         ),
         selector: "#tour-lookup",
         side: "bottom",
         pointerPadding: 10,
         pointerRadius: 14,
-        prevRoute: "/dashboard",
+        prevRoute: CORE,
         nextRoute: DEMO_SELLER,
         ...WAIT,
       },
@@ -105,8 +95,8 @@ const STEPS: Tour[] = [
         title: "Pledged or not, in one line",
         content: (
           <>
-            While an advance is open, the seller&apos;s revenue is <b>pledged</b>: recorded as a public lien so no second lender can borrow
-            against the same income. It clears when the advance is repaid.
+            While an advance is open, the seller&apos;s revenue is <b>pledged</b>: a public lien that blocks every other pool. It clears when the
+            advance is repaid.
           </>
         ),
         selector: "#tour-pledge",
@@ -120,8 +110,8 @@ const STEPS: Tour[] = [
         title: "Why the agent said yes, or no",
         content: (
           <>
-            The underwriter&apos;s latest verdict on this seller: decision, risk score and reasoning. This one was rejected and then financed
-            as an operator pilot, and the page says so. Below it: revenue and payer forensics.
+            The underwriter&apos;s verdict on this seller, with its risk score and reasoning, anchored on Arc. This one was rejected and then
+            financed as an operator pilot, and the page says so.
           </>
         ),
         selector: "#tour-verdict",
@@ -164,12 +154,12 @@ function markSeen() {
   } catch {}
 }
 
-/** Opens the tour once, on a first visit to the dashboard. */
+/** Opens the tour once, on a first visit to the pools page. */
 function AutoStart() {
   const { startNextStep, isNextStepVisible } = useNextStep();
   const path = usePathname();
   useEffect(() => {
-    if (path !== "/dashboard" || isNextStepVisible) return;
+    if (path !== "/markets" || isNextStepVisible) return;
     let seen = true;
     try {
       seen = localStorage.getItem(SEEN) === "1";
@@ -192,8 +182,8 @@ export function TourButton({ className = "" }: { className?: string }) {
       type="button"
       className={className}
       onClick={() => {
-        if (path !== "/dashboard") push("/dashboard");
-        setTimeout(() => startNextStep(TOUR), path === "/dashboard" ? 0 : 500);
+        if (path !== "/markets") push("/markets");
+        setTimeout(() => startNextStep(TOUR), path === "/markets" ? 0 : 500);
       }}
     >
       Take the tour

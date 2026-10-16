@@ -152,7 +152,7 @@ function Composition({ p }: { p: PoolInfo }) {
 function LimitsPanel({ p }: { p: PoolInfo }) {
   const l = p.limits;
   return (
-    <Panel title="This pool's rules" right="enforced by the contract">
+    <Panel id="tour-rules" title="This pool's rules" right="enforced by the contract">
       <ul className="space-y-1.5 text-[13px] leading-relaxed text-white/80">
         {p.version === 2 && <li>Accepts sellers the agent scores at risk {l.maxRiskScore} or lower (0 = safest, 100 = reject).</li>}
         <li>Advances up to {usd(l.maxAdvanceUsdc, 2)}; above {usd(l.autoApproveLimitUsdc, 2)} the curator must approve.</li>
