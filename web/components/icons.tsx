@@ -102,6 +102,12 @@ export const IExternal = (p: P) => (
   </S>
 );
 
+export const IReplay = (p: P) => (
+  <S {...p}>
+    <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.3h4.3" />
+  </S>
+);
+
 /** The Prism glass cube, as the Horos mark. */
 export function PrismCube({ size = 40 }: { size?: number }) {
   const u = useId().replace(/:/g, "");

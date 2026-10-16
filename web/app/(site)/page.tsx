@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { API, EXPLORER, ago, short, usePoll, usd } from "@/lib/api";
-import { IArrow, IExternal, PrismCube } from "@/components/icons";
-import { EASE, Num } from "@/components/motion";
+import { IArrow, IExternal, IReplay, PrismCube } from "@/components/icons";
+import { EASE, Num, useGrowth } from "@/components/motion";
 import type { FeedItem, Lien } from "@/components/ui";
 
 type Overview = {
@@ -54,7 +54,7 @@ export default function Landing() {
       <section className="relative mx-auto grid max-w-[1240px] items-center gap-12 px-4 pb-20 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:pt-16">
         <div>
           <motion.h1
-            initial={{ opacity: 0.2, y: 14, filter: "blur(6px)" }}
+            initial={{ opacity: 0.6, y: 12, filter: "blur(3px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, ease: EASE }}
             className="max-w-[16ch] text-[40px] font-semibold leading-[1.04] tracking-[-0.03em] text-balance sm:text-[56px]"
@@ -62,7 +62,7 @@ export default function Landing() {
             Credit for x402 sellers, repaid by the payments themselves.
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0.2, y: 10 }}
+            initial={{ opacity: 0.6, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
             className="mt-6 max-w-[52ch] text-[16px] leading-relaxed text-white/75"
@@ -72,7 +72,7 @@ export default function Landing() {
             reasoning.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0.2, y: 10 }}
+            initial={{ opacity: 0.6, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
             className="mt-8 flex flex-wrap gap-3"
@@ -137,7 +137,7 @@ const STEPS = 6;
 function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }) {
   const challenge = useChallenge();
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
+  const inView = useInView(ref, { amount: 0.4, once: true });
   const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
   const [run, setRun] = useState(0);
@@ -151,10 +151,10 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
     if (!inView) return;
     setStep(0);
     const timers = Array.from({ length: STEPS }, (_, i) => setTimeout(() => setStep(i + 1), 350 + i * 700));
-    const again = setTimeout(() => setRun((r) => r + 1), 350 + STEPS * 700 + 6000);
-    return () => [...timers, again].forEach(clearTimeout);
+    return () => timers.forEach(clearTimeout);
   }, [challenge, inView, reduce, run]);
 
+  const liveSweeps = useGrowth(lien?.repaidUsdc);
   const sweepPct = (lien?.sweepBps ?? 3000) / 100;
   const amount = challenge?.amount ?? 0.02;
   const toPool = (amount * sweepPct) / 100;
@@ -163,14 +163,9 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
   return (
     <div ref={ref} className="panel edge relative overflow-hidden">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3 text-[12px]">
-        <span className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-          <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-          <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-        </span>
-        <span className="ml-2 text-white/80">A lender asks the Horos Lien Oracle about a seller</span>
-        <button onClick={() => setRun((r) => r + 1)} className="ml-auto text-muted hover:text-cyan" aria-label="Replay the exchange">
-          Replay
+        <span className="text-white/80">A lender asks the Horos Lien Oracle about a seller</span>
+        <button onClick={() => setRun((r) => r + 1)} className="btn btn-ghost ml-auto !h-8 !px-3 !text-[12px]" aria-label="Replay the exchange">
+          <IReplay size={14} /> Replay
         </button>
       </div>
 
@@ -194,7 +189,7 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
               v={
                 <span>
                   {challenge?.payTo ? short(challenge.payTo) : "—"}{" "}
-                  {isLien && <span className="font-sans text-[11px] text-cyan">← splitter for lien #{lien!.id}</span>}
+                  {isLien && <span className="inline-flex items-center gap-1 font-sans text-[11px] text-cyan"><IArrow size={12} className="rotate-180" /> splitter for lien #{lien!.id}</span>}
                 </span>
               }
             />
@@ -221,13 +216,14 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
             </div>
             <div className="relative flex h-9 overflow-hidden rounded-lg text-[12px] font-medium">
               <motion.div
-                className="flex items-center justify-center bg-gradient-to-r from-cyan to-cyan-deep text-midnight"
+                className="relative flex items-center justify-center overflow-hidden bg-gradient-to-r from-cyan to-cyan-deep text-midnight"
                 initial={{ flexGrow: 0.0001 }}
                 animate={{ flexGrow: step >= 5 ? sweepPct : 0.0001 }}
                 transition={{ duration: 0.8, ease: EASE }}
                 style={{ flexBasis: 0 }}
               >
-                {usd(toPool, 4)} to pool
+                {liveSweeps > 0 && <span key={liveSweeps} className="sweep-run" />}
+                <span className="relative">{usd(toPool, 4)} to pool</span>
               </motion.div>
               <motion.div
                 className="flex items-center justify-center bg-glass text-amber"
@@ -262,7 +258,7 @@ function Line({ show, children }: { show: boolean; children: React.ReactNode }) 
   return (
     <motion.div
       initial={false}
-      animate={show ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0.12, y: 4, filter: "blur(2px)" }}
+      animate={show ? { opacity: 1, y: 0 } : { opacity: 0.35, y: 0 }}
       transition={{ duration: show ? 0.45 : 0.2, ease: EASE }}
     >
       {children}
@@ -285,6 +281,7 @@ function Loop({ data, lien }: { data: Overview | null; lien?: Lien }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 70%", "end 60%"] });
   const fill = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+  const reduce = useReducedMotion();
   const uw = data?.feed.filter((f) => f.decision?.agent === "underwriter") ?? [];
   const underwrite = uw.find((f) => f.decision!.action === "offer") ?? uw.find((f) => f.decision!.action === "reject") ?? uw[0];
   const tone = (a?: string) => (a === "reject" ? "text-danger" : a === "offer" || a === "fund" ? "text-success" : "text-info");
@@ -386,21 +383,44 @@ function Loop({ data, lien }: { data: Overview | null; lien?: Lien }) {
         <div className="absolute bottom-2 left-[7px] top-2 w-px bg-line" aria-hidden />
         <motion.div className="absolute left-[7px] top-2 w-px origin-top bg-gradient-to-b from-cyan via-cyan to-amber" style={{ scaleY: fill, bottom: 8 }} aria-hidden />
         <ol className="space-y-14">
-          {stages.map((s) => (
+          {stages.map((s, i) => (
             <motion.li
               key={s.t}
-              initial={{ opacity: 0.25, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7, ease: EASE }}
+              initial={reduce ? "lit" : "rest"}
+              whileInView="lit"
+              viewport={{ once: true, margin: "0px 0px -40% 0px" }}
               className="relative grid gap-6 pl-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-12"
             >
-              <span className="absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-2 border-cyan bg-midnight shadow-[0_0_14px_rgba(54,217,232,0.6)]" />
-              <div>
+              {/* the node ignites as the rail's fill reaches it */}
+              <motion.span
+                variants={{
+                  rest: { backgroundColor: "#080b10", boxShadow: "0 0 0 0 rgba(0,0,0,0)" },
+                  lit: {
+                    backgroundColor: i === stages.length - 1 ? "#ffb65c" : "#36d9e8",
+                    boxShadow: `0 4px 14px -2px ${i === stages.length - 1 ? "rgba(255,182,92,0.6)" : "rgba(54,217,232,0.6)"}`,
+                  },
+                }}
+                transition={{ duration: 0.5, ease: EASE }}
+                className={`absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-2 ${i === stages.length - 1 ? "border-amber" : "border-cyan"}`}
+              />
+              <motion.div variants={{ rest: { opacity: 0.75 }, lit: { opacity: 1 } }} transition={{ duration: 0.5, ease: EASE }}>
                 <h3 className="text-[22px] font-semibold tracking-tight">{s.t}</h3>
                 <p className="mt-2 max-w-[52ch] text-[15px] leading-relaxed text-white/70">{s.d}</p>
-              </div>
-              <div className="panel p-5">{s.art ?? <div className="h-16 animate-pulse rounded-lg bg-glass/60" />}</div>
+              </motion.div>
+              {/* the evidence stays legible; a sheen travels across it from the rail side when it lights */}
+              <motion.div
+                variants={{ rest: { opacity: 0.8, x: -6 }, lit: { opacity: 1, x: 0 } }}
+                transition={{ duration: 0.6, ease: EASE }}
+                className="panel relative overflow-hidden p-5"
+              >
+                {s.art ?? <div className="h-16 animate-pulse rounded-lg bg-glass/60" />}
+                <motion.span
+                  aria-hidden
+                  variants={{ rest: { x: "-110%", opacity: 0 }, lit: { x: "260%", opacity: [0, 1, 0] } }}
+                  transition={{ duration: 1.1, ease: EASE, delay: 0.1 }}
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-cyan/12 to-transparent"
+                />
+              </motion.div>
             </motion.li>
           ))}
         </ol>

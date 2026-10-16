@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { EASE, Num, useGrowth } from "./motion";
 import { EXPLORER, ago, short, usd } from "@/lib/api";
-import { IBolt, ICheck, IChart, ICube, IInfo, IUp, IWarn, IX } from "./icons";
+import { IBolt, ICheck, IChart, ICube, IExternal, IInfo, IUp, IWarn, IX } from "./icons";
 
 export function Panel({
   title,
@@ -277,7 +277,7 @@ export function DecisionEntry({ f }: { f: FeedItem }) {
           )}
           {d.escalated && <span className="chip !h-5 border-amber/40 text-amber">needs a human</span>}
           <a href={f.txUrl} target="_blank" className="ml-auto text-[12px] text-muted hover:text-cyan" title="Anchored on Arc">
-            {ago(f.at)} ↗
+            {ago(f.at)} <IExternal size={11} className="inline -mt-0.5" />
           </a>
         </div>
         {(terms.length > 0 || d.riskScore !== undefined) && (

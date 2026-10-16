@@ -16,8 +16,11 @@ export function SpecularField() {
       raf = 0;
     const paint = () => {
       raf = 0;
-      document.querySelectorAll<HTMLElement>(".btn").forEach((el) => {
-        const r = el.getBoundingClientRect();
+      // read every rect first, then write, so the frame lays out once
+      const els = Array.from(document.querySelectorAll<HTMLElement>(".btn"));
+      const rects = els.map((el) => el.getBoundingClientRect());
+      els.forEach((el, k) => {
+        const r = rects[k];
         if (r.bottom < -PROXIMITY || r.top > innerHeight + PROXIMITY) return;
         const cx = r.left + r.width / 2,
           cy = r.top + r.height / 2;

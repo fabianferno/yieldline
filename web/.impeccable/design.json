@@ -1,0 +1,504 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-16T14:07:47.591406+00:00",
+  "title": "Design System: Horos",
+  "extensions": {
+    "colorMeta": {
+      "midnight": {
+        "role": "neutral",
+        "displayName": "Midnight",
+        "purpose": "Page ground; text on cyan fills; inset wells.",
+        "canonical": "oklch(14.9% 0.012 259.7)",
+        "tonalRamp": [
+          "#080b10",
+          "#22252b",
+          "#3e4249",
+          "#5d6168",
+          "#7e838a",
+          "#a1a5ad",
+          "#c5c9d1",
+          "#eceff3"
+        ]
+      },
+      "navy": {
+        "role": "neutral",
+        "displayName": "Ledger Navy",
+        "purpose": "Translucent panel body, input fill, chips.",
+        "canonical": "oklch(21.8% 0.036 262.5)",
+        "tonalRamp": [
+          "#040b1a",
+          "#1b2537",
+          "#384256",
+          "#566276",
+          "#778399",
+          "#99a6bc",
+          "#bdcae1",
+          "#e8effb"
+        ]
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Glass Slate",
+        "purpose": "Seller segment of split bars, hover fills, skeletons, tracks.",
+        "canonical": "oklch(27.3% 0.035 254.1)",
+        "tonalRamp": [
+          "#020b19",
+          "#192636",
+          "#354354",
+          "#546375",
+          "#748497",
+          "#96a7bb",
+          "#bacbe0",
+          "#e7effa"
+        ]
+      },
+      "cyan": {
+        "role": "primary",
+        "displayName": "Pool Cyan",
+        "purpose": "Money toward the pool, active state, focus, repaid figures.",
+        "canonical": "oklch(81.2% 0.128 204.5)",
+        "tonalRamp": [
+          "#001424",
+          "#003241",
+          "#005261",
+          "#007483",
+          "#0097a6",
+          "#00bbca",
+          "#42e1f0",
+          "#bcfcff"
+        ]
+      },
+      "cyan-deep": {
+        "role": "primary",
+        "displayName": "Deep Cyan",
+        "purpose": "Far stop of the primary gradient on fills and split segments.",
+        "canonical": "oklch(66.1% 0.112 208.7)",
+        "tonalRamp": [
+          "#001223",
+          "#003041",
+          "#005061",
+          "#007183",
+          "#0094a6",
+          "#34b8ca",
+          "#62ddf0",
+          "#c3faff"
+        ]
+      },
+      "ice": {
+        "role": "primary",
+        "displayName": "Ice",
+        "purpose": "Mono addresses, number flash, sweep-run light.",
+        "canonical": "oklch(95.5% 0.031 204.0)",
+        "tonalRamp": [
+          "#000f11",
+          "#102a2c",
+          "#2e474a",
+          "#4c6769",
+          "#6d888b",
+          "#8fabae",
+          "#b2d0d2",
+          "#e3f2f3"
+        ]
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "Seller Amber",
+        "purpose": "Seller's share, parked cash, risk, human judgement.",
+        "canonical": "oklch(82.8% 0.136 69.6)",
+        "tonalRamp": [
+          "#290000",
+          "#4b0a00",
+          "#6d2e00",
+          "#904f00",
+          "#b57100",
+          "#db9436",
+          "#ffb85e",
+          "#ffe7be"
+        ]
+      },
+      "amber-deep": {
+        "role": "secondary",
+        "displayName": "Deep Amber",
+        "purpose": "Far stop of the amber gradient; edge terminus.",
+        "canonical": "oklch(78.1% 0.171 66.7)",
+        "tonalRamp": [
+          "#2f0000",
+          "#520000",
+          "#762400",
+          "#9e4400",
+          "#c46700",
+          "#eb8b00",
+          "#ffb032",
+          "#ffe4b1"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "purpose": "Primary text; secondary text via opacity 85/75/70%.",
+        "canonical": "oklch(97.5% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#242527",
+          "#404244",
+          "#606164",
+          "#818285",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#edeef0"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Fog",
+        "purpose": "Labels, metadata, timestamps, placeholders.",
+        "canonical": "oklch(68.1% 0.028 253.6)",
+        "tonalRamp": [
+          "#040c17",
+          "#1b2632",
+          "#384351",
+          "#566271",
+          "#778493",
+          "#99a6b7",
+          "#bdcbdb",
+          "#e8eff8"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Verdict Green",
+        "purpose": "Offers, funding, repaid, 200 OK.",
+        "canonical": "oklch(77.3% 0.153 163.2)",
+        "tonalRamp": [
+          "#001900",
+          "#00380b",
+          "#005828",
+          "#007a47",
+          "#009e67",
+          "#0ec289",
+          "#51e8ad",
+          "#c0ffe0"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Freeze Red",
+        "purpose": "Rejections, freezes, defaults, errors.",
+        "canonical": "oklch(68.9% 0.200 22.4)",
+        "tonalRamp": [
+          "#360000",
+          "#5c0000",
+          "#820015",
+          "#b80025",
+          "#e13d47",
+          "#ff6569",
+          "#ff8b8b",
+          "#ffd4d0"
+        ]
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Monitor Blue",
+        "purpose": "Neutral agent actions and monitor verdicts.",
+        "canonical": "oklch(68.4% 0.171 252.2)",
+        "tonalRamp": [
+          "#00004b",
+          "#001a6e",
+          "#003e93",
+          "#0060be",
+          "#1b84e4",
+          "#48a8ff",
+          "#6fceff",
+          "#c5f3ff"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "purpose": "Every border and divider (muted at 14%).",
+        "canonical": "rgba(141, 154, 170, 0.14)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The landing's single offer line only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Landing section heads, written as sentences."
+      },
+      "page-title": {
+        "displayName": "Page title",
+        "purpose": "Per-route h1 in the app."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Loop stage names; lien headings at 18px."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Metric values, tabular, animated."
+      },
+      "panel-title": {
+        "displayName": "Panel title",
+        "purpose": "Heading inside every panel."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Lead and section prose, 48-62ch."
+      },
+      "body-small": {
+        "displayName": "Body small",
+        "purpose": "Rationales, rows, alerts; 72ch max."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metric labels and metadata, sentence case."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Protocol and chain text only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 40px -24px rgba(0,0,0,0.8)",
+        "purpose": "Every panel; ambient and structural."
+      },
+      {
+        "name": "glow-cyan",
+        "value": "0 0 0 1px rgba(54,217,232,0.08), 0 0 22px -4px rgba(54,217,232,0.45), inset 0 0 18px -6px rgba(54,217,232,0.35)",
+        "purpose": "Active nav pill and active tab pill."
+      },
+      {
+        "name": "fill-glow",
+        "value": "0 0 12px rgba(54,217,232,0.7)",
+        "purpose": "Progress fills (red variant when frozen)."
+      },
+      {
+        "name": "alert-glow",
+        "value": "0 0 18px -8px <signal at 0.6>",
+        "purpose": "Alerts, tinted to their signal."
+      },
+      {
+        "name": "button-drop",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 20px -12px rgb(<edge> / calc(var(--spec-i) * 0.7))",
+        "purpose": "Buttons; grows with specular intensity."
+      },
+      {
+        "name": "iridescent-edge",
+        "value": "linear-gradient(135deg, rgba(54,217,232,0.95) 0%, rgba(54,217,232,0.35) 22%, rgba(217,247,250,0.08) 45%, rgba(217,247,250,0.08) 62%, rgba(255,182,92,0.55) 85%, rgba(255,158,11,0.95) 100%)",
+        "purpose": "1px masked border gradient (not a shadow) on the hero panel per view, search field and active pills."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-prism",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Every authored transition."
+      },
+      {
+        "name": "route-settle",
+        "value": "380ms; from opacity 0.35, y 10px, blur 5px",
+        "purpose": "App route change (template)."
+      },
+      {
+        "name": "hero-entrance",
+        "value": "800ms, staggered 100ms; from opacity 0.2, y 10-14px, blur 6px",
+        "purpose": "Landing first-viewport copy."
+      },
+      {
+        "name": "count-up",
+        "value": "900ms",
+        "purpose": "Numbers travel to new values."
+      },
+      {
+        "name": "num-flash",
+        "value": "1200ms from ice + cyan text glow",
+        "purpose": "Number increased."
+      },
+      {
+        "name": "sweep-run",
+        "value": "900ms translateX -100% to 260%",
+        "purpose": "Light crossing the pool segment when a repayment lands."
+      },
+      {
+        "name": "pill-spring",
+        "value": "spring stiffness 420, damping 36-38",
+        "purpose": "Shared-layout nav and tab pills."
+      },
+      {
+        "name": "progress-grow",
+        "value": "900-1100ms scaleX",
+        "purpose": "Progress fills."
+      },
+      {
+        "name": "specular",
+        "value": "--spec-i 350ms; idle 0.3, rises with pointer proximity (squared)",
+        "purpose": "Cursor-tracked button edge light; off on coarse pointers."
+      },
+      {
+        "name": "pulse",
+        "value": "2s ease-out infinite",
+        "purpose": "Active status dot."
+      },
+      {
+        "name": "console-line",
+        "value": "450ms in / 200ms out, steps 700ms apart",
+        "purpose": "Exchange console lines coming into focus."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Specular glass button with cyan edge light; the main action. In the build the lit arc tracks the cursor bearing (simplified here to a full-edge brighten).",
+      "html": "<button class=\"ds-btn-primary\">Open the live ledger <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-btn-primary{--l:54 217 232;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(20,90,108,0.55),rgba(8,11,16,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-primary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-primary:active{transform:scale(0.98)} .ds-btn-primary:focus-visible{outline:2px solid #36d9e8;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Quiet partner beside a primary; ice edge light over glass slate.",
+      "html": "<button class=\"ds-btn-ghost\">Look up a seller</button>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-btn-ghost{--l:217 247 250;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(27,40,56,0.5),rgba(8,11,16,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-ghost:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-ghost:active{transform:scale(0.98)} .ds-btn-ghost:focus-visible{outline:2px solid #36d9e8;outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Alternate action with amber edge light.",
+      "html": "<button class=\"ds-btn-secondary\">Read the code</button>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-btn-secondary{--l:255 182 92;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(255,158,11,0.1),rgba(8,11,16,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-secondary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-secondary:active{transform:scale(0.98)} .ds-btn-secondary:focus-visible{outline:2px solid #36d9e8;outline-offset:2px}"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Address lookup field with iridescent edge wrapper and leading icon.",
+      "html": "<div class=\"ds-field\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/></svg><input class=\"ds-input\" placeholder=\"Seller wallet address, 0x…\"></div>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-field{position:relative;isolation:isolate} .ds-field::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(54,217,232,0.95) 0%, rgba(54,217,232,0.35) 22%, rgba(217,247,250,0.08) 45%, rgba(217,247,250,0.08) 62%, rgba(255,182,92,0.55) 85%, rgba(255,158,11,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-field{border-radius:10px;width:360px} .ds-field svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(245,247,250,0.8);z-index:2} .ds-input{height:44px;width:100%;box-sizing:border-box;border:none;border-radius:10px;background:linear-gradient(180deg,rgba(17,26,43,0.9),rgba(8,11,16,0.9));padding:0 14px 0 40px;font:13px 'JetBrains Mono',ui-monospace,monospace;color:#f5f7fa;outline:none} .ds-input::placeholder{color:#8d9aaa} .ds-input:focus-visible{outline:2px solid #36d9e8;outline-offset:2px}"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Lien status pill; Active carries a pulsing dot.",
+      "html": "<span class=\"ds-chip ds-chip-active\"><i></i>Active</span> <span class=\"ds-chip ds-chip-human\">needs a human</span>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font:500 11px Inter,system-ui,sans-serif;border:1px solid rgba(141,154,170,0.14);background:rgba(17,26,43,0.8)} .ds-chip i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:ds-pulse 2s ease-out infinite} .ds-chip-active{color:#36d9e8;border-color:rgba(54,217,232,0.4)} .ds-chip-human{color:#ffb65c;border-color:rgba(255,182,92,0.4)} @keyframes ds-pulse{0%,100%{box-shadow:0 0 0 0 currentColor}60%{box-shadow:0 0 0 4px transparent}}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Translucent navy glass slab; the hero variant adds the iridescent edge.",
+      "html": "<section class=\"ds-panel ds-edge\"><h2 class=\"ds-panel-title\">Open lien</h2><div class=\"ds-label\">Repaid</div><div class=\"ds-figure\">$0.1842</div></section>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-edge{position:relative;isolation:isolate} .ds-edge::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(54,217,232,0.95) 0%, rgba(54,217,232,0.35) 22%, rgba(217,247,250,0.08) 45%, rgba(217,247,250,0.08) 62%, rgba(255,182,92,0.55) 85%, rgba(255,158,11,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-panel{border-radius:14px;padding:20px;width:320px;background:linear-gradient(180deg,rgba(17,26,43,0.78),rgba(10,15,23,0.82));border:1px solid rgba(141,154,170,0.14);box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 20px 40px -24px rgba(0,0,0,0.8);font-family:Inter,system-ui,sans-serif;color:#f5f7fa} .ds-panel-title{margin:0 0 16px;font-size:15px;font-weight:500;letter-spacing:0.005em} .ds-label{font-size:12px;color:#8d9aaa} .ds-figure{margin-top:4px;font-size:22px;font-weight:600;letter-spacing:-0.025em;color:#36d9e8;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Sidebar Nav",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Rail items; the active pill is one shared element that glides between items.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-active\" href=\"#\"><span class=\"ds-pill\"></span><span>Ledger</span></a><a class=\"ds-nav-item\" href=\"#\"><span>Lien explorer</span></a></nav>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-pill{position:relative;isolation:isolate} .ds-pill::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(54,217,232,0.95) 0%, rgba(54,217,232,0.35) 22%, rgba(217,247,250,0.08) 45%, rgba(217,247,250,0.08) 62%, rgba(255,182,92,0.55) 85%, rgba(255,158,11,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-nav{display:flex;flex-direction:column;gap:4px;width:240px;font-family:Inter,system-ui,sans-serif} .ds-nav-item{position:relative;display:flex;align-items:center;height:40px;padding:0 12px;border-radius:10px;font-size:14px;color:rgba(245,247,250,0.82);text-decoration:none;transition:background .2s} .ds-nav-item>span:last-child{position:relative;z-index:2} .ds-nav-item:hover:not(.ds-active){background:rgba(27,40,56,0.6)} .ds-active{color:#36d9e8} .ds-pill{position:absolute;inset:0;border-radius:10px;background:linear-gradient(90deg,rgba(14,165,183,0.22),rgba(17,26,43,0.6) 60%,rgba(255,182,92,0.12));box-shadow:0 0 0 1px rgba(54,217,232,0.08),0 0 22px -4px rgba(54,217,232,0.45),inset 0 0 18px -6px rgba(54,217,232,0.35)} .ds-nav-item:focus-visible{outline:2px solid #36d9e8;outline-offset:2px}"
+    },
+    {
+      "name": "Split Bar",
+      "kind": "custom",
+      "refersTo": "lien-split",
+      "description": "Where one payment goes: cyan pool segment, glass seller segment; a light sweeps the pool side when a repayment lands.",
+      "html": "<div class=\"ds-split\"><div class=\"ds-pool\"><span class=\"ds-sweep\"></span><span>30% to pool</span></div><div class=\"ds-seller\">70% to seller</div></div>",
+      "css": ":host{--midnight:#080b10;--navy:#111a2b;--glass:#1b2838;--cyan:#36d9e8;--cyan-deep:#0ea5b7;--ice:#d9f7fa;--amber:#ffb65c;--amber-deep:#ff9e0b;--white:#f5f7fa;--muted:#8d9aaa;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(141,154,170,0.14)} .ds-split{display:flex;width:360px;height:28px;overflow:hidden;border-radius:6px;font:500 11px Inter,system-ui,sans-serif} .ds-pool{position:relative;overflow:hidden;width:30%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#36d9e8,#0ea5b7);color:#080b10} .ds-pool>span:last-child{position:relative} .ds-seller{flex:1;display:flex;align-items:center;justify-content:center;background:#1b2838;color:rgba(245,247,250,0.85)} .ds-sweep{position:absolute;inset:0 auto 0 0;width:40%;background:linear-gradient(90deg,transparent,rgba(217,247,250,0.85),transparent);animation:ds-sweep 2.4s cubic-bezier(0.16,1,0.3,1) infinite} @keyframes ds-sweep{from{transform:translateX(-100%);opacity:1}40%,to{transform:translateX(260%);opacity:0.2}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lit Ledger",
+    "overview": "A dark ledger read through glass. Everything sits on near-black midnight, inside translucent navy panels, and the only light in the room is the money: cyan where USDC moves toward the pool, amber where it belongs to the seller or where a human has to judge. The system's signature is the iridescent edge, a 1px border that runs cyan at the top-left, fades to near-nothing along the sides and turns amber at the bottom-right, so a single panel carries both halves of every split.\n\nThe world is dense but quiet. Numbers are the heroes: tabular, semibold, and alive (they count to their new value and flash ice when they grow). Prose is sentence-case Inter at moderate weight, set narrow (48 to 72ch). Mono is reserved for real protocol text: addresses, `payTo`, HTTP lines, flags. Motion is one curve everywhere (cubic-bezier(0.16, 1, 0.3, 1)) and always means something arrived, moved or settled.\n\nLight follows the pointer. Buttons carry a specular edge whose bright arc points toward the cursor and brightens as it approaches, so the interface feels like a lit object rather than a flat page.",
+    "keyCharacteristics": [
+      "Midnight ground with two faint fixed radial washes (cyan top-left, amber bottom-right).",
+      "Translucent navy panels with a hairline border and a soft drop; the iridescent edge on the panel that matters most per view.",
+      "Cyan = toward the pool / system; amber = seller's share / human judgement. Never swapped.",
+      "Tabular semibold numbers that animate between values.",
+      "Mono only for protocol and chain text.",
+      "One easing curve; motion reports state changes, not decoration."
+    ],
+    "rules": [
+      {
+        "name": "The Two Lights Rule",
+        "body": "Cyan means toward the pool or the system acting; amber means the seller's share or a human deciding. A split bar is always cyan then amber/glass, left to right, and the iridescent edge always runs cyan top-left to amber bottom-right.",
+        "section": "colors"
+      },
+      {
+        "name": "The Opacity Ladder Rule",
+        "body": "Secondary text is white at reduced opacity (85 / 75 / 70%) or muted; do not introduce new grey hexes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Protocol-Only Mono Rule",
+        "body": "JetBrains Mono appears only on text a machine produced or consumes: addresses, hashes, endpoints, headers, flag codes, `payTo`. Never for labels, numbers or decoration.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Nothing in the system is uppercase or letter-spaced as a label. Headings are sentences; labels are sentence-case muted text. (Uppercase appears only when quoting a real protocol header such as PAYMENT-REQUIRED.)",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every figure that can change carries tabular numerals so live updates don't jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Iridescent Edge Rule",
+        "body": "The cyan-to-amber 1px edge (masked gradient border) marks the one hero panel per view (landing console and closing panel, ledger intro, explorer search, seller header), the search field, and the active pill. It is a signature, not a default border; ordinary panels use the hairline.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Lit From Within Rule",
+        "body": "Glows are inner-and-outer light in the signal's own color, never a dark offset shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep cyan for flows toward the pool and system state, amber for the seller's share and human judgement (The Two Lights Rule).",
+      "**Do** give exactly one panel per view the iridescent edge; everything else uses the 1px hairline.",
+      "**Do** set every changing figure in tabular semibold and animate it with the shared count-up.",
+      "**Do** use the single ease cubic-bezier(0.16, 1, 0.3, 1) and animate with transform, opacity and filter only.",
+      "**Do** make active states a single shared pill that glides, rather than per-item highlights.",
+      "**Do** step secondary text down by white opacity (85 / 75 / 70%) or muted.",
+      "**Do** label testnet mocks and operator overrides in the UI text itself."
+    ],
+    "donts": [
+      "**Don't** use JetBrains Mono for anything that isn't protocol or chain text.",
+      "**Don't** set uppercase, letter-spaced eyebrows or kickers above headings.",
+      "**Don't** use dark offset drop shadows to lift components; depth comes from glass, the edge and inner glow.",
+      "**Don't** swap the edge gradient direction or use amber as a generic highlight.",
+      "**Don't** introduce sharp (0px) corners or new grey hexes outside the neutral set.",
+      "**Don't** animate width/height for progress; grow fills with scaleX."
+    ]
+  }
+}

@@ -404,7 +404,7 @@ body {
   }
 }
 .rise {
-  animation: rise 0.4s ease-out both;
+  animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes num-flash {
@@ -444,7 +444,7 @@ body {
   }
 }
 .pulse {
-  animation: pulse 2s ease-out infinite;
+  animation: pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .pulse,
