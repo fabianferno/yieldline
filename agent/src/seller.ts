@@ -35,7 +35,12 @@ export async function payTo(): Promise<Address> {
   return cache.v;
 }
 
-const facilitatorUrl = env("FACILITATOR_URL", "http://localhost:4021/facilitator");
+const facilitatorUrl = env(
+  "FACILITATOR_URL",
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/facilitator`
+    : "http://localhost:4021/facilitator",
+);
 const server = new x402ResourceServer(new HTTPFacilitatorClient({ url: facilitatorUrl })).register(
   NETWORK,
   new ExactEvmScheme(),
