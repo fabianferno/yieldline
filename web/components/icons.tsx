@@ -115,16 +115,16 @@ export function PrismCube({ size = 40 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
       <defs>
         <linearGradient id={`pc-top-${u}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#d9f7fa" stopOpacity=".9" />
-          <stop offset="1" stopColor="#36d9e8" stopOpacity=".55" />
+          <stop offset="0" stopColor="#ffe2de" stopOpacity=".9" />
+          <stop offset="1" stopColor="#ff4545" stopOpacity=".55" />
         </linearGradient>
         <linearGradient id={`pc-left-${u}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#36d9e8" stopOpacity=".85" />
-          <stop offset="1" stopColor="#0b1e2c" stopOpacity=".9" />
+          <stop offset="0" stopColor="#ff4545" stopOpacity=".85" />
+          <stop offset="1" stopColor="#2a0c0e" stopOpacity=".9" />
         </linearGradient>
         <linearGradient id={`pc-right-${u}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#1b2838" stopOpacity=".95" />
-          <stop offset="1" stopColor="#ffb65c" stopOpacity=".95" />
+          <stop offset="0" stopColor="#232327" stopOpacity=".95" />
+          <stop offset="1" stopColor="#ff8a7a" stopOpacity=".95" />
         </linearGradient>
         <filter id={`pc-glow-${u}`} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="2.2" result="b" />
@@ -135,9 +135,9 @@ export function PrismCube({ size = 40 }: { size?: number }) {
         </filter>
       </defs>
       <g filter={`url(#pc-glow-${u})`} strokeLinejoin="round">
-        <path d="M32 6 54 18 32 30 10 18z" fill={`url(#pc-top-${u})`} stroke="#d9f7fa" strokeWidth="1.2" />
-        <path d="M10 18 32 30v28L10 46z" fill={`url(#pc-left-${u})`} stroke="#36d9e8" strokeWidth="1.2" />
-        <path d="M54 18 32 30v28l22-12z" fill={`url(#pc-right-${u})`} stroke="#ffb65c" strokeWidth="1.2" />
+        <path d="M32 6 54 18 32 30 10 18z" fill={`url(#pc-top-${u})`} stroke="#ffe2de" strokeWidth="1.2" />
+        <path d="M10 18 32 30v28L10 46z" fill={`url(#pc-left-${u})`} stroke="#ff4545" strokeWidth="1.2" />
+        <path d="M54 18 32 30v28l22-12z" fill={`url(#pc-right-${u})`} stroke="#ff8a7a" strokeWidth="1.2" />
       </g>
     </svg>
   );

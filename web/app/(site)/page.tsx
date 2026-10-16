@@ -46,7 +46,7 @@ export default function Landing() {
 
   return (
     <div className="relative overflow-x-clip">
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[900px] bg-[radial-gradient(700px_420px_at_75%_20%,rgba(54,217,232,0.10),transparent_70%),radial-gradient(500px_360px_at_95%_60%,rgba(255,182,92,0.07),transparent_70%)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[900px] bg-[radial-gradient(700px_420px_at_75%_20%,rgba(255,69,69,0.10),transparent_70%),radial-gradient(500px_360px_at_95%_60%,rgba(255,138,122,0.07),transparent_70%)]" />
 
       <SiteNav />
 
@@ -394,10 +394,10 @@ function Loop({ data, lien }: { data: Overview | null; lien?: Lien }) {
               {/* the node ignites as the rail's fill reaches it */}
               <motion.span
                 variants={{
-                  rest: { backgroundColor: "#080b10", boxShadow: "0 0 0 0 rgba(0,0,0,0)" },
+                  rest: { backgroundColor: "#09090b", boxShadow: "0 0 0 0 rgba(0,0,0,0)" },
                   lit: {
-                    backgroundColor: i === stages.length - 1 ? "#ffb65c" : "#36d9e8",
-                    boxShadow: `0 4px 14px -2px ${i === stages.length - 1 ? "rgba(255,182,92,0.6)" : "rgba(54,217,232,0.6)"}`,
+                    backgroundColor: i === stages.length - 1 ? "#ff8a7a" : "#ff4545",
+                    boxShadow: `0 4px 14px -2px ${i === stages.length - 1 ? "rgba(255,138,122,0.6)" : "rgba(255,69,69,0.6)"}`,
                   },
                 }}
                 transition={{ duration: 0.5, ease: EASE }}

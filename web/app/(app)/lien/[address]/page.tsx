@@ -202,7 +202,7 @@ function Revenue({ r }: { r: SellerView["revenue"] }) {
                 className="flex-1 rounded-t-[3px]"
                 style={{
                   height: `${v ? Math.max(4, (v.usdc / maxHour) * 100) : 2}%`,
-                  background: v ? "linear-gradient(180deg,#36d9e8,#0ea5b7)" : "rgba(27,40,56,.8)",
+                  background: v ? "linear-gradient(180deg,#ff4545,#c81e2a)" : "rgba(35,35,39,.8)",
                 }}
               />
             );

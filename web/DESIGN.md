@@ -2,20 +2,20 @@
 name: Horos
 description: Prism glass on midnight for a public ledger of revenue liens on Arc.
 colors:
-  midnight: "#080b10"
-  navy: "#111a2b"
-  glass: "#1b2838"
-  cyan: "#36d9e8"
-  cyan-deep: "#0ea5b7"
-  ice: "#d9f7fa"
-  amber: "#ffb65c"
-  amber-deep: "#ff9e0b"
+  midnight: "#09090b"
+  navy: "#16161a"
+  glass: "#232327"
+  cyan: "#ff4545"
+  cyan-deep: "#c81e2a"
+  ice: "#ffe2de"
+  amber: "#ff8a7a"
+  amber-deep: "#e0352f"
   white: "#f5f7fa"
-  muted: "#8d9aaa"
+  muted: "#9d9ca3"
   success: "#34d399"
   danger: "#ff5a5f"
   info: "#3b9cff"
-  line: "rgba(141, 154, 170, 0.14)"
+  line: "rgba(157, 156, 163, 0.14)"
 typography:
   display:
     fontFamily: "Inter, system-ui, sans-serif"
@@ -91,26 +91,26 @@ spacing:
   section: "80px"
 components:
   button-primary:
-    backgroundColor: "rgba(20, 90, 108, 0.55)"
+    backgroundColor: "rgba(108, 20, 26, 0.55)"
     textColor: "{colors.white}"
     rounded: "{rounded.md}"
     padding: "0 18px"
     height: "40px"
     typography: "{typography.body-small}"
   button-primary-lg:
-    backgroundColor: "rgba(20, 90, 108, 0.55)"
+    backgroundColor: "rgba(108, 20, 26, 0.55)"
     textColor: "{colors.white}"
     rounded: "{rounded.lg}"
     padding: "0 24px"
     height: "48px"
   button-ghost:
-    backgroundColor: "rgba(27, 40, 56, 0.5)"
+    backgroundColor: "rgba(35, 35, 39, 0.5)"
     textColor: "{colors.white}"
     rounded: "{rounded.md}"
     padding: "0 18px"
     height: "40px"
   button-secondary:
-    backgroundColor: "rgba(255, 158, 11, 0.1)"
+    backgroundColor: "rgba(224, 53, 47, 0.1)"
     textColor: "{colors.white}"
     rounded: "{rounded.md}"
     padding: "0 18px"
@@ -126,7 +126,7 @@ components:
     padding: "0 14px 0 40px"
     height: "44px"
   chip:
-    backgroundColor: "rgba(17, 26, 43, 0.8)"
+    backgroundColor: "rgba(22, 22, 26, 0.8)"
     rounded: "{rounded.pill}"
     padding: "0 10px"
     height: "24px"
@@ -144,7 +144,7 @@ components:
     padding: "0 14px"
     height: "38px"
   tab-active:
-    backgroundColor: "rgba(20, 74, 92, 0.9)"
+    backgroundColor: "rgba(92, 20, 24, 0.9)"
     textColor: "{colors.white}"
     rounded: "{rounded.tab}"
 ---
@@ -239,8 +239,8 @@ Depth is glass layering plus light, not lift. The page is lit by two fixed radia
 
 ### Shadow Vocabulary
 - **Panel** (`box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 40px -24px rgba(0,0,0,0.8)`): every panel. Ambient, structural.
-- **Cyan glow** (`box-shadow: 0 0 0 1px rgba(54,217,232,0.08), 0 0 22px -4px rgba(54,217,232,0.45), inset 0 0 18px -6px rgba(54,217,232,0.35)`): the active nav pill and active tab pill only.
-- **Fill glow** (`box-shadow: 0 0 12px rgba(54,217,232,0.7)`): progress fills (red equivalent on frozen).
+- **Cyan glow** (`box-shadow: 0 0 0 1px rgba(255,69,69,0.08), 0 0 22px -4px rgba(255,69,69,0.45), inset 0 0 18px -6px rgba(255,69,69,0.35)`): the active nav pill and active tab pill only.
+- **Fill glow** (`box-shadow: 0 0 12px rgba(255,69,69,0.7)`): progress fills (red equivalent on frozen).
 - **Alert glow** (`box-shadow: 0 0 18px -8px <signal at 0.6>`): alerts, tinted to their signal.
 - **Button drop** (`box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 20px -12px <edge color × intensity>`): grows with the specular intensity.
 
@@ -258,7 +258,7 @@ Softly rounded glass slabs, never sharp, never bubbly. Panels and large buttons 
 ### Buttons
 Specular glass: dark, tinted, and lit along the edge by the pointer.
 - **Shape:** gently rounded (12px), 40px tall, 18px side padding; large is 48px, 24px padding, 14px radius.
-- **Primary:** deep-teal tint (rgba(20, 90, 108, 0.55)) fading to midnight, white 13px/500 text, cyan edge light.
+- **Primary:** deep-teal tint (rgba(108, 20, 26, 0.55)) fading to midnight, white 13px/500 text, cyan edge light.
 - **Secondary:** amber edge light over a faint amber tint. Used for the alternate action in a pair (e.g. "Read the code" on the closing panel).
 - **Ghost:** ice edge light over translucent glass slate. The quiet partner beside a primary.
 - **Hover / Focus:** a conic arc of the edge color points toward the cursor and its intensity (--spec-i, idle 0.3) rises with proximity, with a blurred halo behind it and a soft radial hotspot inside; on hover the button rises 1px and a trailing icon nudges 3px right. Active presses to scale 0.98 in 80ms. Disabled is 40% opacity. Focus uses the global 2px cyan ring, 2px offset. On coarse pointers the edge rests at idle.

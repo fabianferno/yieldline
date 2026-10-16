@@ -175,7 +175,7 @@ function LiveBadge({ updatedAt, error }: { updatedAt: number | null; error: bool
 
 function Step({ n, value, sub, tone, last }: { n: string; value: React.ReactNode; sub: string; tone?: "cyan" | "amber"; last?: boolean }) {
   return (
-    <li className={`bg-[#0b111a] px-5 py-4 sm:px-6 ${last ? "max-md:col-span-2" : ""}`}>
+    <li className={`bg-[#0e0e11] px-5 py-4 sm:px-6 ${last ? "max-md:col-span-2" : ""}`}>
       <div className="flex items-center gap-2 text-[12px] font-medium text-white/85">
         <span className={`h-1.5 w-1.5 rounded-full ${tone === "amber" ? "bg-amber" : "bg-cyan"}`} />
         {n}
