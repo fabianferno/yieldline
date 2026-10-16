@@ -77,11 +77,11 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <Link href="/dashboard" className="btn btn-primary btn-lg">
-              Open the live dashboard <IArrow size={17} />
+            <Link href="/borrow" className="btn btn-primary btn-lg">
+              Get working capital <IArrow size={17} />
             </Link>
-            <Link href="/lookup" className="btn btn-ghost btn-lg">
-              Look up a seller
+            <Link href="/markets" className="btn btn-ghost btn-lg">
+              Earn on x402 revenue
             </Link>
           </motion.div>
           <dl className="mt-10 grid max-w-[520px] grid-cols-3 gap-6 border-t border-line pt-6">
@@ -114,8 +114,8 @@ function SiteNav() {
         <a href="#limits" className="rounded-lg px-3 py-2 hover:text-white">Limits</a>
         <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="rounded-lg px-3 py-2 hover:text-white">GitHub</a>
       </nav>
-      <Link href="/dashboard" className="btn btn-primary max-sm:ml-auto">
-        Dashboard <IArrow size={15} />
+      <Link href="/markets" className="btn btn-primary max-sm:ml-auto">
+        Open the app <IArrow size={15} />
       </Link>
     </header>
   );
@@ -482,11 +482,11 @@ function Close({ addresses }: { addresses?: Overview["addresses"] }) {
         </div>
         <h2 className="max-w-[20ch] text-[30px] font-semibold leading-tight tracking-[-0.025em] sm:text-[40px]">Read every decision yourself.</h2>
         <p className="mt-4 max-w-[54ch] text-[15px] leading-relaxed text-white/70">
-          The dashboard shows each advance, sweep and agent decision as it happens, with a link to the transaction on Arc.
+          The activity feed shows each advance, sweep and agent decision across every pool as it happens, with a link to the transaction on Arc.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/dashboard" className="btn btn-primary btn-lg">
-            Open the live dashboard <IArrow size={17} />
+          <Link href="/activity" className="btn btn-primary btn-lg">
+            Open the activity feed <IArrow size={17} />
           </Link>
           <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-secondary btn-lg">
             Read the code

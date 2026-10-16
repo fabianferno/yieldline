@@ -79,6 +79,7 @@ export type Lien = {
   status: string;
   createdAt: number;
   termEnd: number;
+  lender?: string;
   splitter?: { receivedUsdc: number; sweptUsdc: number; forwardedUsdc: number; owedUsdc: number; accelerated: boolean };
 };
 
@@ -112,6 +113,14 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
             </>
           ) : null}
           opened {ago(new Date(l.createdAt * 1000).toISOString())} · {termLeft(l)}
+          {l.lender && (
+            <>
+              {" "}· held by{" "}
+              <Link href={`/pools/${l.lender}`} className="mono text-ice underline decoration-line underline-offset-4 hover:text-cyan">
+                pool {short(l.lender)}
+              </Link>
+            </>
+          )}
         </span>
       </div>
 

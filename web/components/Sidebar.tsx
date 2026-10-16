@@ -2,23 +2,25 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { IChart, ICube, IExternal, IHome, ILayers, IUsers, PrismCube } from "./icons";
+import { IBolt, IChart, ICube, IExternal, IHome, ILayers, IUsers, PrismCube } from "./icons";
+import { Connect } from "./Connect";
 import { TourButton } from "./Tour";
 
-const PRIMARY = [
-  { href: "/dashboard", label: "Dashboard", icon: IHome },
+const EXPLORE = [
+  { href: "/markets", label: "Pools", icon: IHome },
+  { href: "/activity", label: "Activity", icon: IChart },
   { href: "/lookup", label: "Check a seller", icon: ILayers },
 ];
 
-const SELLERS = [
-  { href: "/seller/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f", label: "Horos Lien Oracle", note: "financed", icon: ICube },
-  { href: "/seller/0xa8904aaa5ef379ccad3edad0c8545fb0951d6466", label: "Arc seller 0xa890", note: "offer out", icon: IUsers },
-  { href: "/seller/0x43f10820df70545f0b308ed014e5b5e5b7f28f28", label: "Wash seller", note: "rejected", icon: IChart },
+const YOU = [
+  { href: "/borrow", label: "Borrow", note: "sellers", icon: IBolt },
+  { href: "/lend", label: "Lend", note: "your deposits", icon: ICube },
+  { href: "/curate", label: "Curate", note: "run a pool", icon: IUsers },
 ];
 
 const LINKS = [
   { href: "https://github.com/sirbadenpowell/horos", label: "Source on GitHub" },
-  { href: "https://explorer.testnet.arc.io/address/0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506", label: "LenderPool" },
+  { href: "https://explorer.testnet.arc.io/address/0x73a78ceE808221f7fE8731209998A157C98AC6E2", label: "PoolFactory" },
   { href: "https://explorer.testnet.arc.io/address/0xD140eED8f20B2157366B36FcC08226d64c16906F", label: "LienRegistry" },
 ];
 
@@ -42,13 +44,14 @@ export function Sidebar() {
           <TourButton className="btn btn-ghost ml-auto !h-8 !px-3 text-[12px]" />
         </div>
         <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
-          {[...PRIMARY, ...SELLERS].map(({ href, label }) => (
+          {[...EXPLORE, ...YOU].map(({ href, label }) => (
             <Link key={href} href={href} className={`relative shrink-0 rounded-lg px-3 py-2 text-[13px] ${isActive(href) ? "text-cyan" : "text-white/75"}`}>
               {isActive(href) && <motion.span layoutId="nav-pill-m" className="nav-pill edge glow-cyan" transition={PILL} />}
               <span className="relative">{label}</span>
             </Link>
           ))}
         </nav>
+        <Connect compact />
       </header>
 
       {/* Desktop: sticky rail */}
@@ -61,8 +64,12 @@ export function Sidebar() {
           </div>
         </Link>
 
+        <div className="mb-5">
+          <Connect />
+        </div>
+
         <nav className="space-y-1">
-          {PRIMARY.map(({ href, label, icon: Icon }) => (
+          {EXPLORE.map(({ href, label, icon: Icon }) => (
             <NavItem key={href} href={href} active={isActive(href)}>
               <Icon size={18} />
               <span>{label}</span>
@@ -70,9 +77,9 @@ export function Sidebar() {
           ))}
         </nav>
 
-        <div className="mb-1.5 mt-6 px-3 text-[12px] font-medium text-muted">Sellers on file</div>
+        <div className="mb-1.5 mt-6 px-3 text-[12px] font-medium text-muted">You</div>
         <nav className="space-y-1">
-          {SELLERS.map(({ href, label, note, icon: Icon }) => (
+          {YOU.map(({ href, label, note, icon: Icon }) => (
             <NavItem key={href} href={href} active={isActive(href)}>
               <Icon size={18} />
               <span className="flex-1 truncate">{label}</span>
