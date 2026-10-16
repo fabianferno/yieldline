@@ -120,3 +120,39 @@ export async function humanApprove(id: string, note = "approved by operator") {
   }
   throw new Error(`offer ${id} is ${o.status}; nothing to approve`);
 }
+
+/** Operator override of an agent rejection: a small, explicitly labelled pilot line. The agent's rejection stays
+ *  on the public record; this adds a human decision (signed by the admin key) with the operator's reasoning. */
+export async function overrideOffer(
+  id: string,
+  terms: { advanceUsdc: number; sweepBps: number; feeBps: number; termDays: number },
+  note: string,
+) {
+  const o = getOffer(id);
+  if (o.status !== "rejected") throw new Error(`offer ${id} is ${o.status}; override applies to agent rejections`);
+  const rec = recordDecision({
+    agent: "human",
+    subject: o.seller,
+    action: "override_pilot",
+    escalated: true,
+    inputs: { overrides: o.id, agentDecisionHash: o.decisionHash, agentRiskScore: o.riskScore, agentFlags: o.flags },
+    output: { ...terms, riskScore: o.riskScore, flags: ["operator_override", "pilot_line", ...o.flags.slice(0, 4)] },
+    rationale: note,
+  });
+  const { anchorDecision } = await import("./decisions.js");
+  const anchorTx = await anchorDecision(rec);
+  const pilot: Offer = {
+    ...o,
+    ...terms,
+    decision: "offer",
+    id: rec.id,
+    status: "offered",
+    decisionHash: rec.hash,
+    createdAt: rec.at,
+    rationale: note,
+    conditions: [...o.conditions, "operator pilot: agent rejection on record"],
+    endpoint: process.env.ENDPOINT ?? o.endpoint,
+  };
+  writeState("offers", [...readState<Offer[]>("offers", []), pilot]);
+  return { pilot, anchorTx };
+}

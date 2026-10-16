@@ -18,7 +18,7 @@ export function summarize(d: Decision) {
     escalated: d.escalated,
     rationale: d.rationale.slice(0, 1800),
     terms:
-      d.agent === "underwriter"
+      d.agent === "underwriter" || d.agent === "human"
         ? { advanceUsdc: pick("advanceUsdc"), sweepBps: pick("sweepBps"), feeBps: pick("feeBps"), termDays: pick("termDays") }
         : undefined,
     riskScore: pick("riskScore"),
@@ -32,6 +32,23 @@ export function summarize(d: Decision) {
 
 export async function anchorDecision(d: Decision, who: "underwriter" | "monitor" = d.agent === "underwriter" ? "underwriter" : "monitor") {
   const uri = PREFIX + JSON.stringify(summarize(d));
+  if (d.agent === "human") {
+    // Human decisions are signed by the pool admin key, not an agent wallet, so they are distinguishable on chain.
+    const { createWalletClient, http } = await import("viem");
+    const { privateKeyToAccount } = await import("viem/accounts");
+    const { arcTestnet } = await import("viem/chains");
+    const admin = createWalletClient({ account: privateKeyToAccount(process.env.DEPLOYER_PRIVATE_KEY as `0x${string}`), chain: arcTestnet, transport: http() });
+    const hash = await admin.writeContract({
+      address: ADDR.pool,
+      abi: LenderPool,
+      functionName: "logDecision",
+      args: [d.subject as Address, `human.${d.action}`, d.hash, uri],
+    });
+    const { publicClient } = await import("./config.js");
+    await publicClient.waitForTransactionReceipt({ hash });
+    patchDecision(d.hash, { txHash: hash });
+    return hash;
+  }
   const r = await tx.logDecision(who, d.subject as Address, `${d.agent}.${d.action}`, d.hash, uri);
   patchDecision(d.hash, { txHash: r.txHash });
   return r.txHash;

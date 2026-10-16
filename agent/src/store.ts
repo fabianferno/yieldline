@@ -17,7 +17,7 @@ export function recordEvent(e: Record<string, unknown>) {
 export type Decision = {
   id: string;
   at: string;
-  agent: "underwriter" | "monitor" | "treasury";
+  agent: "underwriter" | "monitor" | "treasury" | "human";
   subject: string; // seller address or pool
   action: string; // e.g. offer, reject, continue, shrink, freeze, escalate, deploy_idle
   escalated: boolean;
