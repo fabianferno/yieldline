@@ -1,48 +1,121 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { EXPLORER, ago, short, usd } from "@/lib/api";
+import { IBolt, ICheck, IChart, ICube, IInfo, IUp, IWarn, IX } from "./icons";
 
-export function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "terra" | "olive" | "blood" }) {
-  const color = tone === "terra" ? "text-terra" : tone === "olive" ? "text-olive" : tone === "blood" ? "text-blood" : "text-ink";
+export function Panel({
+  title,
+  right,
+  children,
+  className = "",
+}: {
+  title?: string;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="rounded-sm border border-rule bg-card px-4 py-3">
-      <div className="engraved text-[10px] text-ink-3">{label}</div>
-      <div className={`num mt-1 text-2xl ${color}`}>{value}</div>
-      {sub && <div className="mt-0.5 text-xs text-ink-3">{sub}</div>}
-    </div>
-  );
-}
-
-export function Section({ title, kicker, children, right }: { title: string; kicker?: string; children: React.ReactNode; right?: React.ReactNode }) {
-  return (
-    <section className="mt-10">
-      <div className="mb-3 flex items-end justify-between gap-4 border-b border-rule pb-2">
-        <div>
-          {kicker && <div className="engraved text-[10px] text-terra">{kicker}</div>}
-          <h2 className="font-serif text-2xl font-semibold">{title}</h2>
+    <section className={`panel p-4 sm:p-5 ${className}`}>
+      {(title || right) && (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          {title && <h2 className="panel-title">{title}</h2>}
+          {right}
         </div>
-        {right}
-      </div>
+      )}
       {children}
     </section>
   );
 }
 
-const STATUS_TONE: Record<string, string> = {
-  Active: "bg-olive/10 text-olive border-olive/30",
-  Frozen: "bg-blood/10 text-blood border-blood/30",
-  Repaid: "bg-ink/5 text-ink-2 border-rule",
-  Defaulted: "bg-blood text-card border-blood",
-};
+export function Sparkline({ values, tone = "cyan", height = 56 }: { values: number[]; tone?: "cyan" | "amber"; height?: number }) {
+  const w = 220;
+  const pts = values.length > 1 ? values : [0, ...(values.length ? values : [0])];
+  const max = Math.max(...pts, 1e-9);
+  const min = Math.min(...pts);
+  const xy = pts.map((v, i) => [(i / (pts.length - 1)) * w, height - 6 - ((v - min) / (max - min || 1)) * (height - 14)]);
+  const d = xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const color = tone === "cyan" ? "#36d9e8" : "#ffb65c";
+  const id = `sp-${tone}`;
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity=".25" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+        <filter id={`${id}-g`}>
+          <feGaussianBlur stdDeviation="2.5" />
+        </filter>
+      </defs>
+      <path d={`${d} L${w},${height} L0,${height}Z`} fill={`url(#${id})`} />
+      <path d={d} fill="none" stroke={color} strokeWidth="3" opacity=".6" filter={`url(#${id}-g)`} />
+      <path d={d} fill="none" stroke={color} strokeWidth="1.8" />
+    </svg>
+  );
+}
 
+export function Stat({
+  label,
+  value,
+  sub,
+  delta,
+  icon,
+  tone = "cyan",
+  spark,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  delta?: string;
+  icon?: React.ReactNode;
+  tone?: "cyan" | "amber";
+  spark?: number[];
+}) {
+  return (
+    <div className={`panel edge ${tone === "amber" ? "edge-amber" : ""} flex flex-col p-4`}>
+      <div className={`mb-3 ${tone === "cyan" ? "text-cyan" : "text-amber"}`}>{icon ?? <IChart size={18} />}</div>
+      <div className="text-[14px] text-white/85">{label}</div>
+      <div className="num mt-1 text-[26px] font-semibold tracking-tight">{value}</div>
+      {(delta || sub) && (
+        <div className="mt-1 flex items-center gap-1.5 text-[13px]">
+          {delta && (
+            <span className="flex items-center gap-0.5 font-medium text-success">
+              <IUp size={13} />
+              {delta}
+            </span>
+          )}
+          {sub && <span className="text-white/75">{sub}</span>}
+        </div>
+      )}
+      {spark && spark.length > 1 && (
+        <div className="-mx-1 mt-auto pt-3">
+          <Sparkline values={spark} tone={tone} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+const STATUS: Record<string, string> = {
+  Active: "text-cyan border-cyan/40",
+  Frozen: "text-danger border-danger/50",
+  Repaid: "text-success border-success/40",
+  Defaulted: "text-danger border-danger/60",
+};
 export function StatusChip({ status }: { status: string }) {
-  return <span className={`engraved rounded-sm border px-2 py-0.5 text-[10px] ${STATUS_TONE[status] ?? "border-rule"}`}>{status}</span>;
+  return (
+    <span className={`chip ${STATUS[status] ?? "text-muted"}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {status}
+    </span>
+  );
 }
 
 export function Addr({ a, href }: { a?: string | null; href?: string }) {
-  if (!a) return <span className="text-ink-3">—</span>;
+  if (!a) return <span className="text-muted">—</span>;
   return (
-    <a className="num text-xs underline decoration-rule underline-offset-2 hover:text-terra" href={href ?? `${EXPLORER}/address/${a}`} target="_blank">
+    <a className="mono text-[12px] text-ice/90 underline decoration-line underline-offset-4 hover:text-cyan" href={href ?? `${EXPLORER}/address/${a}`} target="_blank">
       {short(a)}
     </a>
   );
@@ -65,40 +138,43 @@ export type Lien = {
 export function LienRow({ l }: { l: Lien }) {
   const pct = Math.min(100, (l.repaidUsdc / (l.repayCapUsdc || 1)) * 100);
   return (
-    <div className="rise grid grid-cols-1 gap-3 border-b border-rule py-4 last:border-0 sm:grid-cols-[80px_1fr_1.2fr_120px] sm:items-center">
-      <div className="flex items-center gap-2 sm:block">
-        <div className="font-serif text-xl">#{l.id}</div>
+    <div className="rise grid grid-cols-1 gap-4 py-4 sm:grid-cols-[120px_1fr_1.3fr_110px] sm:items-center">
+      <div className="flex items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+        <div className="text-[18px] font-semibold">Lien #{l.id}</div>
         <StatusChip status={l.status} />
       </div>
-      <div className="text-sm">
-        <div>
-          Seller <Link href={`/lien/${l.seller}`} className="num text-xs underline decoration-rule underline-offset-2 hover:text-terra">{short(l.seller)}</Link>
+      <div className="space-y-1 text-[13px]">
+        <div className="text-white/85">
+          Seller{" "}
+          <Link href={`/lien/${l.seller}`} className="mono text-[12px] text-ice underline decoration-line underline-offset-4 hover:text-cyan">
+            {short(l.seller)}
+          </Link>
         </div>
-        <div className="text-ink-3">
+        <div className="text-muted">
           payTo → splitter <Addr a={l.payTo} />
         </div>
       </div>
       <div>
-        <div className="flex justify-between text-xs text-ink-3">
+        <div className="mb-1.5 flex justify-between text-[12px] text-muted">
           <span>
-            repaid <span className="num text-ink">{usd(l.repaidUsdc, 4)}</span> of <span className="num">{usd(l.repayCapUsdc, 4)}</span>
+            repaid <span className="num text-white">{usd(l.repaidUsdc, 4)}</span> of <span className="num">{usd(l.repayCapUsdc, 4)}</span>
           </span>
-          <span className="num">{pct.toFixed(1)}%</span>
+          <span className="num text-cyan">{pct.toFixed(1)}%</span>
         </div>
-        <div className="mt-1 h-2 w-full overflow-hidden rounded-sm bg-paper-2">
-          <div className={`h-full ${l.status === "Frozen" ? "bg-blood" : "bg-olive"}`} style={{ width: `${pct}%`, transition: "width .6s" }} />
+        <div className="track">
+          <div className={l.status === "Frozen" ? "fill-danger" : "fill-cyan"} style={{ width: `${pct}%` }} />
         </div>
         {l.splitter && (
-          <div className="mt-1 text-xs text-ink-3">
-            revenue routed <span className="num">{usd(l.splitter.receivedUsdc, 4)}</span> · to seller{" "}
-            <span className="num">{usd(l.splitter.forwardedUsdc, 4)}</span>
-            {l.splitter.accelerated && <span className="ml-1 text-blood">· sweeping 100%</span>}
+          <div className="mt-1.5 text-[12px] text-muted">
+            routed <span className="num text-white/85">{usd(l.splitter.receivedUsdc, 4)}</span> · to seller{" "}
+            <span className="num text-white/85">{usd(l.splitter.forwardedUsdc, 4)}</span>
+            {l.splitter.accelerated && <span className="ml-1 text-danger">· sweeping 100%</span>}
           </div>
         )}
       </div>
-      <div className="text-right text-sm">
-        <div className="num">{usd(l.principalUsdc, 2)}</div>
-        <div className="text-xs text-ink-3">sweep {(l.sweepBps / 100).toFixed(0)}%</div>
+      <div className="text-right">
+        <div className="num text-[18px] font-semibold">{usd(l.principalUsdc, 2)}</div>
+        <div className="text-[12px] text-muted">sweep {(l.sweepBps / 100).toFixed(0)}%</div>
       </div>
     </div>
   );
@@ -125,84 +201,125 @@ export type FeedItem = {
   txUrl: string;
 };
 
-const ACTION_TONE: Record<string, string> = {
-  offer: "text-olive",
-  fund: "text-olive",
-  continue: "text-ink-2",
-  unfreeze: "text-olive",
-  reject: "text-blood",
-  freeze: "text-blood",
-  escalate: "text-ochre",
-  escalate_default: "text-blood",
-  hold: "text-ochre",
-  override_pilot: "text-ochre",
-  human_approved: "text-ochre",
-  adjust_sweep: "text-ochre",
-  deploy_idle: "text-terra",
-  recall_idle: "text-terra",
+type Kind = "success" | "warning" | "error" | "info";
+const ACTION_KIND: Record<string, Kind> = {
+  offer: "success",
+  fund: "success",
+  unfreeze: "success",
+  continue: "info",
+  deploy_idle: "info",
+  recall_idle: "info",
+  hold: "warning",
+  escalate: "warning",
+  adjust_sweep: "warning",
+  override_pilot: "warning",
+  human_approved: "warning",
+  reject: "error",
+  freeze: "error",
+  escalate_default: "error",
 };
+const KIND_ICON = { success: ICheck, warning: IWarn, error: IX, info: IInfo };
+const KIND_TEXT = { success: "text-success", warning: "text-amber", error: "text-danger", info: "text-info" };
 
 export function DecisionCard({ f }: { f: FeedItem }) {
   const d = f.decision!;
+  const [open, setOpen] = useState(false);
+  const kind = ACTION_KIND[d.action] ?? "info";
+  const Icon = KIND_ICON[kind];
+  const who = d.agent === "human" ? "Operator (human)" : `${d.agent[0].toUpperCase()}${d.agent.slice(1)} agent`;
   return (
-    <article className="rise rounded-sm border border-rule bg-card p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div className="flex items-baseline gap-2">
-          <span className="engraved text-[10px] text-ink-3">{d.agent === "human" ? "operator (human)" : `${d.agent} agent`}</span>
-          <span className={`font-serif text-xl font-semibold ${ACTION_TONE[d.action] ?? ""}`}>{d.action.replaceAll("_", " ")}</span>
-          {d.escalated && <span className="engraved rounded-sm bg-ochre/15 px-1.5 text-[10px] text-ochre">human review</span>}
+    <article className={`alert alert-${kind} rise !items-start !py-4`}>
+      <Icon size={26} className={`mt-0.5 shrink-0 ${KIND_TEXT[kind]}`} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-2">
+            <span className={`text-[15px] font-semibold capitalize ${KIND_TEXT[kind]}`}>{d.action.replaceAll("_", " ")}</span>
+            <span className="text-[12px] text-muted">{who}</span>
+            {d.escalated && <span className="chip !h-5 border-amber/40 text-amber">human review</span>}
+          </div>
+          <div className="text-[12px] text-muted">
+            {d.agent !== "treasury" && (
+              <>
+                <Link href={`/lien/${f.args.subject}`} className="mono underline decoration-line underline-offset-4 hover:text-cyan">
+                  {short(f.args.subject)}
+                </Link>{" "}
+                ·{" "}
+              </>
+            )}
+            {ago(f.at)} ·{" "}
+            <a href={f.txUrl} target="_blank" className="underline decoration-line underline-offset-4 hover:text-cyan">
+              on Arc
+            </a>
+          </div>
         </div>
-        <div className="text-xs text-ink-3">
-          {d.agent !== "treasury" && (
-            <>
-              <Link href={`/lien/${f.args.subject}`} className="num underline decoration-rule">{short(f.args.subject)}</Link> ·{" "}
-            </>
-          )}
-          {ago(f.at)} ·{" "}
-          <a href={f.txUrl} target="_blank" className="underline decoration-rule hover:text-terra">on-chain</a>
-        </div>
+        {d.terms && d.terms.advanceUsdc ? (
+          <div className="num mt-2 flex flex-wrap gap-2 text-[12px]">
+            <span className="chip text-white">advance {usd(d.terms.advanceUsdc, 2)}</span>
+            <span className="chip text-white/85">sweep {((d.terms.sweepBps ?? 0) / 100).toFixed(0)}%</span>
+            <span className="chip text-white/85">fee {((d.terms.feeBps ?? 0) / 100).toFixed(1)}%</span>
+            <span className="chip text-white/85">{d.terms.termDays}d term</span>
+            {d.riskScore !== undefined && <span className="chip text-amber">risk {d.riskScore}</span>}
+          </div>
+        ) : d.riskScore !== undefined ? (
+          <div className="num mt-2 flex gap-2 text-[12px]">
+            <span className="chip text-amber">risk {d.riskScore}/100</span>
+            {d.revenueQuality && <span className="chip text-white/85">revenue {d.revenueQuality}</span>}
+          </div>
+        ) : null}
+        <p className={`mt-2 text-[13px] leading-relaxed text-white/80 ${open ? "" : "line-clamp-3"}`}>{d.rationale}</p>
+        {d.rationale.length > 260 && (
+          <button onClick={() => setOpen(!open)} className="mt-1 text-[12px] font-medium text-cyan hover:underline">
+            {open ? "Hide reasoning" : "Read full reasoning"}
+          </button>
+        )}
+        {open && d.flags && d.flags.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {d.flags.map((x) => (
+              <span key={x} className="mono rounded-md border border-line bg-midnight/60 px-1.5 py-0.5 text-[10.5px] text-muted">
+                {x}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-      {d.terms && d.terms.advanceUsdc ? (
-        <div className="num mt-2 flex flex-wrap gap-x-4 text-xs text-ink-2">
-          <span>advance {usd(d.terms.advanceUsdc, 2)}</span>
-          <span>sweep {((d.terms.sweepBps ?? 0) / 100).toFixed(0)}%</span>
-          <span>fee {((d.terms.feeBps ?? 0) / 100).toFixed(1)}%</span>
-          <span>term {d.terms.termDays}d</span>
-          {d.riskScore !== undefined && <span>risk {d.riskScore}/100</span>}
-        </div>
-      ) : d.riskScore !== undefined ? (
-        <div className="num mt-2 text-xs text-ink-2">risk {d.riskScore}/100 · revenue {d.revenueQuality}</div>
-      ) : null}
-      <p className="mt-2 text-sm leading-relaxed text-ink-2">{d.rationale}</p>
-      {d.flags && d.flags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {d.flags.map((x) => (
-            <span key={x} className="num rounded-sm bg-paper-2 px-1.5 py-0.5 text-[10px] text-ink-2">{x}</span>
-          ))}
-        </div>
-      )}
     </article>
   );
 }
 
-const EVENT_TEXT: Record<string, (a: any) => string> = {
-  LienOpened: (a) => `Lien #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`,
-  LienRepayment: (a) => `Sweep → pool ${usd(Number(a.amount) / 1e6, 4)} on lien #${a.lienId}`,
-  LienStatusChanged: (a) => `Lien #${a.lienId} ${["None", "Active", "Frozen", "Repaid", "Defaulted"][Number(a.from)]} → ${["None", "Active", "Frozen", "Repaid", "Defaulted"][Number(a.to)]}`,
-  AdvanceDisbursed: (a) => `Disbursed ${usd(Number(a.amount) / 1e6, 2)} USDC to ${short(a.seller)}`,
-  SplitterCreated: (a) => `Splitter ${short(a.splitter)} deployed for ${short(a.seller)}`,
-  IdleDeployed: (a) => `Parked ${usd(Number(a.assets) / 1e6, 2)} in USYC`,
-  IdleRecalled: (a) => `Recalled ${usd(Number(a.assets) / 1e6, 2)} from USYC`,
-  AdvanceProposed: (a) => `Advance of ${usd(Number(a.amount) / 1e6, 2)} queued for human approval`,
+const ST = ["None", "Active", "Frozen", "Repaid", "Defaulted"];
+const EVENT_TEXT: Record<string, (a: any) => [string, React.ReactNode]> = {
+  LienOpened: (a) => [`Lien #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`, <ICube key="i" size={16} />],
+  LienRepayment: (a) => [`Sweep → pool ${usd(Number(a.amount) / 1e6, 4)} on lien #${a.lienId}`, <IUp key="i" size={16} />],
+  LienStatusChanged: (a) => [`Lien #${a.lienId} ${ST[Number(a.from)]} → ${ST[Number(a.to)]}`, <IWarn key="i" size={16} />],
+  AdvanceDisbursed: (a) => [`Disbursed ${usd(Number(a.amount) / 1e6, 2)} USDC to ${short(a.seller)}`, <IBolt key="i" size={16} />],
+  SplitterCreated: (a) => [`Splitter ${short(a.splitter)} deployed for ${short(a.seller)}`, <ICube key="i" size={16} />],
+  IdleDeployed: (a) => [`Parked ${usd(Number(a.assets) / 1e6, 2)} in USYC`, <IChart key="i" size={16} />],
+  IdleRecalled: (a) => [`Recalled ${usd(Number(a.assets) / 1e6, 2)} from USYC`, <IChart key="i" size={16} />],
+  AdvanceProposed: (a) => [`Advance of ${usd(Number(a.amount) / 1e6, 2)} queued for human approval`, <IWarn key="i" size={16} />],
 };
 
 export function EventLine({ f }: { f: FeedItem }) {
-  const text = EVENT_TEXT[f.event]?.(f.args);
-  if (!text) return null;
+  const e = EVENT_TEXT[f.event]?.(f.args);
+  if (!e) return null;
   return (
-    <div className="flex justify-between gap-3 border-b border-rule/60 py-1.5 text-xs last:border-0">
-      <span className="text-ink-2">{text}</span>
-      <a href={f.txUrl} target="_blank" className="shrink-0 text-ink-3 underline decoration-rule hover:text-terra">{ago(f.at)}</a>
+    <div className="flex items-center gap-3 border-b border-line py-2.5 last:border-0">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-glass/60 text-cyan">{e[1]}</span>
+      <span className="flex-1 text-[13px] text-white/85">{e[0]}</span>
+      <a href={f.txUrl} target="_blank" className="shrink-0 text-[12px] text-muted hover:text-cyan">
+        {ago(f.at)}
+      </a>
+    </div>
+  );
+}
+
+export function Tabs<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
+  return (
+    <div className="tabs">
+      {options.map((o) => (
+        <button key={o.value} onClick={() => onChange(o.value)} className={`tab ${o.value === value ? "active edge glow-cyan" : ""}`}>
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }

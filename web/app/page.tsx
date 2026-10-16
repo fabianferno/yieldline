@@ -1,6 +1,9 @@
 "use client";
+import { useMemo, useState } from "react";
+import Link from "next/link";
 import { usePoll, usd } from "@/lib/api";
-import { Addr, DecisionCard, EventLine, LienRow, Section, Stat, type FeedItem, type Lien } from "@/components/ui";
+import { Addr, DecisionCard, EventLine, LienRow, Panel, Stat, Tabs, type FeedItem, type Lien } from "@/components/ui";
+import { IArrow, IBolt, IChart, ICube, IUsers, PrismCube } from "@/components/icons";
 
 type Overview = {
   addresses: { registry: string; pool: string; teller: string; explorer: string };
@@ -20,96 +23,180 @@ type Overview = {
   feed: FeedItem[];
 };
 
+type Filter = "all" | "underwriter" | "monitor" | "human";
+
 export default function Home() {
   const { data, error } = usePoll<Overview>("/api/overview", 6000);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [limit, setLimit] = useState(10);
   const decisions = data?.feed.filter((f) => f.event === "Decision" && f.decision) ?? [];
+  const shown = decisions.filter((d) => filter === "all" || d.decision!.agent === filter || (filter === "monitor" && d.decision!.agent === "treasury"));
   const events = data?.feed.filter((f) => f.event !== "Decision") ?? [];
 
+  // cumulative repayment series (oldest → newest) for the sweep sparkline
+  const repaySeries = useMemo(() => {
+    const reps = events.filter((e) => e.event === "LienRepayment").reverse();
+    let c = 0;
+    return [0, ...reps.map((r) => (c += Number(r.args.amount) / 1e6))];
+  }, [events]);
+  const decisionSeries = useMemo(() => {
+    const ds = [...decisions].reverse();
+    return ds.map((_, i) => i + 1);
+  }, [decisions]);
+
   return (
-    <>
-      <div className="max-w-3xl">
-        <div className="engraved text-[11px] text-terra">Working capital for businesses that earn through x402</div>
-        <h1 className="mt-2 font-serif text-4xl font-semibold leading-tight sm:text-5xl">
-          An agent lends against on-chain revenue, and carves every debt in public stone.
-        </h1>
-        <p className="mt-3 text-ink-2">
-          Horos reads a seller&apos;s x402 receipts on Arc, decides whether the revenue is real, advances USDC, and sweeps
-          repayment from each incoming payment through a splitter the seller sets as <span className="num text-sm">payTo</span>.
-          Every advance is a lien in a public registry, so no one can borrow twice against the same revenue.
-        </p>
+    <div className="space-y-4">
+      {/* Hero */}
+      <section className="panel edge relative overflow-hidden p-6 sm:p-8">
+        <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 opacity-95 max-lg:hidden">
+          <PrismCube size={230} />
+        </div>
+        <div className="relative max-w-2xl">
+          <div className="text-[12px] font-medium uppercase tracking-[0.14em] text-cyan">Working capital for x402 sellers</div>
+          <h1 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-tight sm:text-[44px]">
+            An agent lends against on-chain revenue, and carves every debt in public.
+          </h1>
+          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
+            Horos reads a seller&apos;s x402 receipts on Arc, decides whether the revenue is real, advances USDC, and sweeps repayment from
+            every incoming payment through a splitter the seller sets as <span className="mono text-ice">payTo</span>. Each advance is a lien in a
+            public registry, so no one can borrow twice against the same revenue.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/explorer" className="btn btn-primary edge glow-cyan">
+              Look up a seller <IArrow size={16} />
+            </Link>
+            <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-secondary edge edge-amber glow-amber">
+              Read the code
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {error && !data && (
+        <div className="alert alert-error text-[13px]">
+          <span className="text-danger">API unreachable:</span> {error}
+        </div>
+      )}
+
+      {/* Metrics */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat
+          label="USDC advanced"
+          value={usd(data?.metrics.advancedUsdc)}
+          sub={`${data?.metrics.advances ?? 0} advance${data?.metrics.advances === 1 ? "" : "s"} · ${data?.metrics.sellersFinanced ?? 0} seller`}
+          icon={<IBolt size={20} />}
+        />
+        <Stat
+          label="Repaid via sweeps"
+          value={usd(data?.metrics.repaidViaSweepsUsdc, 4)}
+          sub={`of ${usd(data?.metrics.revenueRoutedUsdc, 4)} routed`}
+          icon={<IChart size={20} />}
+          spark={repaySeries}
+        />
+        <Stat
+          label="Agent decisions"
+          value={String(data?.metrics.decisions ?? 0)}
+          sub={`${data?.metrics.escalated ?? 0} escalated to a human`}
+          icon={<ICube size={20} />}
+          tone="amber"
+          spark={decisionSeries}
+        />
+        <Stat
+          label="Rejected · Frozen"
+          value={`${data?.metrics.rejected ?? 0} · ${data?.metrics.freezes ?? 0}`}
+          sub="wash trades · diversions"
+          icon={<IUsers size={20} />}
+          tone="amber"
+        />
       </div>
 
-      {error && !data && <div className="mt-6 rounded-sm border border-blood/30 bg-blood/5 p-3 text-sm text-blood">API unreachable: {error}</div>}
-
-      <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stat label="USDC advanced" value={usd(data?.metrics.advancedUsdc)} sub={`${data?.metrics.advances ?? 0} advances`} />
-        <Stat label="Repaid via sweeps" value={usd(data?.metrics.repaidViaSweepsUsdc, 4)} tone="olive" />
-        <Stat label="Revenue routed" value={usd(data?.metrics.revenueRoutedUsdc, 4)} sub="through splitters" />
-        <Stat label="Agent decisions" value={String(data?.metrics.decisions ?? 0)} sub={`${data?.metrics.escalated ?? 0} escalated to a human`} />
-        <Stat label="Rejected / frozen" value={`${data?.metrics.rejected ?? 0} / ${data?.metrics.freezes ?? 0}`} tone="blood" sub="wash trades · diversions" />
-      </div>
-
-      <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr]">
-        <div>
-          <Section title="Liens" kicker="Registry">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.55fr_1fr]">
+        <div className="min-w-0 space-y-4">
+          <Panel title="Liens" right={<span className="text-[12px] text-muted">LienRegistry · Arc testnet</span>}>
             {data?.liens.length ? (
-              <div className="rounded-sm border border-rule bg-card px-4">
+              <div className="divide-y divide-line">
                 {[...data.liens].reverse().map((l) => (
                   <LienRow key={l.id} l={l} />
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-ink-3">No liens yet.</p>
+              <p className="text-[13px] text-muted">No liens yet.</p>
             )}
-          </Section>
+          </Panel>
 
-          <Section title="Agent decisions" kicker="Published on chain, with reasons">
-            <div className="space-y-3">
-              {decisions.length ? decisions.slice(0, 30).map((f) => <DecisionCard key={f.tx + f.at} f={f} />) : <p className="text-sm text-ink-3">No decisions yet.</p>}
+          <Panel title="Agent decisions" right={<span className="text-[12px] text-muted">published on chain, with reasons</span>}>
+            <div className="mb-4">
+              <Tabs<Filter>
+                value={filter}
+                onChange={setFilter}
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "underwriter", label: "Underwriter" },
+                  { value: "monitor", label: "Monitor" },
+                  { value: "human", label: "Operator" },
+                ]}
+              />
             </div>
-          </Section>
+            <div className="space-y-3">
+              {shown.length ? shown.slice(0, limit).map((f) => <DecisionCard key={f.tx + f.at} f={f} />) : <p className="text-[13px] text-muted">No decisions yet.</p>}
+            </div>
+            {shown.length > limit && (
+              <button onClick={() => setLimit(limit + 10)} className="btn btn-ghost mt-4 w-full">
+                Show more ({shown.length - limit})
+              </button>
+            )}
+          </Panel>
         </div>
 
-        <div>
-          <Section title="Lender pool" kicker="Treasury">
-            <div className="rounded-sm border border-rule bg-card p-4 text-sm">
+        <div className="min-w-0 space-y-4">
+          <Panel title="Lender pool">
+            <div className="text-[13px]">
               <Row k="Liquid USDC" v={usd(data?.pool.liquidityUsdc, 4)} />
               <Row k="Parked in USYC (mock)" v={usd(data?.pool.idleInUsycUsdc, 4)} />
               <Row k="Outstanding principal" v={usd(data?.pool.outstandingPrincipalUsdc, 4)} />
               <Row k="Fees earned" v={usd(data?.pool.feesEarnedUsdc, 4)} />
               <Row k="Written off" v={usd(data?.pool.writtenOffUsdc, 4)} />
+              <div className="divider my-2" />
               <Row k="NAV" v={usd(data?.pool.navUsdc, 4)} strong />
-              <div className="mt-3 border-t border-rule pt-3 text-xs text-ink-3">
-                Hard limits enforced by the pool contract, not the prompt: max advance {usd(data?.pool.limits.maxAdvanceUsdc)} ·
-                human approval above {usd(data?.pool.limits.autoApproveLimitUsdc)} · ≤{(data?.pool.limits.maxExposureBps ?? 0) / 100}% of NAV per
-                seller · sweep {(data?.pool.limits.minSweepBps ?? 0) / 100}–{(data?.pool.limits.maxSweepBps ?? 0) / 100}% · defaults are human-only.
+            </div>
+            <div className="alert alert-info mt-4 !items-start text-[12px] leading-relaxed text-white/80">
+              <span>
+                Hard limits live in the pool contract, not the prompt: max advance {usd(data?.pool.limits.maxAdvanceUsdc)} · human approval above{" "}
+                {usd(data?.pool.limits.autoApproveLimitUsdc)} · ≤{(data?.pool.limits.maxExposureBps ?? 0) / 100}% of NAV per seller · sweep{" "}
+                {(data?.pool.limits.minSweepBps ?? 0) / 100}–{(data?.pool.limits.maxSweepBps ?? 0) / 100}% · defaults are human-only.
+              </span>
+            </div>
+          </Panel>
+
+          <Panel title="On-chain activity">
+            {events.length ? (
+              <div>
+                {events.slice(0, 30).map((f) => (
+                  <EventLine key={f.tx + f.event + (f.args?.lienId ?? "") + (f.args?.amount ?? "")} f={f} />
+                ))}
               </div>
-            </div>
-          </Section>
+            ) : (
+              <p className="text-[13px] text-muted">Nothing yet.</p>
+            )}
+          </Panel>
 
-          <Section title="On-chain activity" kicker="Pool + registry events">
-            <div className="rounded-sm border border-rule bg-card px-4 py-2">
-              {events.length ? events.slice(0, 40).map((f) => <EventLine key={f.tx + f.event + f.args?.lienId} f={f} />) : <p className="py-2 text-sm text-ink-3">Nothing yet.</p>}
-            </div>
-          </Section>
-
-          <Section title="Contracts" kicker="Arc testnet">
-            <div className="rounded-sm border border-rule bg-card p-4 text-sm">
+          <Panel title="Contracts">
+            <div className="text-[13px]">
               <Row k="LienRegistry" v={<Addr a={data?.addresses.registry} />} />
               <Row k="LenderPool" v={<Addr a={data?.addresses.pool} />} />
               <Row k="USYC Teller (mock)" v={<Addr a={data?.addresses.teller} />} />
             </div>
-          </Section>
+          </Panel>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
 function Row({ k, v, strong }: { k: string; v: React.ReactNode; strong?: boolean }) {
   return (
-    <div className={`flex justify-between py-1 ${strong ? "border-t border-rule pt-2 font-semibold" : ""}`}>
-      <span className="text-ink-2">{k}</span>
+    <div className={`flex items-center justify-between py-1.5 ${strong ? "text-[15px] font-semibold" : ""}`}>
+      <span className={strong ? "text-white" : "text-muted"}>{k}</span>
       <span className="num">{v}</span>
     </div>
   );
