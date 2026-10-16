@@ -8,9 +8,8 @@ import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import LienRegistry from "./abi/LienRegistry.js";
-import LenderPool from "./abi/LenderPool.js";
 import { ADDR, NETWORK, env, publicClient } from "./config.js";
-import { readState } from "./store.js";
+import { listOffers, readState } from "./store.js";
 
 const SELLER = env("SELLER_NAME", "horos-api");
 const SELLER_WALLET = env("SELLER_WALLET", ADDR.wallets.seller) as Address;
@@ -18,20 +17,29 @@ const ZERO = "0x0000000000000000000000000000000000000000";
 
 // payTo resolution, in priority order:
 //   1. SELLER_PAYTO_OVERRIDE env / data/seller-<name>.json  (the seller's own config — and how a diversion happens)
-//   2. the seller's Horos RevenueSplitter, once one exists   (the seller's commitment after accepting an advance)
+//   2. the splitter of the seller's live lien, or of the offer they most recently accepted in any pool
+//      (the seller's commitment after accepting an advance)
 //   3. the seller's own wallet
 let cache: { at: number; v: Address } | null = null;
+async function committedSplitter(): Promise<Address | null> {
+  const live = (await publicClient.readContract({
+    address: ADDR.registry,
+    abi: LienRegistry,
+    functionName: "liveLienOfSeller",
+    args: [SELLER_WALLET],
+  })) as bigint;
+  if (live !== 0n) {
+    const l = (await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "lien", args: [live] })) as { payTo: Address };
+    return l.payTo;
+  }
+  const accepted = (await listOffers()).find((o) => o.seller.toLowerCase() === SELLER_WALLET.toLowerCase() && o.status === "accepted" && o.splitter);
+  return accepted?.splitter ?? null;
+}
 export async function payTo(): Promise<Address> {
   const override = process.env.SELLER_PAYTO_OVERRIDE ?? (await readState<{ payTo?: Address }>(`seller-${SELLER}`, {})).payTo;
   if (override) return override as Address;
   if (cache && Date.now() - cache.at < 5_000) return cache.v;
-  const splitter = (await publicClient.readContract({
-    address: ADDR.pool,
-    abi: LenderPool,
-    functionName: "splitterOf",
-    args: [SELLER_WALLET],
-  })) as Address;
-  cache = { at: Date.now(), v: splitter === ZERO ? SELLER_WALLET : splitter };
+  cache = { at: Date.now(), v: (await committedSplitter()) ?? SELLER_WALLET };
   return cache.v;
 }
 

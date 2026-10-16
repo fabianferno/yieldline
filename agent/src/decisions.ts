@@ -3,6 +3,8 @@
 import { decodeEventLog, type Address } from "viem";
 import LenderPool from "./abi/LenderPool.js";
 import LienRegistry from "./abi/LienRegistry.js";
+import LenderPoolV2 from "./abi/LenderPoolV2.js";
+import { isV1, listPools } from "./pools.js";
 import { ADDR, EXPLORER } from "./config.js";
 import { tx } from "./chain.js";
 import { patchDecision, type Decision } from "./store.js";
@@ -30,7 +32,12 @@ export function summarize(d: Decision) {
   };
 }
 
-export async function anchorDecision(d: Decision, who: "underwriter" | "monitor" = d.agent === "underwriter" ? "underwriter" : "monitor") {
+/** Anchor on the pool the decision concerns; pool-agnostic underwriting decisions anchor on Horos Core. */
+export async function anchorDecision(
+  d: Decision,
+  who: "underwriter" | "monitor" = d.agent === "underwriter" ? "underwriter" : "monitor",
+  pool: Address = (d.pool as Address | undefined) ?? ADDR.core,
+) {
   const uri = PREFIX + JSON.stringify(summarize(d));
   if (d.agent === "human") {
     // Human decisions are signed by the pool admin key, not an agent wallet, so they are distinguishable on chain.
@@ -39,7 +46,7 @@ export async function anchorDecision(d: Decision, who: "underwriter" | "monitor"
     const { arcTestnet } = await import("viem/chains");
     const admin = createWalletClient({ account: privateKeyToAccount(process.env.DEPLOYER_PRIVATE_KEY as `0x${string}`), chain: arcTestnet, transport: http() });
     const hash = await admin.writeContract({
-      address: ADDR.pool,
+      address: pool,
       abi: LenderPool,
       functionName: "logDecision",
       args: [d.subject as Address, `human.${d.action}`, d.hash, uri],
@@ -49,7 +56,7 @@ export async function anchorDecision(d: Decision, who: "underwriter" | "monitor"
     await patchDecision(d.hash, { txHash: hash });
     return hash;
   }
-  const r = await tx.logDecision(who, d.subject as Address, `${d.agent}.${d.action}`, d.hash, uri);
+  const r = await tx.logDecision(pool, who, d.subject as Address, `${d.agent}.${d.action}`, d.hash, uri);
   await patchDecision(d.hash, { txHash: r.txHash });
   return r.txHash;
 }
@@ -81,13 +88,14 @@ const ser = (v: unknown) => JSON.parse(JSON.stringify(v, (_, x) => (typeof x ===
 
 /** Full public activity feed: agent decisions + pool and registry events, newest first. */
 export async function activity() {
-  const [poolLogs, regLogs] = await Promise.all([getLogs(ADDR.pool), getLogs(ADDR.registry)]);
+  const pools = await listPools();
+  const [regLogs, ...poolLogs] = await Promise.all([getLogs(ADDR.registry), ...pools.map(getLogs)]);
   const rows = [
-    ...poolLogs.map((l) => ({ l, ev: decode(LenderPool, l), src: "pool" })),
+    ...poolLogs.flatMap((logs, i) => logs.map((l) => ({ l, ev: decode(isV1(pools[i]) ? LenderPool : LenderPoolV2, l), src: "pool", pool: pools[i] }))),
     ...regLogs.map((l) => ({ l, ev: decode(LienRegistry, l), src: "registry" })),
   ]
-    .filter((r) => r.ev && !["RoleGranted", "LimitsUpdated"].includes(r.ev.name))
-    .map(({ l, ev, src }) => {
+    .filter((r) => r.ev && !["RoleGranted", "LimitsUpdated", "Transfer", "Approval", "Initialized"].includes(r.ev.name))
+    .map(({ l, ev, src, pool }: { l: any; ev: ReturnType<typeof decode>; src: string; pool?: Address }) => {
       let summary: unknown;
       if (ev!.name === "Decision" && typeof ev!.args.uri === "string" && ev!.args.uri.startsWith(PREFIX)) {
         try {
@@ -96,6 +104,7 @@ export async function activity() {
       }
       return {
         src,
+        pool: pool ?? null,
         event: ev!.name,
         args: ser({ ...ev!.args, uri: summary ? undefined : ev!.args.uri }),
         decision: summary,

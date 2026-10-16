@@ -4,6 +4,7 @@ import LenderPool from "./abi/LenderPool.js";
 import LienRegistry from "./abi/LienRegistry.js";
 import { ADDR, publicClient, toUnits } from "./config.js";
 import { probe402, tx } from "./chain.js";
+import { isV1, splitterIn } from "./pools.js";
 import { anchorDecision } from "./decisions.js";
 import { getOffer, putOffer, recordDecision } from "./store.js";
 
@@ -13,18 +14,17 @@ import type { Offer } from "./underwriter.js";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 
-/** Step 1 (seller accepts): deploy the seller's splitter so they can point payTo at it. */
-export async function acceptOffer(id: string) {
+/** Step 1 (seller accepts in a chosen pool): deploy the seller's splitter in that pool so they can point payTo at it. */
+export async function acceptOffer(id: string, pool: Address = ADDR.core) {
   const o = await getOffer(id);
-  if (o.status !== "offered") throw new Error(`offer ${id} is ${o.status}`);
-  const r = await tx.ensureSplitter(o.seller);
-  const splitter = (await publicClient.readContract({
-    address: ADDR.pool,
-    abi: LenderPool,
-    functionName: "splitterOf",
-    args: [o.seller],
-  })) as Address;
-  Object.assign(o, { status: "accepted", splitter, txs: { ...o.txs, splitter: r.txHash } });
+  if (o.status !== "offered" && o.status !== "accepted") throw new Error(`offer ${id} is ${o.status}`);
+  let splitter = await splitterIn(pool, o.seller);
+  let splitterTx: string | undefined;
+  if (!splitter) {
+    splitterTx = (await tx.ensureSplitter(pool, o.seller)).txHash;
+    splitter = await splitterIn(pool, o.seller);
+  }
+  Object.assign(o, { status: "accepted", pool, splitter, txs: { ...o.txs, ...(splitterTx ? { splitter: splitterTx } : {}) } });
   await putOffer(o);
   return o;
 }
@@ -60,18 +60,21 @@ export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
       : `Holding disbursement: the live x402 challenge at ${o.endpoint} still names ${probe.ok ? probe.payTo : "no payTo"} instead of splitter ${o.splitter}. Funds move only after the commitment is visible on the endpoint buyers actually hit.`,
   });
   if (!committed) {
-    await anchorDecision(rec, "underwriter");
+    await anchorDecision(rec, "underwriter", o.pool ?? ADDR.pool);
     return { offer: o, funded: false, probe };
   }
 
-  const r = await tx.advance(o.seller, toUnits(o.advanceUsdc), o.feeBps, o.sweepBps, o.termDays * 86400, o.decisionHash);
-  await anchorDecision(rec, "underwriter");
+  const pool = o.pool ?? ADDR.pool;
+  const r = isV1(pool)
+    ? await tx.advanceV1(o.seller, toUnits(o.advanceUsdc), o.feeBps, o.sweepBps, o.termDays * 86400, o.decisionHash)
+    : await tx.advance(pool, o.seller, toUnits(o.advanceUsdc), o.feeBps, o.sweepBps, o.termDays * 86400, o.riskScore, o.decisionHash);
+  await anchorDecision(rec, "underwriter", pool);
   const lienId = Number(
     await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }),
   );
   if (!lienId) {
     // Above the pool's auto-approve limit: the contract queued it for the human admin.
-    const pid = Number(await publicClient.readContract({ address: ADDR.pool, abi: LenderPool, functionName: "proposalCount" })) - 1;
+    const pid = Number(await publicClient.readContract({ address: pool, abi: LenderPool, functionName: "proposalCount" })) - 1;
     Object.assign(o, { status: "pending_human", proposalId: pid, txs: { ...o.txs, proposal: r.txHash } });
     await putOffer(o);
     return { offer: o, funded: false, queuedForHuman: pid, txHash: r.txHash };
@@ -100,7 +103,7 @@ export async function humanApprove(id: string, note = "approved by operator") {
       chain: arcTestnet,
       transport: http(),
     });
-    const hash = await admin.writeContract({ address: ADDR.pool, abi: LenderPool, functionName: "approveProposal", args: [BigInt(o.proposalId)] });
+    const hash = await admin.writeContract({ address: o.pool ?? ADDR.pool, abi: LenderPool, functionName: "approveProposal", args: [BigInt(o.proposalId)] });
     await publicClient.waitForTransactionReceipt({ hash });
     const lienId = Number(
       await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }),

@@ -24,6 +24,8 @@ export const ADDR = {
   registry: deployments.lienRegistry as Address,
   pool: deployments.lenderPool as Address,
   teller: deployments.mockUsycTeller as Address,
+  factory: (deployments as any).poolFactory as Address | undefined,
+  core: ((deployments as any).corePool ?? deployments.lenderPool) as Address,
   admin: deployments.admin as Address,
   wallets: deployments.circleWallets as {
     underwritingAgent: Address;

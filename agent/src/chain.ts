@@ -46,20 +46,21 @@ export async function poolState() {
 }
 
 export async function lienInfo(seller: Address) {
-  const [[total, liveLienId], record, ids, splitter] = await Promise.all([
+  const [[total, liveLienId], record, ids] = await Promise.all([
     read<[bigint, bigint]>(ADDR.registry, LienRegistry, "encumbrance", [seller]),
     read<[number, number, number, number]>(ADDR.registry, LienRegistry, "recordOf", [seller]),
     read<bigint[]>(ADDR.registry, LienRegistry, "liensOf", [seller]),
-    read<Address>(ADDR.pool, LenderPool, "splitterOf", [seller]),
   ]);
   const liens = await Promise.all(ids.map((id) => lien(id)));
+  const live = liens.find((l) => l.id === Number(liveLienId));
   return {
     seller,
     encumbered: liveLienId !== 0n,
     liveLienId: Number(liveLienId),
     outstandingUsdc: Number(total) / 1e6,
     record: { opened: record[0], repaid: record[1], defaulted: record[2], frozenEvents: record[3] },
-    splitter: splitter === "0x0000000000000000000000000000000000000000" ? null : splitter,
+    splitter: live?.payTo ?? null,
+    pool: live?.lender ?? null,
     liens,
   };
 }
@@ -108,45 +109,53 @@ const agentWallet = (who: "underwriter" | "monitor") =>
   circleWallet(who === "underwriter" ? "underwriting-agent" : "monitor-agent").id;
 
 export const tx = {
-  ensureSplitter: (seller: Address) =>
+  ensureSplitter: (pool: Address, seller: Address) =>
     circleExecute({
       walletId: agentWallet("underwriter"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "ensureSplitter(address)",
       abiParameters: [seller],
     }),
-  advance: (seller: Address, amount: bigint, feeBps: number, sweepBps: number, termSec: number, decisionHash: string) =>
+  /** v1 pool (operator pilot): no risk-score argument. */
+  advanceV1: (seller: Address, amount: bigint, feeBps: number, sweepBps: number, termSec: number, decisionHash: string) =>
     circleExecute({
       walletId: agentWallet("underwriter"),
       contractAddress: ADDR.pool,
       abiFunctionSignature: "advance(address,uint128,uint16,uint16,uint64,bytes32)",
       abiParameters: [seller, amount.toString(), feeBps, sweepBps, termSec, decisionHash],
     }),
-  logDecision: (who: "underwriter" | "monitor", subject: Address, kind: string, hash: string, uri: string) =>
+  advance: (pool: Address, seller: Address, amount: bigint, feeBps: number, sweepBps: number, termSec: number, riskScore: number, decisionHash: string) =>
+    circleExecute({
+      walletId: agentWallet("underwriter"),
+      contractAddress: pool,
+      abiFunctionSignature: "advance(address,uint128,uint16,uint16,uint64,uint8,bytes32)",
+      abiParameters: [seller, amount.toString(), feeBps, sweepBps, termSec, riskScore, decisionHash],
+    }),
+  logDecision: (pool: Address, who: "underwriter" | "monitor", subject: Address, kind: string, hash: string, uri: string) =>
     circleExecute({
       walletId: agentWallet(who),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "logDecision(address,string,bytes32,string)",
       abiParameters: [subject, kind, hash, uri],
     }),
-  freeze: (lienId: number, reasonHash: string) =>
+  freeze: (pool: Address, lienId: number, reasonHash: string) =>
     circleExecute({
       walletId: agentWallet("monitor"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "freeze(uint256,bytes32)",
       abiParameters: [lienId, reasonHash],
     }),
-  unfreeze: (lienId: number, reasonHash: string) =>
+  unfreeze: (pool: Address, lienId: number, reasonHash: string) =>
     circleExecute({
       walletId: agentWallet("monitor"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "unfreeze(uint256,bytes32)",
       abiParameters: [lienId, reasonHash],
     }),
-  setSweep: (lienId: number, sweepBps: number, hash: string) =>
+  setSweep: (pool: Address, lienId: number, sweepBps: number, hash: string) =>
     circleExecute({
       walletId: agentWallet("monitor"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "setSweep(uint256,uint16,bytes32)",
       abiParameters: [lienId, sweepBps, hash],
     }),
@@ -157,17 +166,17 @@ export const tx = {
       abiFunctionSignature: "split()",
       abiParameters: [],
     }),
-  deployIdle: (assets: bigint, hash: string) =>
+  deployIdle: (pool: Address, assets: bigint, hash: string) =>
     circleExecute({
       walletId: agentWallet("monitor"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "deployIdle(uint256,bytes32)",
       abiParameters: [assets.toString(), hash],
     }),
-  recallIdle: (shares: bigint, hash: string) =>
+  recallIdle: (pool: Address, shares: bigint, hash: string) =>
     circleExecute({
       walletId: agentWallet("monitor"),
-      contractAddress: ADDR.pool,
+      contractAddress: pool,
       abiFunctionSignature: "recallIdle(uint256,bytes32)",
       abiParameters: [shares.toString(), hash],
     }),

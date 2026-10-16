@@ -1,18 +1,21 @@
 // Horos operator CLI.
 //   underwrite <seller> <endpoint>   run the underwriting agent
-//   accept <offerId>                 seller accepts: deploy their splitter
+//   accept <offerId> [pool]          seller accepts in a pool (default Horos Core): deploy their splitter there
 //   fund <offerId> [waitSec]         verify payTo on the live endpoint, then disburse
 //   approve <offerId> [note]         human sign-off on an escalated offer / queued advance
 //   override <offerId> <usdc> <sweepBps> <feeBps> <days> <note>   operator pilot over an agent rejection
 //   offers                           list offers
 //   monitor [--force]                one monitoring tick
 //   treasury [--force]               one treasury tick
-//   loop [intervalSec]               run monitor + treasury forever
+//   pools                            every pool with live accounting
+//   tick                             fund pending + monitor + treasury once
+//   loop [intervalSec]               run fund-pending + monitor + treasury forever
 //   divert <address> | restore       (demo) local seller sets/clears a payTo override
 import type { Address } from "viem";
 import { underwrite } from "./underwriter.js";
 import { acceptOffer, fundOffer, humanApprove, overrideOffer } from "./lifecycle.js";
-import { loop, monitorTick, treasuryTick } from "./monitor.js";
+import { fundPending, loop, monitorTick, treasuryTick } from "./monitor.js";
+import { allPoolInfo } from "./pools.js";
 import { listOffers, writeState } from "./store.js";
 
 const [cmd, ...args] = process.argv.slice(2);
@@ -26,7 +29,7 @@ switch (cmd) {
     break;
   }
   case "accept":
-    out(await acceptOffer(args[0]));
+    out(await acceptOffer(args[0], args[1] as Address | undefined));
     break;
   case "fund":
     out(await fundOffer(args[0], { waitSec: Number(args[1] ?? 120) }));
@@ -47,6 +50,12 @@ switch (cmd) {
     break;
   case "treasury":
     out(await treasuryTick({ force }));
+    break;
+  case "pools":
+    out(await allPoolInfo());
+    break;
+  case "tick":
+    out({ fund: await fundPending(), monitor: await monitorTick({ force }), treasury: await treasuryTick({ force }) });
     break;
   case "loop":
     await loop(Number(args[0] ?? 30));

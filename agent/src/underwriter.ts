@@ -1,6 +1,7 @@
 // Underwriting agent: investigates a seller's x402 revenue and proposes (or refuses) an advance.
 import type { Address } from "viem";
-import { lienInfo, poolState, probe402 } from "./chain.js";
+import { lienInfo, probe402 } from "./chain.js";
+import { allPoolInfo, protocolCaps } from "./pools.js";
 import { runAgent, MODEL, type Tool } from "./llm.js";
 import { revenueProfile } from "./revenue.js";
 import { putOffer, recordDecision, type Decision } from "./store.js";
@@ -23,9 +24,16 @@ export type Offer = UnderwritingDecision & {
   id: string;
   seller: Address;
   endpoint: string;
-  status: "offered" | "accepted" | "funded" | "rejected" | "pending_human";
+  status: "underwriting" | "failed" | "offered" | "accepted" | "funded" | "rejected" | "pending_human";
   decisionHash: string;
   createdAt: string;
+  /** Passkey account that applied through the product (absent for CLI-created offers). */
+  applicant?: Address;
+  /** Live investigation steps while underwriting. */
+  trace?: { tool: string; at: string; summary: string }[];
+  error?: string;
+  /** Pool the seller chose; v1 offers predate the marketplace and use the operator pilot pool. */
+  pool?: Address;
   splitter?: Address;
   lienId?: number;
   txs?: Record<string, string>;
@@ -40,7 +48,7 @@ Your job: decide whether to advance, how much, and on what terms, and explain wh
 a credit committee can both read. You are a careful lender, not a rubber stamp.
 
 How to underwrite:
-1. Always pull the revenue profile, lien registry record, pool state, and probe the seller's live 402 endpoint.
+1. Always pull the revenue profile, lien registry record, lending capacity, and probe the seller's live 402 endpoint.
 2. Judge whether revenue is REAL. Wash-trading signs: few distinct payers, high concentration (HHI > 0.5),
    payers funded by the seller, several payers sharing one funder, brand-new payer wallets with no other activity,
    machine-regular inter-arrival times (interArrivalCv near 0 with many calls), round-trip flows. Payers funded by the
@@ -49,13 +57,14 @@ How to underwrite:
    history is under 3 days, annualise from the hourly series but haircut at least 50% for short history).
    Then adjust for trend (last24h vs prev24h), volatility (dailyCv), concentration, and repayment record.
 4. Sweep: choose so the repay cap is expected to clear in roughly the term at the observed run-rate, within the
-   pool's min/max sweep. Fee: 300–1500 bps flat, higher for riskier / shorter-history sellers; discount for prior
-   clean repayments. Term ≤ pool max term.
+   protocol min/max sweep. Fee: 300–1500 bps flat, higher for riskier / shorter-history sellers; discount for prior
+   clean repayments. Term ≤ protocol max term.
 5. Hard limits are enforced by the contracts (max advance, per-seller exposure share of NAV, sweep bounds, existing
    lien). Never propose terms outside them. If the seller already has a live lien anywhere in the registry, reject:
    double financing.
-6. Decide "escalate" if the right amount exceeds the auto-approve limit or the evidence is genuinely ambiguous —
-   a human will review. "reject" if revenue is not real, not x402, or the seller is encumbered/defaulted.
+6. Decide "escalate" only if the evidence is genuinely ambiguous: a human will review. Size does not need escalation:
+   pools queue advances above their auto-approve limit for their own curator on chain.
+   riskScore matters: each pool only accepts sellers at or below its stated risk appetite. "reject" if revenue is not real, not x402, or the seller is encumbered/defaulted.
 7. Before an offer, payTo normally points at the seller's own wallet: that is expected, not a red flag. Pointing payTo
    at the splitter is a funding CONDITION, verified on the live endpoint before any USDC is disbursed.
    Payers funded by a public testnet faucet are normal on testnet; a shared faucet funder is not wash evidence.
@@ -83,10 +92,11 @@ export async function underwrite(seller: Address, endpoint: string) {
       run: () => lienInfo(seller),
     },
     {
-      name: "get_pool_state",
-      description: "Lender pool liquidity, NAV, outstanding exposure, and the hard on-chain limits.",
+      name: "get_lending_capacity",
+      description:
+        "Protocol caps every pool must stay within, and each open pool's free cash, assets, limits and risk appetite (max risk score it accepts). You decide risk and terms; the seller then picks among pools whose limits fit.",
       input_schema: { type: "object", properties: {}, required: [] },
-      run: () => poolState(),
+      run: () => lendingCapacity(),
     },
     {
       name: "probe_live_endpoint",
@@ -129,21 +139,23 @@ export async function underwrite(seller: Address, endpoint: string) {
     submitTool: "submit_decision",
   });
 
-  // Defence in depth: clamp to on-chain limits so a bad proposal fails here rather than on chain.
-  const pool = await poolState();
+  // Defence in depth: clamp to protocol caps and to what the best open pool could fund, so a bad proposal fails
+  // here rather than on chain. Amounts above a pool's auto-approve limit are queued for that pool's curator on chain.
+  const cap = await lendingCapacity();
+  const c = cap.protocolCaps;
   const d = { ...result };
   const notes: string[] = [];
-  if (d.decision === "offer") {
-    const maxByExposure = (pool.navUsdc * pool.limits.maxExposureBps) / 10_000;
-    const cap = Math.min(pool.limits.maxAdvanceUsdc, maxByExposure, pool.liquidityUsdc);
-    if (d.advanceUsdc > cap) notes.push(`clamped advance ${d.advanceUsdc} -> ${cap} (on-chain limits)`), (d.advanceUsdc = cap);
-    d.sweepBps = Math.min(Math.max(d.sweepBps, pool.limits.minSweepBps), pool.limits.maxSweepBps);
-    d.feeBps = Math.min(d.feeBps, pool.limits.maxFeeBps);
-    d.termDays = Math.min(Math.max(1, d.termDays), pool.limits.maxTermDays);
+  if (d.decision === "offer" && c) {
+    const best = Math.max(0, ...cap.pools.map((p) => p.maxFundableUsdc));
+    const limit = Math.min(c.maxAdvanceUsdc, best);
+    if (d.advanceUsdc > limit) notes.push(`clamped advance ${d.advanceUsdc} -> ${limit} (caps / best pool capacity)`), (d.advanceUsdc = limit);
+    d.sweepBps = Math.min(Math.max(d.sweepBps, c.minSweepBps), c.maxSweepBps);
+    d.feeBps = Math.min(d.feeBps, c.maxFeeBps);
+    d.termDays = Math.min(Math.max(1, d.termDays), c.maxTermDays);
     d.advanceUsdc = Math.floor(d.advanceUsdc * 1e6) / 1e6;
-    if (d.advanceUsdc <= 0) notes.push("advance rounds to zero"), (d.decision = "reject");
-    if (d.advanceUsdc > pool.limits.autoApproveLimitUsdc) notes.push("above auto-approve limit"), (d.decision = "escalate");
+    if (d.advanceUsdc <= 0) notes.push("no open pool has capacity for this seller right now"), (d.decision = "reject");
   }
+  d.riskScore = Math.round(Math.min(100, Math.max(0, d.riskScore)));
 
   const rec: Decision = await recordDecision({
     agent: "underwriter",
@@ -167,4 +179,22 @@ export async function underwrite(seller: Address, endpoint: string) {
   await putOffer(offer);
   const anchorTx = await anchorDecision(rec, "underwriter");
   return { offer, decision: rec, guardrailNotes: notes, anchorTx };
+}
+
+/** What the marketplace could lend right now: protocol caps plus each open pool's capacity. */
+export async function lendingCapacity() {
+  const [caps, pools] = await Promise.all([protocolCaps(), allPoolInfo()]);
+  return {
+    protocolCaps: caps,
+    pools: pools
+      .filter((p) => p.version === 2)
+      .map((p) => ({
+        name: p.name,
+        maxRiskScore: p.limits.maxRiskScore,
+        freeCashUsdc: p.liquidityUsdc,
+        totalAssetsUsdc: p.totalAssetsUsdc,
+        limits: p.limits,
+        maxFundableUsdc: Math.min(p.limits.maxAdvanceUsdc, p.liquidityUsdc, (p.totalAssetsUsdc * p.limits.maxExposureBps) / 10_000),
+      })),
+  };
 }

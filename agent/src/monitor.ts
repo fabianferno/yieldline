@@ -4,7 +4,9 @@
 //   - asks Claude to decide: continue / adjust_sweep / freeze / unfreeze / escalate_default — and explain
 //   - manages pool idle liquidity in (mock) USYC against forecast advance demand
 import type { Address } from "viem";
-import { allLiens, poolState, probe402, splitterStats, tx } from "./chain.js";
+import { allLiens, probe402, splitterStats, tx } from "./chain.js";
+import { fundOffer } from "./lifecycle.js";
+import { allPoolInfo, type PoolInfo } from "./pools.js";
 import { ADDR, publicClient, toUnits } from "./config.js";
 import { anchorDecision } from "./decisions.js";
 import { runAgent, MODEL } from "./llm.js";
@@ -77,7 +79,7 @@ type LienMemory = { lastPayTo?: string; lastLlmAt?: number; lastRepaid?: number;
 export async function monitorTick(opts: { force?: boolean; quietMinutes?: number } = {}) {
   const offers = await listOffers();
   const memory = await readState<Record<string, LienMemory>>("monitor-memory", {});
-  const pool = await poolState();
+  const pools = await allPoolInfo();
   const liens = (await allLiens()).filter((l) => l.status === "Active" || l.status === "Frozen");
   const results: unknown[] = [];
 
@@ -93,6 +95,7 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
     const livePayTo = probe && probe.ok ? (probe as any).payTo : null;
     const diverted = !!livePayTo && livePayTo !== l.payTo.toLowerCase();
     const mem = (memory[l.id] ??= {});
+    const pool = pools.find((p) => p.address.toLowerCase() === l.lender.toLowerCase())!;
 
     const facts = {
       lienId: l.id,
@@ -152,6 +155,7 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
     const rec = await recordDecision({
       agent: "monitor",
       subject: l.seller,
+      pool: pool.address,
       action: result.action,
       escalated: result.action === "escalate_default",
       inputs: { endpoint, model: MODEL, facts },
@@ -160,13 +164,13 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
     });
 
     let actionTx: string | undefined;
-    if (result.action === "freeze" && l.status === "Active") actionTx = (await tx.freeze(l.id, rec.hash)).txHash;
-    if (result.action === "unfreeze" && l.status === "Frozen") actionTx = (await tx.unfreeze(l.id, rec.hash)).txHash;
+    if (result.action === "freeze" && l.status === "Active") actionTx = (await tx.freeze(pool.address, l.id, rec.hash)).txHash;
+    if (result.action === "unfreeze" && l.status === "Frozen") actionTx = (await tx.unfreeze(pool.address, l.id, rec.hash)).txHash;
     if (result.action === "adjust_sweep" && result.newSweepBps) {
       const bps = Math.min(Math.max(result.newSweepBps, pool.limits.minSweepBps), pool.limits.maxSweepBps);
-      if (bps !== l.sweepBps) actionTx = (await tx.setSweep(l.id, bps, rec.hash)).txHash;
+      if (bps !== l.sweepBps) actionTx = (await tx.setSweep(pool.address, l.id, bps, rec.hash)).txHash;
     }
-    const anchorTx = await anchorDecision(rec, "monitor"); // every reasoned decision is published on chain
+    const anchorTx = await anchorDecision(rec, "monitor", pool.address); // every reasoned decision is published on chain
     results.push({ lienId: l.id, decision: result, actionTx, anchorTx });
   }
 
@@ -174,26 +178,41 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
   return results;
 }
 
+/** Treasury agent for every pool that has a teller configured. */
 export async function treasuryTick(opts: { force?: boolean } = {}) {
-  const pool = await poolState();
+  const pools = (await allPoolInfo()).filter((p) => p.teller);
+  const out: Record<string, unknown> = {};
+  for (const p of pools) {
+    try {
+      out[p.name] = await treasuryTickFor(p, opts);
+    } catch (e: any) {
+      out[p.name] = { error: e?.message ?? String(e) };
+    }
+  }
+  return out;
+}
+
+async function treasuryTickFor(pool: PoolInfo, opts: { force?: boolean }) {
   const offers = await listOffers();
-  const pipelineUsdc = offers.filter((o) => o.status === "offered" || o.status === "accepted" || o.status === "pending_human")
+  const mine = (o: Offer) => (o.pool ?? ADDR.pool).toLowerCase() === pool.address.toLowerCase();
+  const pipelineUsdc = offers.filter((o) => mine(o) && (o.status === "accepted" || o.status === "pending_human"))
     .reduce((s, o) => s + o.advanceUsdc, 0);
   const shares = (await publicClient.readContract({
     address: ADDR.teller,
     abi: MockUSYCTeller,
     functionName: "balanceOf",
-    args: [ADDR.pool],
+    args: [pool.address],
   })) as bigint;
   const price = (await publicClient.readContract({ address: ADDR.teller, abi: MockUSYCTeller, functionName: "price" })) as bigint;
-  const buffer = pool.navUsdc * 0.2;
+  const buffer = pool.totalAssetsUsdc * 0.2;
   const target = buffer + pipelineUsdc + pool.limits.maxAdvanceUsdc; // keep room for one max-size advance
   const gap = pool.liquidityUsdc - target;
   if (!opts.force && Math.abs(gap) < 1) return { skipped: true, gap };
 
   const facts = {
     liquidityUsdc: pool.liquidityUsdc,
-    navUsdc: pool.navUsdc,
+    navUsdc: pool.totalAssetsUsdc,
+    pool: pool.name,
     idleInUsycUsdc: pool.idleInUsycUsdc,
     usycShares: Number(shares) / 1e6,
     usycPrice: Number(price) / 1e6,
@@ -213,7 +232,8 @@ export async function treasuryTick(opts: { force?: boolean } = {}) {
   });
   const rec = await recordDecision({
     agent: "treasury",
-    subject: ADDR.pool,
+    subject: pool.address,
+    pool: pool.address,
     action: result.action,
     escalated: false,
     inputs: { model: MODEL, facts },
@@ -223,27 +243,43 @@ export async function treasuryTick(opts: { force?: boolean } = {}) {
   let actionTx: string | undefined;
   if (result.action === "deploy_idle" && result.amountUsdc > 0) {
     const amt = Math.min(result.amountUsdc, pool.liquidityUsdc);
-    actionTx = (await tx.deployIdle(toUnits(amt), rec.hash)).txHash;
+    actionTx = (await tx.deployIdle(pool.address, toUnits(amt), rec.hash)).txHash;
   }
   if (result.action === "recall_idle" && result.amountUsdc > 0 && shares > 0n) {
     const want = (toUnits(result.amountUsdc) * 1_000_000n) / price;
-    actionTx = (await tx.recallIdle(want > shares ? shares : want, rec.hash)).txHash;
+    actionTx = (await tx.recallIdle(pool.address, want > shares ? shares : want, rec.hash)).txHash;
   }
-  const anchorTx = await anchorDecision(rec, "monitor");
+  const anchorTx = await anchorDecision(rec, "monitor", pool.address);
   return { decision: result, facts, actionTx, anchorTx };
 }
 
 export async function loop(intervalSec = 30) {
   for (;;) {
     try {
+      const f = await fundPending();
       const m = await monitorTick();
       const t = await treasuryTick();
-      console.log(new Date().toISOString(), JSON.stringify({ monitor: m, treasury: t }).slice(0, 2000));
+      console.log(new Date().toISOString(), JSON.stringify({ fund: f, monitor: m, treasury: t }).slice(0, 2000));
     } catch (e: any) {
       console.error("tick failed", e?.message ?? e);
     }
     await new Promise((r) => setTimeout(r, intervalSec * 1000));
   }
+}
+
+/** Accepted offers whose seller may have switched payTo since the last check: fund the ones that have. */
+export async function fundPending() {
+  const accepted = (await listOffers()).filter((o) => o.status === "accepted");
+  const out: unknown[] = [];
+  for (const o of accepted) {
+    try {
+      const r = await fundOffer(o.id, { waitSec: 0 });
+      out.push({ offer: o.id, funded: r.funded, queued: (r as any).queuedForHuman });
+    } catch (e: any) {
+      out.push({ offer: o.id, error: e?.message ?? String(e) });
+    }
+  }
+  return out;
 }
 
 export type { Address };
