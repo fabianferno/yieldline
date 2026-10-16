@@ -12,7 +12,7 @@ export const CLIENT_URL = process.env.NEXT_PUBLIC_CIRCLE_CLIENT_URL ?? "https://
 export const USDC: Address = "0x3600000000000000000000000000000000000000";
 export const FAUCET = "https://faucet.circle.com";
 
-export const publicClient = createPublicClient({ chain: arcTestnet, transport: http() });
+export const publicClient = createPublicClient({ chain: arcTestnet, transport: http(), batch: { multicall: true } });
 
 export type Call = { to: Address; data: Hex; value?: bigint };
 type Status = "unconfigured" | "idle" | "connecting" | "ready" | "error";

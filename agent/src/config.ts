@@ -44,7 +44,8 @@ export const circleWallet = (name: string) => {
   return w;
 };
 
-export const publicClient = createPublicClient({ chain: arcTestnet, transport: http(RPC_URL) });
+// Concurrent reads are merged into one Multicall3 eth_call: the public Arc RPC rate-limits per request.
+export const publicClient = createPublicClient({ chain: arcTestnet, transport: http(RPC_URL), batch: { multicall: true } });
 
 // Facilitator + keeper signer: a gas-only key, separate from the pool admin.
 export const operatorAccount = privateKeyToAccount(
