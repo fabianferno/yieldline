@@ -7,6 +7,7 @@ export const EXPLORER = "https://explorer.testnet.arc.io";
 export function usePoll<T>(path: string | null, ms = 6000) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!path) return;
     let alive = true;
@@ -19,6 +20,7 @@ export function usePoll<T>(path: string | null, ms = 6000) {
         else {
           setData(j);
           setError(null);
+          setUpdatedAt(Date.now());
         }
       } catch (e: any) {
         if (alive) setError(e?.message ?? "fetch failed");
@@ -31,12 +33,12 @@ export function usePoll<T>(path: string | null, ms = 6000) {
       clearInterval(t);
     };
   }, [path, ms]);
-  return { data, error };
+  return { data, error, updatedAt };
 }
 
 export const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "—");
 export const usd = (n?: number | null, d = 2) =>
-  n === undefined || n === null ? "—" : `$${n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: Math.max(d, 4) })}`;
+  n === undefined || n === null ? "—" : `$${n.toLocaleString(undefined, { minimumFractionDigits: Math.min(d, 2), maximumFractionDigits: d })}`;
 export const ago = (iso?: string) => {
   if (!iso) return "";
   const s = (Date.now() - Date.parse(iso)) / 1000;
@@ -45,3 +47,12 @@ export const ago = (iso?: string) => {
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   return `${Math.floor(s / 86400)}d ago`;
 };
+
+/** Re-render on an interval so relative times stay honest. */
+export function useTick(ms = 1000) {
+  const [, set] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => set((n) => n + 1), ms);
+    return () => clearInterval(t);
+  }, [ms]);
+}

@@ -1,9 +1,9 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePoll, usd } from "@/lib/api";
-import { Addr, DecisionCard, EventLine, LienRow, Panel, Stat, Tabs, type FeedItem, type Lien } from "@/components/ui";
-import { IArrow, IBolt, IChart, ICube, IUsers, PrismCube } from "@/components/icons";
+import { ago, usePoll, useTick, usd } from "@/lib/api";
+import { ActivityList, Addr, DecisionEntry, LienCard, LienRow, Panel, Skeleton, Tabs, type FeedItem, type Lien } from "@/components/ui";
+import { IArrow, PrismCube } from "@/components/icons";
 
 type Overview = {
   addresses: { registry: string; pool: string; teller: string; explorer: string };
@@ -26,166 +26,130 @@ type Overview = {
 type Filter = "all" | "underwriter" | "monitor" | "human";
 
 export default function Home() {
-  const { data, error } = usePoll<Overview>("/api/overview", 6000);
+  const { data, error, updatedAt } = usePoll<Overview>("/api/overview", 6000);
+  useTick(5000);
   const [filter, setFilter] = useState<Filter>("all");
-  const [limit, setLimit] = useState(10);
-  const decisions = data?.feed.filter((f) => f.event === "Decision" && f.decision) ?? [];
-  const shown = decisions.filter((d) => filter === "all" || d.decision!.agent === filter || (filter === "monitor" && d.decision!.agent === "treasury"));
-  const events = data?.feed.filter((f) => f.event !== "Decision") ?? [];
+  const [limit, setLimit] = useState(8);
 
-  // cumulative repayment series (oldest → newest) for the sweep sparkline
-  const repaySeries = useMemo(() => {
-    const reps = events.filter((e) => e.event === "LienRepayment").reverse();
-    let c = 0;
-    return [0, ...reps.map((r) => (c += Number(r.args.amount) / 1e6))];
-  }, [events]);
-  const decisionSeries = useMemo(() => {
-    const ds = [...decisions].reverse();
-    return ds.map((_, i) => i + 1);
-  }, [decisions]);
+  const decisions = data?.feed.filter((f) => f.event === "Decision" && f.decision) ?? [];
+  const byAgent = (a: Filter) => decisions.filter((d) => a === "all" || d.decision!.agent === a || (a === "monitor" && d.decision!.agent === "treasury"));
+  const shown = byAgent(filter);
+  const events = data?.feed.filter((f) => f.event !== "Decision") ?? [];
+  const liens = [...(data?.liens ?? [])].reverse();
+  const live = liens.filter((l) => l.status === "Active" || l.status === "Frozen");
+  const past = liens.filter((l) => !live.includes(l));
+  const lastMonitor = decisions.find((d) => d.decision!.agent === "monitor");
+  const m = data?.metrics;
 
   return (
-    <div className="space-y-4">
-      {/* Hero */}
-      <section className="panel edge relative overflow-hidden p-6 sm:p-8">
-        <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 opacity-95 max-lg:hidden">
-          <PrismCube size={230} />
-        </div>
-        <div className="relative max-w-2xl">
-          <div className="text-[12px] font-medium uppercase tracking-[0.14em] text-cyan">Working capital for x402 sellers</div>
-          <h1 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-tight sm:text-[44px]">
-            An agent lends against on-chain revenue, and carves every debt in public.
-          </h1>
-          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Horos reads a seller&apos;s x402 receipts on Arc, decides whether the revenue is real, advances USDC, and sweeps repayment from
-            every incoming payment through a splitter the seller sets as <span className="mono text-ice">payTo</span>. Each advance is a lien in a
-            public registry, so no one can borrow twice against the same revenue.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/explorer" className="btn btn-primary edge glow-cyan">
-              Look up a seller <IArrow size={16} />
-            </Link>
-            <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-secondary edge edge-amber glow-amber">
-              Read the code
-            </a>
+    <div className="space-y-5">
+      {/* Intro + the loop, live */}
+      <section className="panel edge relative overflow-hidden">
+        <div className="relative flex items-center gap-8 p-5 sm:p-7">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]">Ledger</h1>
+              <LiveBadge updatedAt={updatedAt} error={!!error} />
+            </div>
+            <p className="mt-2 max-w-[62ch] text-[14px] leading-relaxed text-white/75">
+              An agent advances USDC to x402 sellers against revenue it can verify on Arc, then takes repayment from every incoming payment
+              through a splitter the seller sets as <span className="mono text-ice">payTo</span>. Each advance is a public lien, so the same
+              revenue can&apos;t be borrowed against twice.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/explorer" className="btn btn-primary edge glow-cyan">
+                Look up a seller <IArrow size={16} />
+              </Link>
+              <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-ghost">
+                Read the code
+              </a>
+            </div>
+          </div>
+          <div className="pointer-events-none shrink-0 max-md:hidden">
+            <PrismCube size={150} />
           </div>
         </div>
+
+        <ol className="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-5">
+          <Step n="Underwrite" value={String(m?.decisions ?? "—")} sub={`decisions · ${m?.rejected ?? 0} rejected · ${m?.escalated ?? 0} to a human`} />
+          <Step n="Advance" value={usd(m?.advancedUsdc, 2)} sub={`${m?.advances ?? 0} advance · ${m?.sellersFinanced ?? 0} seller`} />
+          <Step n="Sweep" value={usd(m?.repaidViaSweepsUsdc, 4)} sub={`repaid from ${usd(m?.revenueRoutedUsdc, 2)} routed`} tone="cyan" />
+          <Step n="Watch" value={lastMonitor ? ago(lastMonitor.at) : "—"} sub={`last monitor check · ${m?.freezes ?? 0} freezes`} />
+          <Step n="Park idle cash" value={usd(data?.pool.idleInUsycUsdc, 2)} sub="in USYC (mock teller)" tone="amber" last />
+        </ol>
       </section>
 
       {error && !data && (
         <div className="alert alert-error text-[13px]">
-          <span className="text-danger">API unreachable:</span> {error}
+          <span className="text-danger">Can&apos;t reach the Horos API.</span> {error}. Retrying every 6 seconds.
         </div>
       )}
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
-          label="USDC advanced"
-          value={usd(data?.metrics.advancedUsdc)}
-          sub={`${data?.metrics.advances ?? 0} advance${data?.metrics.advances === 1 ? "" : "s"} · ${data?.metrics.sellersFinanced ?? 0} seller`}
-          icon={<IBolt size={20} />}
-        />
-        <Stat
-          label="Repaid via sweeps"
-          value={usd(data?.metrics.repaidViaSweepsUsdc, 4)}
-          sub={`of ${usd(data?.metrics.revenueRoutedUsdc, 4)} routed`}
-          icon={<IChart size={20} />}
-          spark={repaySeries}
-        />
-        <Stat
-          label="Agent decisions"
-          value={String(data?.metrics.decisions ?? 0)}
-          sub={`${data?.metrics.escalated ?? 0} escalated to a human`}
-          icon={<ICube size={20} />}
-          tone="amber"
-          spark={decisionSeries}
-        />
-        <Stat
-          label="Rejected · Frozen"
-          value={`${data?.metrics.rejected ?? 0} · ${data?.metrics.freezes ?? 0}`}
-          sub="wash trades · diversions"
-          icon={<IUsers size={20} />}
-          tone="amber"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.55fr_1fr]">
-        <div className="min-w-0 space-y-4">
-          <Panel title="Liens" right={<span className="text-[12px] text-muted">LienRegistry · Arc testnet</span>}>
-            {data?.liens.length ? (
-              <div className="divide-y divide-line">
-                {[...data.liens].reverse().map((l) => (
-                  <LienRow key={l.id} l={l} />
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-5">
+          <Panel title={live.length === 1 ? "Open lien" : "Open liens"} right="LienRegistry · Arc testnet">
+            {!data ? (
+              <Skeleton rows={3} />
+            ) : live.length ? (
+              <div className="space-y-8">
+                {live.map((l) => (
+                  <LienCard key={l.id} l={l} />
                 ))}
               </div>
             ) : (
-              <p className="text-[13px] text-muted">No liens yet.</p>
+              <p className="text-[13px] text-muted">
+                No open liens. When the underwriter funds an offer, the lien and its repayment split appear here.
+              </p>
+            )}
+            {past.length > 0 && (
+              <div className="mt-6 border-t border-line pt-3">
+                <div className="mb-1 text-[12px] text-muted">Closed</div>
+                <div className="divide-y divide-line">
+                  {past.map((l) => (
+                    <LienRow key={l.id} l={l} />
+                  ))}
+                </div>
+              </div>
             )}
           </Panel>
 
-          <Panel title="Agent decisions" right={<span className="text-[12px] text-muted">published on chain, with reasons</span>}>
-            <div className="mb-4">
+          <Panel title="Decision log" right="each one anchored on Arc with its reasoning">
+            <div className="overflow-x-auto">
               <Tabs<Filter>
                 value={filter}
-                onChange={setFilter}
+                onChange={(v) => {
+                  setFilter(v);
+                  setLimit(8);
+                }}
                 options={[
-                  { value: "all", label: "All" },
-                  { value: "underwriter", label: "Underwriter" },
-                  { value: "monitor", label: "Monitor" },
-                  { value: "human", label: "Operator" },
+                  { value: "all", label: "All", count: decisions.length },
+                  { value: "underwriter", label: "Underwriter", count: byAgent("underwriter").length },
+                  { value: "monitor", label: "Monitor", count: byAgent("monitor").length },
+                  { value: "human", label: "Operator", count: byAgent("human").length },
                 ]}
               />
             </div>
-            <div className="space-y-3">
-              {shown.length ? shown.slice(0, limit).map((f) => <DecisionCard key={f.tx + f.at} f={f} />) : <p className="text-[13px] text-muted">No decisions yet.</p>}
+            <div className="divide-y divide-line">
+              {!data ? (
+                <Skeleton rows={4} />
+              ) : shown.length ? (
+                shown.slice(0, limit).map((f) => <DecisionEntry key={f.tx + f.at} f={f} />)
+              ) : (
+                <p className="py-6 text-[13px] text-muted">No decisions from this agent yet.</p>
+              )}
             </div>
             {shown.length > limit && (
-              <button onClick={() => setLimit(limit + 10)} className="btn btn-ghost mt-4 w-full">
-                Show more ({shown.length - limit})
+              <button onClick={() => setLimit(limit + 10)} className="btn btn-ghost mt-2 w-full">
+                Show {Math.min(10, shown.length - limit)} more
               </button>
             )}
           </Panel>
         </div>
 
-        <div className="min-w-0 space-y-4">
-          <Panel title="Lender pool">
-            <div className="text-[13px]">
-              <Row k="Liquid USDC" v={usd(data?.pool.liquidityUsdc, 4)} />
-              <Row k="Parked in USYC (mock)" v={usd(data?.pool.idleInUsycUsdc, 4)} />
-              <Row k="Outstanding principal" v={usd(data?.pool.outstandingPrincipalUsdc, 4)} />
-              <Row k="Fees earned" v={usd(data?.pool.feesEarnedUsdc, 4)} />
-              <Row k="Written off" v={usd(data?.pool.writtenOffUsdc, 4)} />
-              <div className="divider my-2" />
-              <Row k="NAV" v={usd(data?.pool.navUsdc, 4)} strong />
-            </div>
-            <div className="alert alert-info mt-4 !items-start text-[12px] leading-relaxed text-white/80">
-              <span>
-                Hard limits live in the pool contract, not the prompt: max advance {usd(data?.pool.limits.maxAdvanceUsdc)} · human approval above{" "}
-                {usd(data?.pool.limits.autoApproveLimitUsdc)} · ≤{(data?.pool.limits.maxExposureBps ?? 0) / 100}% of NAV per seller · sweep{" "}
-                {(data?.pool.limits.minSweepBps ?? 0) / 100}–{(data?.pool.limits.maxSweepBps ?? 0) / 100}% · defaults are human-only.
-              </span>
-            </div>
-          </Panel>
-
-          <Panel title="On-chain activity">
-            {events.length ? (
-              <div>
-                {events.slice(0, 30).map((f) => (
-                  <EventLine key={f.tx + f.event + (f.args?.lienId ?? "") + (f.args?.amount ?? "")} f={f} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-[13px] text-muted">Nothing yet.</p>
-            )}
-          </Panel>
-
-          <Panel title="Contracts">
-            <div className="text-[13px]">
-              <Row k="LienRegistry" v={<Addr a={data?.addresses.registry} />} />
-              <Row k="LenderPool" v={<Addr a={data?.addresses.pool} />} />
-              <Row k="USYC Teller (mock)" v={<Addr a={data?.addresses.teller} />} />
-            </div>
+        <div className="min-w-0 space-y-5">
+          <PoolPanel data={data} />
+          <Panel title="On-chain activity" right="newest first">
+            {!data ? <Skeleton rows={5} /> : <ActivityList items={events} />}
           </Panel>
         </div>
       </div>
@@ -193,11 +157,92 @@ export default function Home() {
   );
 }
 
-function Row({ k, v, strong }: { k: string; v: React.ReactNode; strong?: boolean }) {
+function LiveBadge({ updatedAt, error }: { updatedAt: number | null; error: boolean }) {
+  const stale = error || !updatedAt || Date.now() - updatedAt > 30_000;
   return (
-    <div className={`flex items-center justify-between py-1.5 ${strong ? "text-[15px] font-semibold" : ""}`}>
-      <span className={strong ? "text-white" : "text-muted"}>{k}</span>
-      <span className="num">{v}</span>
-    </div>
+    <span className={`chip ${stale ? "text-amber" : "text-success"}`}>
+      <span className={`h-1.5 w-1.5 rounded-full bg-current ${stale ? "" : "pulse"}`} />
+      {!updatedAt ? "Connecting…" : stale ? "Reconnecting" : `Live · ${Math.max(0, Math.round((Date.now() - updatedAt) / 1000))}s ago`}
+    </span>
+  );
+}
+
+function Step({ n, value, sub, tone, last }: { n: string; value: string; sub: string; tone?: "cyan" | "amber"; last?: boolean }) {
+  return (
+    <li className={`bg-[#0b111a] px-5 py-4 sm:px-6 ${last ? "max-md:col-span-2" : ""}`}>
+      <div className="flex items-center gap-2 text-[12px] font-medium text-white/85">
+        <span className={`h-1.5 w-1.5 rounded-full ${tone === "amber" ? "bg-amber" : "bg-cyan"}`} />
+        {n}
+      </div>
+      <div className={`num mt-1.5 text-[20px] font-semibold tracking-tight ${tone === "cyan" ? "text-cyan" : tone === "amber" ? "text-amber" : ""}`}>{value}</div>
+      <div className="mt-0.5 text-[12px] leading-snug text-muted">{sub}</div>
+    </li>
+  );
+}
+
+function PoolPanel({ data }: { data: Overview | null }) {
+  const p = data?.pool;
+  const nav = p?.navUsdc || 1;
+  const parts = p
+    ? [
+        { k: "Liquid", v: p.liquidityUsdc, c: "bg-ice/80" },
+        { k: "Lent out", v: p.outstandingPrincipalUsdc, c: "bg-cyan" },
+        { k: "In USYC", v: p.idleInUsycUsdc, c: "bg-amber" },
+      ]
+    : [];
+  const L = p?.limits;
+  return (
+    <Panel title="Lender pool" right={<span className="num text-[15px] font-semibold text-white">NAV {usd(p?.navUsdc, 2)}</span>}>
+      {!p ? (
+        <Skeleton rows={3} />
+      ) : (
+        <>
+          <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+            {parts.map((x) => (
+              <div key={x.k} className={x.c} style={{ width: `${(x.v / nav) * 100}%` }} />
+            ))}
+          </div>
+          <dl className="mt-4 space-y-2 text-[13px]">
+            {parts.map((x) => (
+              <div key={x.k} className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${x.c}`} />
+                <dt className="flex-1 text-white/75">{x.k}</dt>
+                <dd className="num">{usd(x.v, 2)}</dd>
+              </div>
+            ))}
+            <div className="flex items-center gap-2 border-t border-line pt-2">
+              <span className="h-2 w-2" />
+              <dt className="flex-1 text-white/75">Fees earned · written off</dt>
+              <dd className="num">
+                {usd(p.feesEarnedUsdc, 2)} · {usd(p.writtenOffUsdc, 2)}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-4 rounded-xl border border-line bg-midnight/40 p-3.5 text-[12px] leading-relaxed text-white/75">
+            <div className="mb-1.5 font-medium text-white/90">Limits enforced by the contract, not the prompt</div>
+            <ul className="num grid grid-cols-2 gap-x-4 gap-y-1">
+              <li>max advance {usd(L?.maxAdvanceUsdc, 0)}</li>
+              <li>human above {usd(L?.autoApproveLimitUsdc, 0)}</li>
+              <li>≤{(L?.maxExposureBps ?? 0) / 100}% NAV per seller</li>
+              <li>
+                sweep {(L?.minSweepBps ?? 0) / 100}–{(L?.maxSweepBps ?? 0) / 100}%
+              </li>
+            </ul>
+            <div className="mt-1">Only a human can mark a default.</div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted">
+            <span>
+              Registry <Addr a={data?.addresses.registry} />
+            </span>
+            <span>
+              Pool <Addr a={data?.addresses.pool} />
+            </span>
+            <span>
+              Teller <Addr a={data?.addresses.teller} />
+            </span>
+          </div>
+        </>
+      )}
+    </Panel>
   );
 }

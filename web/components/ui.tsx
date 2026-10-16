@@ -10,7 +10,7 @@ export function Panel({
   children,
   className = "",
 }: {
-  title?: string;
+  title?: React.ReactNode;
   right?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
@@ -18,9 +18,9 @@ export function Panel({
   return (
     <section className={`panel p-4 sm:p-5 ${className}`}>
       {(title || right) && (
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           {title && <h2 className="panel-title">{title}</h2>}
-          {right}
+          {right && <div className="text-[12px] text-muted">{right}</div>}
         </div>
       )}
       {children}
@@ -28,71 +28,14 @@ export function Panel({
   );
 }
 
-export function Sparkline({ values, tone = "cyan", height = 56 }: { values: number[]; tone?: "cyan" | "amber"; height?: number }) {
-  const w = 220;
-  const pts = values.length > 1 ? values : [0, ...(values.length ? values : [0])];
-  const max = Math.max(...pts, 1e-9);
-  const min = Math.min(...pts);
-  const xy = pts.map((v, i) => [(i / (pts.length - 1)) * w, height - 6 - ((v - min) / (max - min || 1)) * (height - 14)]);
-  const d = xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const color = tone === "cyan" ? "#36d9e8" : "#ffb65c";
-  const id = `sp-${tone}`;
+/** A label/value pair laid out for scanning, not a card. */
+export function Metric({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub?: React.ReactNode; tone?: "cyan" | "amber" | "danger" }) {
+  const c = tone === "cyan" ? "text-cyan" : tone === "amber" ? "text-amber" : tone === "danger" ? "text-danger" : "text-white";
   return (
-    <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }} preserveAspectRatio="none">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={color} stopOpacity=".25" />
-          <stop offset="1" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-        <filter id={`${id}-g`}>
-          <feGaussianBlur stdDeviation="2.5" />
-        </filter>
-      </defs>
-      <path d={`${d} L${w},${height} L0,${height}Z`} fill={`url(#${id})`} />
-      <path d={d} fill="none" stroke={color} strokeWidth="3" opacity=".6" filter={`url(#${id}-g)`} />
-      <path d={d} fill="none" stroke={color} strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-export function Stat({
-  label,
-  value,
-  sub,
-  delta,
-  icon,
-  tone = "cyan",
-  spark,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  delta?: string;
-  icon?: React.ReactNode;
-  tone?: "cyan" | "amber";
-  spark?: number[];
-}) {
-  return (
-    <div className={`panel edge ${tone === "amber" ? "edge-amber" : ""} flex flex-col p-4`}>
-      <div className={`mb-3 ${tone === "cyan" ? "text-cyan" : "text-amber"}`}>{icon ?? <IChart size={18} />}</div>
-      <div className="text-[14px] text-white/85">{label}</div>
-      <div className="num mt-1 text-[26px] font-semibold tracking-tight">{value}</div>
-      {(delta || sub) && (
-        <div className="mt-1 flex items-center gap-1.5 text-[13px]">
-          {delta && (
-            <span className="flex items-center gap-0.5 font-medium text-success">
-              <IUp size={13} />
-              {delta}
-            </span>
-          )}
-          {sub && <span className="text-white/75">{sub}</span>}
-        </div>
-      )}
-      {spark && spark.length > 1 && (
-        <div className="-mx-1 mt-auto pt-3">
-          <Sparkline values={spark} tone={tone} />
-        </div>
-      )}
+    <div className="min-w-0">
+      <div className="text-[12px] text-muted">{label}</div>
+      <div className={`num mt-1 text-[22px] font-semibold leading-tight tracking-tight ${c}`}>{value}</div>
+      {sub && <div className="mt-0.5 text-[12px] text-white/70">{sub}</div>}
     </div>
   );
 }
@@ -106,7 +49,7 @@ const STATUS: Record<string, string> = {
 export function StatusChip({ status }: { status: string }) {
   return (
     <span className={`chip ${STATUS[status] ?? "text-muted"}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      <span className={`h-1.5 w-1.5 rounded-full bg-current ${status === "Active" ? "pulse" : ""}`} />
       {status}
     </span>
   );
@@ -135,47 +78,102 @@ export type Lien = {
   splitter?: { receivedUsdc: number; sweptUsdc: number; forwardedUsdc: number; owedUsdc: number; accelerated: boolean };
 };
 
+function termLeft(l: Lien) {
+  const s = l.termEnd - Date.now() / 1000;
+  if (s <= 0) return "term ended";
+  const d = s / 86400;
+  return d >= 1 ? `${d.toFixed(1)} days left` : `${Math.ceil(s / 3600)}h left`;
+}
+
+/** The lien as the page's main object: what is owed, how fast it is coming back, and where every payment goes. */
+export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boolean }) {
+  const pct = Math.min(100, (l.repaidUsdc / (l.repayCapUsdc || 1)) * 100);
+  const sweep = l.splitter?.accelerated ? 100 : l.sweepBps / 100;
+  const frozen = l.status === "Frozen";
+  return (
+    <article className="rise">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h3 className="text-[18px] font-semibold tracking-tight">Lien #{l.id}</h3>
+        <StatusChip status={l.status} />
+        <span className="text-[12px] text-muted">
+          {sellerLink ? (
+            <>
+              seller{" "}
+              <Link href={`/lien/${l.seller}`} className="mono text-ice underline decoration-line underline-offset-4 hover:text-cyan">
+                {short(l.seller)}
+              </Link>{" "}
+              ·{" "}
+            </>
+          ) : null}
+          opened {ago(new Date(l.createdAt * 1000).toISOString())} · {termLeft(l)}
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+        <Metric label="Advanced" value={usd(l.principalUsdc, 2)} />
+        <Metric label="Repaid" value={usd(l.repaidUsdc, 4)} tone="cyan" sub={`${pct.toFixed(1)}% of ${usd(l.repayCapUsdc, 2)} cap`} />
+        <Metric label="Still owed" value={usd(Math.max(0, l.repayCapUsdc - l.repaidUsdc), 4)} />
+        {l.splitter ? (
+          <Metric label="Revenue routed" value={usd(l.splitter.receivedUsdc, 4)} sub="through the splitter" />
+        ) : (
+          <Metric label="Term" value={termLeft(l)} sub={`${(l.sweepBps / 100).toFixed(0)}% of revenue swept`} />
+        )}
+      </div>
+
+      <div className="mt-5">
+        <div className="track !h-2">
+          <div className={frozen ? "fill-danger" : "fill-cyan"} style={{ width: `${Math.max(pct, 1)}%` }} />
+        </div>
+      </div>
+
+      {/* Where one incoming payment goes */}
+      <div className="mt-5 rounded-xl border border-line bg-midnight/40 p-3.5">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 text-[12px]">
+          <span className="text-white/85">Every x402 payment to this seller splits on arrival</span>
+          <span className="text-muted">
+            payTo → splitter <Addr a={l.payTo} />
+          </span>
+        </div>
+        <div className="flex h-7 overflow-hidden rounded-md text-[11px] font-medium">
+          <div className="flex items-center justify-center bg-gradient-to-r from-cyan to-cyan-deep text-midnight" style={{ width: `${sweep}%` }}>
+            {sweep}% to pool
+          </div>
+          {sweep < 100 && (
+            <div className="flex flex-1 items-center justify-center bg-glass text-white/85">{100 - sweep}% to seller</div>
+          )}
+        </div>
+        {l.splitter && <div className="mt-2 flex justify-between text-[12px] text-muted">
+          <span>
+            swept <span className="num text-white/85">{usd(l.splitter.sweptUsdc, 4)}</span>
+          </span>
+          <span>
+            forwarded <span className="num text-white/85">{usd(l.splitter.forwardedUsdc, 4)}</span>
+          </span>
+        </div>}
+        {l.splitter?.accelerated && <p className="mt-2 text-[12px] text-danger">Frozen by the monitor: sweeping 100% until the seller restores payTo.</p>}
+      </div>
+    </article>
+  );
+}
+
+/** Compact row for lien history lists. */
 export function LienRow({ l }: { l: Lien }) {
   const pct = Math.min(100, (l.repaidUsdc / (l.repayCapUsdc || 1)) * 100);
   return (
-    <div className="rise grid grid-cols-1 gap-4 py-4 sm:grid-cols-[120px_1fr_1.3fr_110px] sm:items-center">
-      <div className="flex items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
-        <div className="text-[18px] font-semibold">Lien #{l.id}</div>
+    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-3">
+      <div className="flex items-center gap-2">
+        <span className="text-[14px] font-semibold">#{l.id}</span>
         <StatusChip status={l.status} />
       </div>
-      <div className="space-y-1 text-[13px]">
-        <div className="text-white/85">
-          Seller{" "}
-          <Link href={`/lien/${l.seller}`} className="mono text-[12px] text-ice underline decoration-line underline-offset-4 hover:text-cyan">
-            {short(l.seller)}
-          </Link>
-        </div>
-        <div className="text-muted">
-          payTo → splitter <Addr a={l.payTo} />
-        </div>
-      </div>
       <div>
-        <div className="mb-1.5 flex justify-between text-[12px] text-muted">
-          <span>
-            repaid <span className="num text-white">{usd(l.repaidUsdc, 4)}</span> of <span className="num">{usd(l.repayCapUsdc, 4)}</span>
-          </span>
-          <span className="num text-cyan">{pct.toFixed(1)}%</span>
-        </div>
         <div className="track">
-          <div className={l.status === "Frozen" ? "fill-danger" : "fill-cyan"} style={{ width: `${pct}%` }} />
+          <div className={l.status === "Frozen" ? "fill-danger" : "fill-cyan"} style={{ width: `${Math.max(pct, 1)}%` }} />
         </div>
-        {l.splitter && (
-          <div className="mt-1.5 text-[12px] text-muted">
-            routed <span className="num text-white/85">{usd(l.splitter.receivedUsdc, 4)}</span> · to seller{" "}
-            <span className="num text-white/85">{usd(l.splitter.forwardedUsdc, 4)}</span>
-            {l.splitter.accelerated && <span className="ml-1 text-danger">· sweeping 100%</span>}
-          </div>
-        )}
+        <div className="mt-1 text-[12px] text-muted">
+          <span className="num text-white/85">{usd(l.repaidUsdc, 4)}</span> of {usd(l.repayCapUsdc, 2)} · sweep {(l.sweepBps / 100).toFixed(0)}% · {termLeft(l)}
+        </div>
       </div>
-      <div className="text-right">
-        <div className="num text-[18px] font-semibold">{usd(l.principalUsdc, 2)}</div>
-        <div className="text-[12px] text-muted">sweep {(l.sweepBps / 100).toFixed(0)}%</div>
-      </div>
+      <div className="num text-right text-[15px] font-semibold">{usd(l.principalUsdc, 2)}</div>
     </div>
   );
 }
@@ -220,62 +218,63 @@ const ACTION_KIND: Record<string, Kind> = {
 };
 const KIND_ICON = { success: ICheck, warning: IWarn, error: IX, info: IInfo };
 const KIND_TEXT = { success: "text-success", warning: "text-amber", error: "text-danger", info: "text-info" };
+const KIND_RING = { success: "border-success/40 bg-success/10", warning: "border-amber/40 bg-amber/10", error: "border-danger/40 bg-danger/10", info: "border-info/40 bg-info/10" };
 
-export function DecisionCard({ f }: { f: FeedItem }) {
+export const agentName = (a: string) => (a === "human" ? "Operator" : `${a[0].toUpperCase()}${a.slice(1)}`);
+
+/** One entry in the decision log: verdict first, terms next, reasoning on demand. */
+export function DecisionEntry({ f }: { f: FeedItem }) {
   const d = f.decision!;
   const [open, setOpen] = useState(false);
   const kind = ACTION_KIND[d.action] ?? "info";
   const Icon = KIND_ICON[kind];
-  const who = d.agent === "human" ? "Operator (human)" : `${d.agent[0].toUpperCase()}${d.agent.slice(1)} agent`;
+  const long = d.rationale.length > 180;
+  const terms = d.terms?.advanceUsdc
+    ? [
+        `${usd(d.terms.advanceUsdc, 2)} advance`,
+        `${((d.terms.sweepBps ?? 0) / 100).toFixed(0)}% sweep`,
+        `${((d.terms.feeBps ?? 0) / 100).toFixed(1)}% fee`,
+        `${d.terms.termDays}d`,
+      ]
+    : [];
   return (
-    <article className={`alert alert-${kind} rise !items-start !py-4`}>
-      <Icon size={26} className={`mt-0.5 shrink-0 ${KIND_TEXT[kind]}`} />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div className="flex items-baseline gap-2">
-            <span className={`text-[15px] font-semibold capitalize ${KIND_TEXT[kind]}`}>{d.action.replaceAll("_", " ")}</span>
-            <span className="text-[12px] text-muted">{who}</span>
-            {d.escalated && <span className="chip !h-5 border-amber/40 text-amber">human review</span>}
-          </div>
-          <div className="text-[12px] text-muted">
-            {d.agent !== "treasury" && (
-              <>
-                <Link href={`/lien/${f.args.subject}`} className="mono underline decoration-line underline-offset-4 hover:text-cyan">
-                  {short(f.args.subject)}
-                </Link>{" "}
-                ·{" "}
-              </>
-            )}
-            {ago(f.at)} ·{" "}
-            <a href={f.txUrl} target="_blank" className="underline decoration-line underline-offset-4 hover:text-cyan">
-              on Arc
-            </a>
-          </div>
+    <article className="relative grid grid-cols-[32px_1fr] gap-3 py-4">
+      <span className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full border ${KIND_RING[kind]} ${KIND_TEXT[kind]}`}>
+        <Icon size={16} />
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className={`text-[14px] font-semibold capitalize ${KIND_TEXT[kind]}`}>{d.action.replaceAll("_", " ")}</span>
+          <span className="text-[12px] text-white/70">{agentName(d.agent)}</span>
+          {d.agent !== "treasury" && f.args.subject && (
+            <Link href={`/lien/${f.args.subject}`} className="mono text-[12px] text-muted underline decoration-line underline-offset-4 hover:text-cyan">
+              {short(f.args.subject)}
+            </Link>
+          )}
+          {d.escalated && <span className="chip !h-5 border-amber/40 text-amber">needs a human</span>}
+          <a href={f.txUrl} target="_blank" className="ml-auto text-[12px] text-muted hover:text-cyan" title="Anchored on Arc">
+            {ago(f.at)} ↗
+          </a>
         </div>
-        {d.terms && d.terms.advanceUsdc ? (
-          <div className="num mt-2 flex flex-wrap gap-2 text-[12px]">
-            <span className="chip text-white">advance {usd(d.terms.advanceUsdc, 2)}</span>
-            <span className="chip text-white/85">sweep {((d.terms.sweepBps ?? 0) / 100).toFixed(0)}%</span>
-            <span className="chip text-white/85">fee {((d.terms.feeBps ?? 0) / 100).toFixed(1)}%</span>
-            <span className="chip text-white/85">{d.terms.termDays}d term</span>
-            {d.riskScore !== undefined && <span className="chip text-amber">risk {d.riskScore}</span>}
+        {(terms.length > 0 || d.riskScore !== undefined) && (
+          <div className="num mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-white/85">
+            {terms.map((t) => (
+              <span key={t}>{t}</span>
+            ))}
+            {d.riskScore !== undefined && <span className="text-amber">risk {d.riskScore}/100</span>}
+            {!terms.length && d.revenueQuality && <span className="text-muted">revenue {d.revenueQuality}</span>}
           </div>
-        ) : d.riskScore !== undefined ? (
-          <div className="num mt-2 flex gap-2 text-[12px]">
-            <span className="chip text-amber">risk {d.riskScore}/100</span>
-            {d.revenueQuality && <span className="chip text-white/85">revenue {d.revenueQuality}</span>}
-          </div>
-        ) : null}
-        <p className={`mt-2 text-[13px] leading-relaxed text-white/80 ${open ? "" : "line-clamp-3"}`}>{d.rationale}</p>
-        {d.rationale.length > 260 && (
+        )}
+        <p className={`mt-1.5 max-w-[72ch] text-[13px] leading-relaxed text-white/72 ${open ? "" : "line-clamp-2"}`}>{d.rationale}</p>
+        {long && (
           <button onClick={() => setOpen(!open)} className="mt-1 text-[12px] font-medium text-cyan hover:underline">
-            {open ? "Hide reasoning" : "Read full reasoning"}
+            {open ? "Show less" : "Full reasoning"}
           </button>
         )}
         {open && d.flags && d.flags.length > 0 && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {d.flags.map((x) => (
-              <span key={x} className="mono rounded-md border border-line bg-midnight/60 px-1.5 py-0.5 text-[10.5px] text-muted">
+              <span key={x} className="mono rounded-md border border-line bg-midnight/60 px-1.5 py-0.5 text-[11px] text-muted">
                 {x}
               </span>
             ))}
@@ -288,37 +287,75 @@ export function DecisionCard({ f }: { f: FeedItem }) {
 
 const ST = ["None", "Active", "Frozen", "Repaid", "Defaulted"];
 const EVENT_TEXT: Record<string, (a: any) => [string, React.ReactNode]> = {
-  LienOpened: (a) => [`Lien #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`, <ICube key="i" size={16} />],
-  LienRepayment: (a) => [`Sweep → pool ${usd(Number(a.amount) / 1e6, 4)} on lien #${a.lienId}`, <IUp key="i" size={16} />],
-  LienStatusChanged: (a) => [`Lien #${a.lienId} ${ST[Number(a.from)]} → ${ST[Number(a.to)]}`, <IWarn key="i" size={16} />],
-  AdvanceDisbursed: (a) => [`Disbursed ${usd(Number(a.amount) / 1e6, 2)} USDC to ${short(a.seller)}`, <IBolt key="i" size={16} />],
-  SplitterCreated: (a) => [`Splitter ${short(a.splitter)} deployed for ${short(a.seller)}`, <ICube key="i" size={16} />],
-  IdleDeployed: (a) => [`Parked ${usd(Number(a.assets) / 1e6, 2)} in USYC`, <IChart key="i" size={16} />],
-  IdleRecalled: (a) => [`Recalled ${usd(Number(a.assets) / 1e6, 2)} from USYC`, <IChart key="i" size={16} />],
-  AdvanceProposed: (a) => [`Advance of ${usd(Number(a.amount) / 1e6, 2)} queued for human approval`, <IWarn key="i" size={16} />],
+  LienOpened: (a) => [`Lien #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`, <ICube key="i" size={15} />],
+  LienRepayment: (a) => [`Sweep to pool · ${usd(Number(a.amount) / 1e6, 4)} on lien #${a.lienId}`, <IUp key="i" size={15} />],
+  LienStatusChanged: (a) => [`Lien #${a.lienId} ${ST[Number(a.from)]} → ${ST[Number(a.to)]}`, <IWarn key="i" size={15} />],
+  AdvanceDisbursed: (a) => [`Disbursed ${usd(Number(a.amount) / 1e6, 2)} USDC to ${short(a.seller)}`, <IBolt key="i" size={15} />],
+  SplitterCreated: (a) => [`Splitter ${short(a.splitter)} deployed for ${short(a.seller)}`, <ICube key="i" size={15} />],
+  IdleDeployed: (a) => [`Parked ${usd(Number(a.assets) / 1e6, 2)} in USYC`, <IChart key="i" size={15} />],
+  IdleRecalled: (a) => [`Recalled ${usd(Number(a.assets) / 1e6, 2)} from USYC`, <IChart key="i" size={15} />],
+  AdvanceProposed: (a) => [`Advance of ${usd(Number(a.amount) / 1e6, 2)} queued for human approval`, <IWarn key="i" size={15} />],
 };
 
-export function EventLine({ f }: { f: FeedItem }) {
-  const e = EVENT_TEXT[f.event]?.(f.args);
-  if (!e) return null;
+/** On-chain events, with runs of sweeps folded into a single line so the rarer events stay visible. */
+export function ActivityList({ items, max = 14 }: { items: FeedItem[]; max?: number }) {
+  type Row = { key: string; text: string; icon: React.ReactNode; at: string; href: string; count?: number };
+  const rows: Row[] = [];
+  for (const f of items) {
+    const e = EVENT_TEXT[f.event]?.(f.args);
+    if (!e) continue;
+    const prev = rows[rows.length - 1];
+    if (f.event === "LienRepayment" && prev?.count) {
+      prev.count++;
+      (prev as any).sum += Number(f.args.amount) / 1e6;
+      prev.text = `${prev.count} sweeps to pool · ${usd((prev as any).sum, 4)} on lien #${f.args.lienId}`;
+      (prev as any).last = f.at;
+      continue;
+    }
+    const row: any = { key: f.tx + f.event + (f.args?.amount ?? ""), text: e[0], icon: e[1], at: f.at, href: f.txUrl };
+    if (f.event === "LienRepayment") {
+      row.count = 1;
+      row.sum = Number(f.args.amount) / 1e6;
+    }
+    rows.push(row);
+  }
+  if (!rows.length) return <p className="text-[13px] text-muted">No on-chain events yet. The first advance will appear here.</p>;
   return (
-    <div className="flex items-center gap-3 border-b border-line py-2.5 last:border-0">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-glass/60 text-cyan">{e[1]}</span>
-      <span className="flex-1 text-[13px] text-white/85">{e[0]}</span>
-      <a href={f.txUrl} target="_blank" className="shrink-0 text-[12px] text-muted hover:text-cyan">
-        {ago(f.at)}
-      </a>
+    <ol>
+      {rows.slice(0, max).map((r: any) => (
+        <li key={r.key} className="flex items-center gap-3 border-b border-line py-2.5 last:border-0">
+          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-glass/60 ${r.count ? "text-cyan" : "text-amber"}`}>{r.icon}</span>
+          <span className="min-w-0 flex-1 text-[13px] text-white/85">
+            {r.text}
+            {r.count > 1 && <span className="block text-[11px] text-muted">{ago(r.last)} → {ago(r.at)}</span>}
+          </span>
+          <a href={r.href} target="_blank" className="shrink-0 text-[12px] text-muted hover:text-cyan">
+            {ago(r.at)}
+          </a>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function Tabs<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string; count?: number }[]; onChange: (v: T) => void }) {
+  return (
+    <div className="tabs" role="tablist">
+      {options.map((o) => (
+        <button key={o.value} role="tab" aria-selected={o.value === value} onClick={() => onChange(o.value)} className={`tab ${o.value === value ? "active edge glow-cyan" : ""}`}>
+          {o.label}
+          {o.count !== undefined && <span className="num ml-1.5 text-[11px] opacity-60">{o.count}</span>}
+        </button>
+      ))}
     </div>
   );
 }
 
-export function Tabs<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
+export function Skeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <div className="tabs">
-      {options.map((o) => (
-        <button key={o.value} onClick={() => onChange(o.value)} className={`tab ${o.value === value ? "active edge glow-cyan" : ""}`}>
-          {o.label}
-        </button>
+    <div className="space-y-3 py-2" aria-busy>
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="h-4 animate-pulse rounded bg-glass/70" style={{ width: `${90 - i * 12}%` }} />
       ))}
     </div>
   );

@@ -1,3 +1,4 @@
+import { useId } from "react";
 // Thin-stroke icons matching the Prism UI line set (1.6px stroke, rounded joins).
 type P = { className?: string; size?: number };
 const S = ({ size = 20, className, children }: P & { children: React.ReactNode }) => (
@@ -103,22 +104,23 @@ export const IExternal = (p: P) => (
 
 /** The Prism glass cube, as the Horos mark. */
 export function PrismCube({ size = 40 }: { size?: number }) {
+  const u = useId().replace(/:/g, "");
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
       <defs>
-        <linearGradient id="pc-top" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`pc-top-${u}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#d9f7fa" stopOpacity=".9" />
           <stop offset="1" stopColor="#36d9e8" stopOpacity=".55" />
         </linearGradient>
-        <linearGradient id="pc-left" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`pc-left-${u}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#36d9e8" stopOpacity=".85" />
           <stop offset="1" stopColor="#0b1e2c" stopOpacity=".9" />
         </linearGradient>
-        <linearGradient id="pc-right" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`pc-right-${u}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#1b2838" stopOpacity=".95" />
           <stop offset="1" stopColor="#ffb65c" stopOpacity=".95" />
         </linearGradient>
-        <filter id="pc-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <filter id={`pc-glow-${u}`} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="2.2" result="b" />
           <feMerge>
             <feMergeNode in="b" />
@@ -126,10 +128,10 @@ export function PrismCube({ size = 40 }: { size?: number }) {
           </feMerge>
         </filter>
       </defs>
-      <g filter="url(#pc-glow)" strokeLinejoin="round">
-        <path d="M32 6 54 18 32 30 10 18z" fill="url(#pc-top)" stroke="#d9f7fa" strokeWidth="1.2" />
-        <path d="M10 18 32 30v28L10 46z" fill="url(#pc-left)" stroke="#36d9e8" strokeWidth="1.2" />
-        <path d="M54 18 32 30v28l22-12z" fill="url(#pc-right)" stroke="#ffb65c" strokeWidth="1.2" />
+      <g filter={`url(#pc-glow-${u})`} strokeLinejoin="round">
+        <path d="M32 6 54 18 32 30 10 18z" fill={`url(#pc-top-${u})`} stroke="#d9f7fa" strokeWidth="1.2" />
+        <path d="M10 18 32 30v28L10 46z" fill={`url(#pc-left-${u})`} stroke="#36d9e8" strokeWidth="1.2" />
+        <path d="M54 18 32 30v28l22-12z" fill={`url(#pc-right-${u})`} stroke="#ffb65c" strokeWidth="1.2" />
       </g>
     </svg>
   );

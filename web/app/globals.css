@@ -196,9 +196,9 @@ body {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  height: 42px;
-  padding: 0 16px;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
   border-radius: 10px;
   font-size: 14px;
   color: rgba(245, 247, 250, 0.82);
@@ -226,8 +226,13 @@ body {
   background: rgba(8, 11, 16, 0.6);
   border: 1px solid var(--line);
 }
+.tabs {
+  min-width: max-content;
+}
 .tab {
   flex: 1;
+  padding: 0 14px;
+  white-space: nowrap;
   height: 38px;
   border-radius: 9px;
   font-size: 13px;
@@ -315,6 +320,31 @@ body {
 }
 .rise {
   animation: rise 0.4s ease-out both;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  60% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+.pulse {
+  animation: pulse 2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse,
+  .rise {
+    animation: none;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 ::selection {
