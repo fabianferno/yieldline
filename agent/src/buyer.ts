@@ -1,5 +1,5 @@
 // Paid x402 calls from Circle developer-controlled buyer wallets (EIP-3009 authorizations signed via Circle API).
-// Usage: tsx src/buyer.ts [calls=5] [baseUrl=http://localhost:4021]
+// Usage: tsx src/buyer.ts [calls=5] [baseUrl=http://localhost:4021] [walletPrefix=buyer-] [delayMs=0]
 import { wrapFetchWithPaymentFromConfig, decodePaymentResponseHeader } from "@x402/fetch";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { toClientEvmSigner } from "@x402/evm";
@@ -8,7 +8,9 @@ import { circleSigner } from "./circle.js";
 
 const calls = Number(process.argv[2] ?? 5);
 const base = process.argv[3] ?? "http://localhost:4021";
-const buyers = circleWallets().filter((w) => w.name.startsWith("buyer-"));
+const prefix = process.argv[4] ?? "buyer-";
+const delayMs = Number(process.argv[5] ?? 0);
+const buyers = circleWallets().filter((w) => w.name.startsWith(prefix));
 const targets = [ADDR.wallets.seller, ADDR.wallets.underwritingAgent, ADDR.pool, ...ADDR.wallets.buyers];
 
 const fetchers = buyers.map((b) => ({
@@ -34,4 +36,5 @@ for (let i = 0; i < calls; i++) {
   } catch (e: any) {
     console.log(`${f.name} ${path} -> error ${e?.message}`);
   }
+  if (delayMs) await new Promise((r) => setTimeout(r, delayMs * (0.5 + Math.random())));
 }
