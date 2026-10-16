@@ -1,4 +1,8 @@
-import { initiateDeveloperControlledWalletsClient } from "@circle-fin/developer-controlled-wallets";
+import * as circleSdk from "@circle-fin/developer-controlled-wallets";
+// Works whether the runtime resolves the SDK's ESM build (named export) or its CJS build (under `default`).
+const sdk = circleSdk as typeof circleSdk & { default?: typeof circleSdk };
+const initiateDeveloperControlledWalletsClient =
+  sdk.initiateDeveloperControlledWalletsClient ?? sdk.default!.initiateDeveloperControlledWalletsClient;
 import type { Address } from "viem";
 import { env, publicClient } from "./config.js";
 

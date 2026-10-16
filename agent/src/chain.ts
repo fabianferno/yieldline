@@ -4,7 +4,9 @@ import LienRegistry from "./abi/LienRegistry.js";
 import LenderPool from "./abi/LenderPool.js";
 import RevenueSplitter from "./abi/RevenueSplitter.js";
 import { ADDR, circleWallet, publicClient } from "./config.js";
-import { circleExecute } from "./circle.js";
+// Loaded lazily: the hosted read/x402 API never writes, and this keeps the Circle SDK out of its cold path.
+const circleExecute = async (opts: Parameters<typeof import("./circle.js").circleExecute>[0]) =>
+  (await import("./circle.js")).circleExecute(opts);
 
 const STATUS = ["None", "Active", "Frozen", "Repaid", "Defaulted"] as const;
 const read = <T>(address: Address, abi: any, functionName: string, args: unknown[] = []) =>
