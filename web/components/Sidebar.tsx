@@ -3,16 +3,17 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { IChart, ICube, IExternal, IHome, ILayers, IUsers, PrismCube } from "./icons";
+import { TourButton } from "./Tour";
 
 const PRIMARY = [
-  { href: "/ledger", label: "Ledger", icon: IHome },
-  { href: "/explorer", label: "Lien explorer", icon: ILayers },
+  { href: "/dashboard", label: "Dashboard", icon: IHome },
+  { href: "/lookup", label: "Check a seller", icon: ILayers },
 ];
 
 const SELLERS = [
-  { href: "/lien/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f", label: "Horos Lien Oracle", note: "financed", icon: ICube },
-  { href: "/lien/0xa8904aaa5ef379ccad3edad0c8545fb0951d6466", label: "Arc seller 0xa890", note: "offer out", icon: IUsers },
-  { href: "/lien/0x43f10820df70545f0b308ed014e5b5e5b7f28f28", label: "Wash seller", note: "rejected", icon: IChart },
+  { href: "/seller/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f", label: "Horos Lien Oracle", note: "financed", icon: ICube },
+  { href: "/seller/0xa8904aaa5ef379ccad3edad0c8545fb0951d6466", label: "Arc seller 0xa890", note: "offer out", icon: IUsers },
+  { href: "/seller/0x43f10820df70545f0b308ed014e5b5e5b7f28f28", label: "Wash seller", note: "rejected", icon: IChart },
 ];
 
 const LINKS = [
@@ -32,11 +33,14 @@ export function Sidebar() {
     <>
       {/* Mobile / tablet: compact bar */}
       <header className="panel flex flex-col gap-3 p-3 lg:hidden">
-        <Link href="/" className="flex items-center gap-2.5 px-1">
-          <PrismCube size={30} />
-          <span className="text-[18px] font-semibold tracking-tight">Horos</span>
-          <span className="ml-auto text-[11px] text-muted">revenue liens on Arc</span>
-        </Link>
+        <div className="flex items-center gap-2.5 px-1">
+          <Link href="/" className="flex items-center gap-2.5">
+            <PrismCube size={30} />
+            <span className="text-[18px] font-semibold tracking-tight">Horos</span>
+          </Link>
+          <span className="text-[11px] text-muted max-sm:hidden">revenue-based credit on Arc</span>
+          <TourButton className="btn btn-ghost ml-auto !h-8 !px-3 text-[12px]" />
+        </div>
         <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
           {[...PRIMARY, ...SELLERS].map(({ href, label }) => (
             <Link key={href} href={href} className={`relative shrink-0 rounded-lg px-3 py-2 text-[13px] ${isActive(href) ? "text-cyan" : "text-white/75"}`}>
@@ -53,7 +57,7 @@ export function Sidebar() {
           <PrismCube size={40} />
           <div>
             <div className="text-[22px] font-semibold leading-none tracking-tight">Horos</div>
-            <div className="mt-1.5 text-[12px] text-muted">ΟΡΟΣ · revenue liens on Arc</div>
+            <div className="mt-1.5 text-[12px] text-muted">ΟΡΟΣ · revenue-based credit on Arc</div>
           </div>
         </Link>
 
@@ -78,6 +82,7 @@ export function Sidebar() {
         </nav>
 
         <div className="mt-auto pt-8">
+          <TourButton className="btn btn-ghost mb-4 w-full" />
           <div className="divider mb-3" />
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} target="_blank" className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12px] text-muted hover:text-cyan">

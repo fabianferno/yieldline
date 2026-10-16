@@ -77,10 +77,10 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <Link href="/ledger" className="btn btn-primary btn-lg">
-              Open the live ledger <IArrow size={17} />
+            <Link href="/dashboard" className="btn btn-primary btn-lg">
+              Open the live dashboard <IArrow size={17} />
             </Link>
-            <Link href="/explorer" className="btn btn-ghost btn-lg">
+            <Link href="/lookup" className="btn btn-ghost btn-lg">
               Look up a seller
             </Link>
           </motion.div>
@@ -114,8 +114,8 @@ function SiteNav() {
         <a href="#limits" className="rounded-lg px-3 py-2 hover:text-white">Limits</a>
         <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="rounded-lg px-3 py-2 hover:text-white">GitHub</a>
       </nav>
-      <Link href="/ledger" className="btn btn-primary max-sm:ml-auto">
-        Ledger <IArrow size={15} />
+      <Link href="/dashboard" className="btn btn-primary max-sm:ml-auto">
+        Dashboard <IArrow size={15} />
       </Link>
     </header>
   );
@@ -189,7 +189,7 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
               v={
                 <span>
                   {challenge?.payTo ? short(challenge.payTo) : "—"}{" "}
-                  {isLien && <span className="inline-flex items-center gap-1 font-sans text-[11px] text-cyan"><IArrow size={12} className="rotate-180" /> splitter for lien #{lien!.id}</span>}
+                  {isLien && <span className="inline-flex items-center gap-1 font-sans text-[11px] text-cyan"><IArrow size={12} className="rotate-180" /> splitter for advance #{lien!.id}</span>}
                 </span>
               }
             />
@@ -241,12 +241,12 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3 text-[11.5px] text-muted sm:px-5">
         <span>
-          {challenge?.live ? "Challenge read live from the endpoint just now." : "Showing the endpoint's published terms."} Payment replayed with lien #
+          {challenge?.live ? "Challenge read live from the endpoint just now." : "Showing the endpoint's published terms."} Payment replayed with advance #
           {lien?.id ?? 1}&apos;s {sweepPct}% sweep.
         </span>
         {latestSweep && (
           <a href={latestSweep.txUrl} target="_blank" className="inline-flex items-center gap-1 hover:text-cyan">
-            latest real sweep {ago(latestSweep.at)} <IExternal size={12} />
+            latest real repayment {ago(latestSweep.at)} <IExternal size={12} />
           </a>
         )}
       </div>
@@ -309,11 +309,11 @@ function Loop({ data, lien }: { data: Overview | null; lien?: Lien }) {
       ),
     },
     {
-      t: "Lien",
+      t: "Advance",
       d: "On acceptance the seller sets payTo to a splitter made for them, and the advance is written to a public registry. A second registered lender can't lend against the same revenue.",
       art: lien && (
         <div className="grid grid-cols-2 gap-4 text-[13px]">
-          <Kv k={`Lien #${lien.id}`} v={lien.status} tone="text-cyan" />
+          <Kv k={`Advance #${lien.id}`} v={lien.status} tone="text-cyan" />
           <Kv k="Principal" v={usd(lien.principalUsdc, 2)} />
           <Kv k="Repay cap" v={usd(lien.repayCapUsdc, 2)} />
           <Kv k="Splitter" v={short(lien.payTo)} mono />
@@ -321,7 +321,7 @@ function Loop({ data, lien }: { data: Overview | null; lien?: Lien }) {
       ),
     },
     {
-      t: "Sweep",
+      t: "Repay",
       d: "Every payment that reaches the splitter is divided on arrival: a share to the pool until the cap is repaid, the rest straight to the seller. Nobody has to remember to repay.",
       art: lien && (
         <div>
@@ -482,11 +482,11 @@ function Close({ addresses }: { addresses?: Overview["addresses"] }) {
         </div>
         <h2 className="max-w-[20ch] text-[30px] font-semibold leading-tight tracking-[-0.025em] sm:text-[40px]">Read every decision yourself.</h2>
         <p className="mt-4 max-w-[54ch] text-[15px] leading-relaxed text-white/70">
-          The ledger shows each lien, sweep and agent decision as it happens, with a link to the transaction on Arc.
+          The dashboard shows each advance, sweep and agent decision as it happens, with a link to the transaction on Arc.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/ledger" className="btn btn-primary btn-lg">
-            Open the live ledger <IArrow size={17} />
+          <Link href="/dashboard" className="btn btn-primary btn-lg">
+            Open the live dashboard <IArrow size={17} />
           </Link>
           <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-secondary btn-lg">
             Read the code
@@ -508,7 +508,7 @@ function Close({ addresses }: { addresses?: Overview["addresses"] }) {
                 {k} <span className="mono">{short(a)}</span>
               </a>
             ))}
-          <span className="ml-auto">The first lien is an operator-approved pilot over the agent&apos;s rejection. The ledger says so.</span>
+          <span className="ml-auto">The first advance is an operator-approved pilot over the agent&apos;s rejection. The dashboard says so.</span>
       </footer>
     </section>
   );

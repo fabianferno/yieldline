@@ -11,14 +11,16 @@ export function Panel({
   right,
   children,
   className = "",
+  id,
 }: {
+  id?: string;
   title?: React.ReactNode;
   right?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`panel p-4 sm:p-5 ${className}`}>
+    <section id={id} className={`panel p-4 sm:p-5 ${className}`}>
       {(title || right) && (
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           {title && <h2 className="panel-title">{title}</h2>}
@@ -97,13 +99,13 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
   return (
     <article>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h3 className="text-[18px] font-semibold tracking-tight">Lien #{l.id}</h3>
+        <h3 className="text-[18px] font-semibold tracking-tight">Advance #{l.id}</h3>
         <StatusChip status={l.status} />
         <span className="text-[12px] text-muted">
           {sellerLink ? (
             <>
               seller{" "}
-              <Link href={`/lien/${l.seller}`} className="mono text-ice underline decoration-line underline-offset-4 hover:text-cyan">
+              <Link href={`/seller/${l.seller}`} className="mono text-ice underline decoration-line underline-offset-4 hover:text-cyan">
                 {short(l.seller)}
               </Link>{" "}
               ·{" "}
@@ -173,7 +175,7 @@ export function Bar({ pct, danger }: { pct: number; danger?: boolean }) {
   );
 }
 
-/** Compact row for lien history lists. */
+/** Compact row for past advances. */
 export function LienRow({ l }: { l: Lien }) {
   const pct = Math.min(100, (l.repaidUsdc / (l.repayCapUsdc || 1)) * 100);
   return (
@@ -271,7 +273,7 @@ export function DecisionEntry({ f }: { f: FeedItem }) {
           <span className={`text-[14px] font-semibold capitalize ${KIND_TEXT[kind]}`}>{d.action.replaceAll("_", " ")}</span>
           <span className="text-[12px] text-white/70">{agentName(d.agent)}</span>
           {d.agent !== "treasury" && f.args.subject && (
-            <Link href={`/lien/${f.args.subject}`} className="mono text-[12px] text-muted underline decoration-line underline-offset-4 hover:text-cyan">
+            <Link href={`/seller/${f.args.subject}`} className="mono text-[12px] text-muted underline decoration-line underline-offset-4 hover:text-cyan">
               {short(f.args.subject)}
             </Link>
           )}
@@ -321,9 +323,9 @@ export function DecisionEntry({ f }: { f: FeedItem }) {
 
 const ST = ["None", "Active", "Frozen", "Repaid", "Defaulted"];
 const EVENT_TEXT: Record<string, (a: any) => [string, React.ReactNode]> = {
-  LienOpened: (a) => [`Lien #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`, <ICube key="i" size={15} />],
-  LienRepayment: (a) => [`Sweep to pool · ${usd(Number(a.amount) / 1e6, 4)} on lien #${a.lienId}`, <IUp key="i" size={15} />],
-  LienStatusChanged: (a) => [`Lien #${a.lienId} ${ST[Number(a.from)]} → ${ST[Number(a.to)]}`, <IWarn key="i" size={15} />],
+  LienOpened: (a) => [`Advance #${a.lienId} opened · ${usd(Number(a.principal) / 1e6, 2)} principal, cap ${usd(Number(a.repayCap) / 1e6, 4)}`, <ICube key="i" size={15} />],
+  LienRepayment: (a) => [`Repaid to pool · ${usd(Number(a.amount) / 1e6, 4)} on advance #${a.lienId}`, <IUp key="i" size={15} />],
+  LienStatusChanged: (a) => [`Advance #${a.lienId} ${ST[Number(a.from)]} → ${ST[Number(a.to)]}`, <IWarn key="i" size={15} />],
   AdvanceDisbursed: (a) => [`Disbursed ${usd(Number(a.amount) / 1e6, 2)} USDC to ${short(a.seller)}`, <IBolt key="i" size={15} />],
   SplitterCreated: (a) => [`Splitter ${short(a.splitter)} deployed for ${short(a.seller)}`, <ICube key="i" size={15} />],
   IdleDeployed: (a) => [`Parked ${usd(Number(a.assets) / 1e6, 2)} in USYC`, <IChart key="i" size={15} />],
@@ -342,7 +344,7 @@ export function ActivityList({ items, max = 14 }: { items: FeedItem[]; max?: num
     if (f.event === "LienRepayment" && prev?.count) {
       prev.count++;
       (prev as any).sum += Number(f.args.amount) / 1e6;
-      prev.text = `${prev.count} sweeps to pool · ${usd((prev as any).sum, 4)} on lien #${f.args.lienId}`;
+      prev.text = `${prev.count} repayments to pool · ${usd((prev as any).sum, 4)} on advance #${f.args.lienId}`;
       (prev as any).last = f.at;
       continue;
     }

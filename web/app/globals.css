@@ -464,3 +464,13 @@ body {
 ::selection {
   background: rgba(255, 69, 69, 0.35);
 }
+
+/* Onboarding tour card (nextstepjs) */
+.tour-card {
+  background: #18181c;
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 69 69 / 0.18);
+}
+.tour-copy b {
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.92);
+}

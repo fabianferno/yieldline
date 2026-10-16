@@ -14,6 +14,9 @@ importers:
       next:
         specifier: 15.5.28
         version: 15.5.28(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      nextstepjs:
+        specifier: ^2.3.0
+        version: 2.3.0(motion@12.43.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.5.28(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -1531,6 +1534,23 @@ packages:
       babel-plugin-react-compiler:
         optional: true
       sass:
+        optional: true
+
+  nextstepjs@2.3.0:
+    resolution: {integrity: sha512-EiIszwnflzj3L6LgUE1Dwcwchx1Uy5qZNQjiUsxuQzUeiZ/6Y4UG6KmtLA84wrgRAczu4eQMI3by36gZzuvecA==}
+    peerDependencies:
+      '@remix-run/react': '>=1.0.0'
+      motion: '>=11'
+      next: '>=13.0.0'
+      react: '>=18'
+      react-dom: '>=18'
+      react-router: '>=7.0.0'
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      next:
+        optional: true
+      react-router:
         optional: true
 
   node-exports-info@1.6.2:
@@ -3419,6 +3439,14 @@ snapshots:
       - '@babel/core'
       - '@types/node'
       - babel-plugin-macros
+
+  nextstepjs@2.3.0(motion@12.43.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.5.28(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      motion: 12.43.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    optionalDependencies:
+      next: 15.5.28(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   node-exports-info@1.6.2:
     dependencies:

@@ -59,17 +59,17 @@ export default function SellerPage({ params }: { params: Promise<{ address: stri
 
   return (
     <div className="space-y-5">
-      <section className="panel edge p-5 sm:p-7">
+      <section id="tour-pledge" className="panel edge p-5 sm:p-7">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-[26px] font-semibold tracking-tight sm:text-[30px]">Seller</h1>
           {data &&
             (data.lien.encumbered ? (
               <span className="chip border-amber/50 text-amber">
-                <IWarn size={13} /> Encumbered · lien #{data.lien.liveLienId}
+                <IWarn size={13} /> Revenue pledged · advance #{data.lien.liveLienId}
               </span>
             ) : (
               <span className="chip border-success/40 text-success">
-                <ICheck size={13} /> Unencumbered
+                <ICheck size={13} /> Revenue not pledged
               </span>
             ))}
         </div>
@@ -87,15 +87,15 @@ export default function SellerPage({ params }: { params: Promise<{ address: stri
         {data && (
           <p className="mt-4 max-w-[72ch] text-[13px] leading-relaxed text-white/75">
             {data.lien.encumbered
-              ? `${usd(data.lien.outstandingUsdc, 4)} is outstanding. This seller's revenue is pledged through splitter ${short(data.lien.splitter)}, so no registered lender can open a second lien on it until this one closes.`
-              : "No live lien in the Horos registry. This seller's revenue is not pledged to any registered lender."}
+              ? `${usd(data.lien.outstandingUsdc, 4)} is outstanding. This seller's revenue is pledged through splitter ${short(data.lien.splitter)}, so no registered lender can advance against it again until this one is repaid.`
+              : "Nothing open in the Horos registry. This seller's revenue is not pledged to any registered lender."}
           </p>
         )}
       </section>
 
       {error && !data && <div className="alert alert-error text-[13px]">Couldn&apos;t read this seller: {error}. Retrying.</div>}
 
-      <Panel title="Underwriter's verdict" right={verdict ? "most recent decision on this seller" : undefined}>
+      <Panel id="tour-verdict" title="Underwriter's verdict" right={verdict ? "most recent decision on this seller" : undefined}>
         {!ov ? (
           <Skeleton rows={2} />
         ) : verdict ? (
@@ -115,14 +115,14 @@ export default function SellerPage({ params }: { params: Promise<{ address: stri
       )}
 
       {live.length > 0 && (
-        <Panel title="Open lien">
+        <Panel title="Active advance" right="pays itself back from each sale">
           {live.map((l) => (
             <LienCard key={l.id} l={l} sellerLink={false} />
           ))}
         </Panel>
       )}
       {past.length > 0 && (
-        <Panel title="Past liens">
+        <Panel title="Past advances">
           <div className="divide-y divide-line">
             {[...past].reverse().map((l) => (
               <LienRow key={l.id} l={l} />

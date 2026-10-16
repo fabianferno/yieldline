@@ -5,7 +5,7 @@ import Link from "next/link";
 import { IArrow, ISearch, PrismCube } from "@/components/icons";
 
 const EXAMPLES = [
-  { a: "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f", name: "Horos Lien Oracle", note: "Financed under an operator pilot · lien #1 open", tone: "bg-cyan" },
+  { a: "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f", name: "Horos Lien Oracle", note: "Financed under an operator pilot · advance #1 active", tone: "bg-cyan" },
   { a: "0xa8904aaa5ef379ccad3edad0c8545fb0951d6466", name: "Arc seller 0xa890", note: "55 days of history, 14 payers · offer outstanding", tone: "bg-success" },
   { a: "0x43f10820df70545f0b308ed014e5b5e5b7f28f28", name: "Wash seller", note: "Payers funded by the seller · rejected at risk 95", tone: "bg-danger" },
 ];
@@ -23,14 +23,15 @@ export default function Explorer() {
         <div className="relative max-w-2xl">
           <h1 className="text-[28px] font-semibold leading-tight tracking-tight sm:text-[34px]">Look up a business before you lend to it.</h1>
           <p className="mt-3 text-[15px] text-muted">
-            Encumbrances, repayment record and x402 revenue forensics, read straight from Arc and Circle Gateway. The same lookup is sold per
+            Whether its revenue is already pledged, its repayment record and where its x402 revenue really comes from, read straight from Arc and Circle Gateway. The same lookup is sold per
             call over x402 by the Horos Lien Oracle.
           </p>
           <form
+            id="tour-lookup"
             className="mt-6 flex flex-col gap-3 sm:flex-row"
             onSubmit={(e) => {
               e.preventDefault();
-              if (ok) router.push(`/lien/${a.trim()}`);
+              if (ok) router.push(`/seller/${a.trim()}`);
             }}
           >
             <div className="edge relative flex-1 rounded-[10px]">
@@ -47,7 +48,7 @@ export default function Explorer() {
         <h2 className="panel-title mb-2">Sellers on file</h2>
         <div className="divide-y divide-line">
           {EXAMPLES.map((e) => (
-            <Link key={e.a} href={`/lien/${e.a}`} className="group flex items-center gap-4 rounded-lg px-2 py-3 hover:bg-glass/40">
+            <Link key={e.a} href={`/seller/${e.a}`} className="group flex items-center gap-4 rounded-lg px-2 py-3 hover:bg-glass/40">
               <span className={`h-2 w-2 shrink-0 rounded-full ${e.tone}`} />
               <span className="min-w-0 flex-1">
                 <span className="block text-[14px] text-white">{e.name}</span>

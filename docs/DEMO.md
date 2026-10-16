@@ -21,5 +21,5 @@ Wash seller: `0x43f10820df70545f0b308ed014e5b5e5b7f28f28` (endpoint on :4022).
 | 1:00 | Accept + verify + fund | `pnpm horos accept <id>` → oracle `/oracle` shows payTo = splitter → `pnpm horos fund <id>` | "The seller points payTo at a splitter. The agent refuses to fund until it sees that on the endpoint buyers actually hit. Then USDC moves, and the lien appears in the public registry." |
 | 1:30 | Sweeps | dashboard lien progress bar moving; explorer `Split` events | "Every paid call lands in the splitter. A slice goes to the pool until the cap; the rest goes to the seller, automatically." |
 | 2:00 | Diversion | `pnpm horos divert <sellerWallet>` → `pnpm horos monitor` → lien turns Frozen; buyer call to own wallet refused by facilitator | "The seller tries to route revenue back to themselves. The monitor catches the payTo change and freezes the line in public; our facilitator refuses to settle to the seller while the lien is live." |
-| 2:30 | Wash trader | `/lien/0x43f1…` payer forensics, reject card | "A seller paying itself through wallets it funded is rejected, with the evidence." |
+| 2:30 | Wash trader | `/seller/0x43f1…` payer forensics, reject card | "A seller paying itself through wallets it funded is rejected, with the evidence." |
 | 2:50 | Numbers | dashboard metric row | advanced, repaid via sweeps, decisions, escalated, rejected, frozen. |

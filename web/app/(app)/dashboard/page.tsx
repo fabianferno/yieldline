@@ -50,16 +50,16 @@ export default function Home() {
         <div className="relative flex items-center gap-8 p-5 sm:p-7">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]">Ledger</h1>
+              <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]">Dashboard</h1>
               <LiveBadge updatedAt={updatedAt} error={!!error} />
             </div>
             <p className="mt-2 max-w-[62ch] text-[14px] leading-relaxed text-white/75">
               An agent advances USDC to x402 sellers against revenue it can verify on Arc, then takes repayment from every incoming payment
-              through a splitter the seller sets as <span className="mono text-ice">payTo</span>. Each advance is a public lien, so the same
+              through a splitter the seller sets as <span className="mono text-ice">payTo</span>. Each advance is recorded on chain as a public lien (a claim on that revenue), so the same
               revenue can&apos;t be borrowed against twice.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/explorer" className="btn btn-primary">
+              <Link href="/lookup" className="btn btn-primary">
                 Look up a seller <IArrow size={16} />
               </Link>
               <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-ghost">
@@ -72,10 +72,10 @@ export default function Home() {
           </div>
         </div>
 
-        <ol className="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-5">
+        <ol id="tour-loop" className="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-5">
           <Step n="Underwrite" value={<Num value={m?.decisions} format={(n) => String(Math.round(n))} />} sub={`decisions · ${m?.rejected ?? 0} rejected · ${m?.escalated ?? 0} to a human`} />
           <Step n="Advance" value={<Num value={m?.advancedUsdc} format={(n) => usd(n, 2)} />} sub={`${m?.advances ?? 0} advance · ${m?.sellersFinanced ?? 0} seller`} />
-          <Step n="Sweep" value={<Num value={m?.repaidViaSweepsUsdc} format={(n) => usd(n, 4)} />} sub={`repaid from ${usd(m?.revenueRoutedUsdc, 2)} routed`} tone="cyan" />
+          <Step n="Repay" value={<Num value={m?.repaidViaSweepsUsdc} format={(n) => usd(n, 4)} />} sub={`repaid from ${usd(m?.revenueRoutedUsdc, 2)} routed`} tone="cyan" />
           <Step n="Watch" value={lastMonitor ? ago(lastMonitor.at) : "—"} sub={`last monitor check · ${m?.freezes ?? 0} freezes`} />
           <Step n="Park idle cash" value={<Num value={data?.pool.idleInUsycUsdc} format={(n) => usd(n, 2)} />} sub="in USYC (mock teller)" tone="amber" last />
         </ol>
@@ -89,18 +89,18 @@ export default function Home() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-5">
-          <Panel title={live.length === 1 ? "Open lien" : "Open liens"} right="LienRegistry · Arc testnet">
+          <Panel title={live.length === 1 ? "Active advance" : "Active advances"} right="recorded in the LienRegistry on Arc">
             {!data ? (
               <Skeleton rows={3} />
             ) : live.length ? (
-              <div className="space-y-8">
+              <div id="tour-advance" className="space-y-8">
                 {live.map((l) => (
                   <LienCard key={l.id} l={l} />
                 ))}
               </div>
             ) : (
               <p className="text-[13px] text-muted">
-                No open liens. When the underwriter funds an offer, the lien and its repayment split appear here.
+                No active advances. When the underwriter funds an offer, the advance and its repayment split appear here.
               </p>
             )}
             {past.length > 0 && (
@@ -115,8 +115,8 @@ export default function Home() {
             )}
           </Panel>
 
-          <Panel title="Decision log" right="each one anchored on Arc with its reasoning">
-            <div className="overflow-x-auto">
+          <Panel title="Agent decisions" right="each one anchored on Arc with its reasoning">
+            <div id="tour-decisions" className="overflow-x-auto">
               <Tabs<Filter>
                 value={filter}
                 onChange={(v) => {
@@ -198,7 +198,7 @@ function PoolPanel({ data }: { data: Overview | null }) {
     : [];
   const L = p?.limits;
   return (
-    <Panel title="Lender pool" right={<span className="num text-[15px] font-semibold text-white">NAV <Num value={p?.navUsdc} format={(n) => usd(n, 2)} /></span>}>
+    <Panel id="tour-pool" title="Lender pool" right={<span className="num text-[15px] font-semibold text-white">NAV <Num value={p?.navUsdc} format={(n) => usd(n, 2)} /></span>}>
       {!p ? (
         <Skeleton rows={3} />
       ) : (
