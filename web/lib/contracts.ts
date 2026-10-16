@@ -6,8 +6,8 @@ export const ADDR = {
   usdc: "0x3600000000000000000000000000000000000000" as Address,
   registry: "0xD140eED8f20B2157366B36FcC08226d64c16906F" as Address,
   poolV1: "0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506" as Address,
-  factory: "0x73a78ceE808221f7fE8731209998A157C98AC6E2" as Address,
-  core: "0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495" as Address,
+  factory: "0x99Fccc04f51284b9CDe6D3f793CC3430392e039C" as Address,
+  core: "0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e" as Address,
 };
 
 export const poolAbi = parseAbi([

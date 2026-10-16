@@ -7,7 +7,8 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {LienRegistry} from "../src/LienRegistry.sol";
 import {RevenueSplitter} from "../src/RevenueSplitter.sol";
 import {LenderPoolV2} from "../src/LenderPoolV2.sol";
-import {PoolFactory, Limits} from "../src/PoolFactory.sol";
+import {PoolFactory} from "../src/PoolFactory.sol";
+import {Limits, PoolSetup} from "../src/Limits.sol";
 import {USDC} from "./Horos.t.sol";
 
 contract HorosV2Test is Test {
@@ -36,7 +37,7 @@ contract HorosV2Test is Test {
         LenderPoolV2 impl = new LenderPoolV2(IERC20(address(usdc)), registry);
         address[] memory agents = new address[](1);
         agents[0] = agent;
-        factory = new PoolFactory(registry, address(impl), admin, agents, _caps());
+        factory = new PoolFactory(registry, address(impl), admin, agents, _caps(), address(0));
         bytes32 adminRole = registry.DEFAULT_ADMIN_ROLE();
         vm.prank(admin);
         registry.grantRole(adminRole, address(factory));
@@ -153,7 +154,7 @@ contract HorosV2Test is Test {
         LenderPoolV2 rogue = LenderPoolV2(_clone(address(factory.implementation())));
         address[] memory agents = new address[](1);
         agents[0] = agent;
-        rogue.initialize(curator, agents, "Rogue", "R", _limits(60));
+        rogue.initialize(PoolSetup(curator, admin, address(0)), agents, "Rogue", "R", _limits(60));
         usdc.mint(address(rogue), 50e6);
         vm.prank(agent);
         vm.expectRevert();
@@ -202,7 +203,72 @@ contract HorosV2Test is Test {
     function test_initializeOnlyOnce() public {
         address[] memory agents = new address[](0);
         vm.expectRevert();
-        pool.initialize(lp, agents, "X", "X", _limits(60));
+        pool.initialize(PoolSetup(lp, lp, address(0)), agents, "X", "X", _limits(60));
+    }
+
+    // ---- review fixes
+
+    function test_curatorCannotGrantAgentRole() public {
+        bytes32 role = pool.AGENT_ROLE();
+        vm.prank(curator);
+        vm.expectRevert();
+        pool.grantRole(role, curator);
+    }
+
+    function test_curatorCannotSetTeller() public {
+        vm.prank(curator);
+        vm.expectRevert();
+        pool.setTeller(makeAddr("evil"));
+    }
+
+    function test_protocolSetsTellerOnlyWhenNothingParked() public {
+        address t = makeAddr("teller");
+        vm.prank(admin);
+        pool.setTeller(t);
+        assertEq(address(pool.teller()), t);
+    }
+
+    function test_actionsOnClosedLienRevert() public {
+        uint256 id1 = _advance(pool, 2e6, 30); // cap 2.2
+        RevenueSplitter s = pool.splitterOf(seller);
+        _pay(address(s), 100e6);
+        s.split();
+        assertEq(uint8(registry.lien(id1).status), uint8(LienRegistry.Status.Repaid));
+        uint256 id2 = _advance(pool, 2e6, 30); // same splitter, new lien
+
+        vm.prank(curator);
+        vm.expectRevert(LenderPoolV2.NotLiveLien.selector);
+        pool.markDefault(id1, keccak256("x"));
+        vm.prank(agent);
+        vm.expectRevert(LenderPoolV2.NotLiveLien.selector);
+        pool.setSweep(id1, 1_000, keccak256("x"));
+        vm.prank(agent);
+        vm.expectRevert(LenderPoolV2.NotLiveLien.selector);
+        pool.freeze(id1, keccak256("x"));
+        assertEq(s.owed(), 2.2e6, "live lien untouched");
+        assertEq(s.lienId(), id2);
+    }
+
+    function test_actionsOnOtherPoolsLienRevert() public {
+        vm.prank(curator);
+        LenderPoolV2 other = LenderPoolV2(factory.createPool("Steady", "hSTDY", _limits(40)));
+        uint256 id = _advance(pool, 2e6, 30);
+        vm.prank(curator);
+        vm.expectRevert(LenderPoolV2.NotLiveLien.selector);
+        other.markDefault(id, keccak256("x"));
+    }
+
+    function test_curatorRejectsProposal() public {
+        vm.prank(agent);
+        pool.advance(seller, 8e6, 1_000, 2_000, 7 days, 30, keccak256("d"));
+        vm.prank(agent);
+        vm.expectRevert();
+        pool.rejectProposal(0, keccak256("no"));
+        vm.prank(curator);
+        pool.rejectProposal(0, keccak256("no"));
+        vm.prank(curator);
+        vm.expectRevert(LenderPoolV2.AlreadyExecuted.selector);
+        pool.approveProposal(0);
     }
 
     function _clone(address impl) internal returns (address instance) {

@@ -17,9 +17,13 @@ export const deployments = {
       "0x6a2c074215c737c1bd5c2f97312d89d123f3b754"
     ]
   },
-  "poolFactory": "0x73a78ceE808221f7fE8731209998A157C98AC6E2",
-  "poolImplementation": "0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647",
-  "corePool": "0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495"
+  "poolFactory": "0x99Fccc04f51284b9CDe6D3f793CC3430392e039C",
+  "poolImplementation": "0xE9dfFc5d95725EA3Ac0665A7112eD413C98D1Bac",
+  "corePool": "0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e",
+  "retired": {
+    "poolFactory": "0x73a78ceE808221f7fE8731209998A157C98AC6E2",
+    "note": "first v2 factory, retired after review (curator could grant AGENT_ROLE); registry roles revoked"
+  }
 };
 
 export const circleWalletSet = {

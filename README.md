@@ -121,10 +121,10 @@ The underwriter decides risk and terms once, pool-agnostic; the seller then sees
 |---|---|
 | LienRegistry | [`0xD140eED8f20B2157366B36FcC08226d64c16906F`](https://explorer.testnet.arc.io/address/0xD140eED8f20B2157366B36FcC08226d64c16906F) |
 | LenderPool (v1, operator pilot, closed) | [`0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506`](https://explorer.testnet.arc.io/address/0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506) |
-| PoolFactory | [`0x73a78ceE808221f7fE8731209998A157C98AC6E2`](https://explorer.testnet.arc.io/address/0x73a78ceE808221f7fE8731209998A157C98AC6E2) |
-| LenderPoolV2 (implementation) | [`0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647`](https://explorer.testnet.arc.io/address/0xBdDa77d7c48Ef548b11BE25913B25ba70aCA7647) |
-| Pool "Horos Core" (curator: Horos operator, risk ≤ 60) | [`0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495`](https://explorer.testnet.arc.io/address/0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495) |
-| Pool "Steady" (second curator account, created from a fresh key to show anyone can open a pool; risk ≤ 40) | [`0x8E20335558Cf33809585cAc47c4e9D7A22a8ef8f`](https://explorer.testnet.arc.io/address/0x8E20335558Cf33809585cAc47c4e9D7A22a8ef8f) |
+| PoolFactory | [`0x99Fccc04f51284b9CDe6D3f793CC3430392e039C`](https://explorer.testnet.arc.io/address/0x99Fccc04f51284b9CDe6D3f793CC3430392e039C) |
+| LenderPoolV2 (implementation) | [`0xE9dfFc5d95725EA3Ac0665A7112eD413C98D1Bac`](https://explorer.testnet.arc.io/address/0xE9dfFc5d95725EA3Ac0665A7112eD413C98D1Bac) |
+| Pool "Horos Core" (curator: Horos operator, risk ≤ 60) | [`0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e`](https://explorer.testnet.arc.io/address/0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e) |
+| Pool "Steady" (second curator account, created from a fresh key to show anyone can open a pool; risk ≤ 40) | [`0x6863ac3db29b682A33312c8c94541DB1011E25aC`](https://explorer.testnet.arc.io/address/0x6863ac3db29b682A33312c8c94541DB1011E25aC) |
 | MockUSYCTeller | [`0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5`](https://explorer.testnet.arc.io/address/0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5) |
 
 Contracts verified on Blockscout; pools are EIP-1167 clones of the verified implementation. Agent and buyer Circle wallets are listed in `agent/src/deployments.ts`.

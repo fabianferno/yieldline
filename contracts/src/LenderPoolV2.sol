@@ -12,7 +12,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {LienRegistry} from "./LienRegistry.sol";
 import {RevenueSplitter} from "./RevenueSplitter.sol";
 import {IUSYCTeller} from "./LenderPool.sol";
-import {Limits} from "./Limits.sol";
+import {Limits, PoolSetup} from "./Limits.sol";
 
 interface ICapsSource {
     function checkLimits(Limits memory l) external view;
@@ -20,13 +20,15 @@ interface ICapsSource {
 
 /// @title LenderPoolV2
 /// @notice An ERC-4626 lending pool anyone can deposit USDC into. Its curator (DEFAULT_ADMIN_ROLE) sets risk limits
-///         within the factory's protocol caps, approves advances above the auto-approve limit, and alone can mark a
-///         default. The Horos agents (AGENT_ROLE) advance, monitor and park idle cash. There is no admin withdrawal:
-///         depositors' USDC leaves only through redemptions or advances. Deployed as clones by PoolFactory.
+///         within the factory's protocol caps, approves or rejects advances above the auto-approve limit, and alone can
+///         mark a default. The Horos agents (AGENT_ROLE) advance, monitor and park idle cash. The curator cannot grant
+///         AGENT_ROLE or choose where idle cash is parked: both belong to the protocol (PROTOCOL_ROLE). There is no admin
+///         withdrawal: depositors' USDC leaves only through redemptions or advances. Deployed as clones by PoolFactory.
 contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
     using SafeERC20 for IERC20;
 
     bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE");
+    bytes32 public constant PROTOCOL_ROLE = keccak256("PROTOCOL_ROLE");
 
     IERC20 public immutable usdc;
     LienRegistry public immutable registry;
@@ -76,11 +78,15 @@ contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
     event IdleDeployed(uint256 assets, uint256 shares);
     event IdleRecalled(uint256 shares, uint256 assets);
     event LimitsUpdated();
+    event ProposalRejected(uint256 indexed proposalId, bytes32 reasonHash);
+    event TellerSet(address teller);
 
     error LimitExceeded(string which);
     error InsufficientLiquidity();
     error UnknownSplitter();
     error AlreadyExecuted();
+    error NotLiveLien();
+    error IdleStillDeployed();
 
     constructor(IERC20 _usdc, LienRegistry _registry) ERC4626(_usdc) ERC20("", "") {
         usdc = _usdc;
@@ -88,19 +94,24 @@ contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
         _disableInitializers();
     }
 
-    function initialize(address curator_, address[] calldata agents, string calldata name_, string calldata symbol_, Limits calldata l)
+    function initialize(PoolSetup calldata setup, address[] calldata agents, string calldata name_, string calldata symbol_, Limits calldata l)
         external
         initializer
     {
         factory = msg.sender;
-        curator = curator_;
+        curator = setup.curator;
         _name = name_;
         _symbol = symbol_;
         limits = l;
-        _grantRole(DEFAULT_ADMIN_ROLE, curator_);
+        _grantRole(DEFAULT_ADMIN_ROLE, setup.curator);
+        // Agents and the teller are protocol-controlled: the curator's admin role does not administer them.
+        _setRoleAdmin(PROTOCOL_ROLE, PROTOCOL_ROLE);
+        _setRoleAdmin(AGENT_ROLE, PROTOCOL_ROLE);
+        _grantRole(PROTOCOL_ROLE, setup.protocolAdmin);
         for (uint256 i; i < agents.length; i++) {
             _grantRole(AGENT_ROLE, agents[i]);
         }
+        if (setup.teller != address(0)) _setTeller(setup.teller);
     }
 
     // ================================================================ ERC-4626
@@ -158,6 +169,13 @@ contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
             return 0;
         }
         return _disburse(seller, amount, feeBps, sweepBps, term, decisionHash);
+    }
+
+    function rejectProposal(uint256 pid, bytes32 reasonHash) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        Proposal storage p = proposals[pid];
+        if (p.executed) revert AlreadyExecuted();
+        p.executed = true;
+        emit ProposalRejected(pid, reasonHash);
     }
 
     function approveProposal(uint256 pid) external onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256 lienId) {
@@ -244,29 +262,37 @@ contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
 
     // ================================================================ monitoring actions
 
+    /// @dev A lien this pool can act on: opened by this pool, still live, and the one its splitter is currently serving
+    ///      (a splitter is reused across a seller's successive liens in the same pool).
+    function _liveLien(uint256 lienId) internal view returns (LienRegistry.Lien memory l) {
+        l = registry.lien(lienId);
+        bool live = l.status == LienRegistry.Status.Active || l.status == LienRegistry.Status.Frozen;
+        if (l.lender != address(this) || !live || RevenueSplitter(l.payTo).lienId() != lienId) revert NotLiveLien();
+    }
+
     function setSweep(uint256 lienId, uint16 sweepBps, bytes32 decisionHash) external onlyRole(AGENT_ROLE) {
         if (sweepBps < limits.minSweepBps || sweepBps > limits.maxSweepBps) revert LimitExceeded("sweepBounds");
-        LienRegistry.Lien memory l = registry.lien(lienId);
+        LienRegistry.Lien memory l = _liveLien(lienId);
         RevenueSplitter(l.payTo).setSweepBps(sweepBps);
         registry.setSweep(lienId, sweepBps);
         emit Decision(l.seller, "sweep", decisionHash, "");
     }
 
     function freeze(uint256 lienId, bytes32 reasonHash) external onlyRole(AGENT_ROLE) {
-        LienRegistry.Lien memory l = registry.lien(lienId);
+        LienRegistry.Lien memory l = _liveLien(lienId);
         RevenueSplitter(l.payTo).setAccelerated(true);
         registry.setStatus(lienId, LienRegistry.Status.Frozen, reasonHash);
     }
 
     function unfreeze(uint256 lienId, bytes32 reasonHash) external onlyRole(AGENT_ROLE) {
-        LienRegistry.Lien memory l = registry.lien(lienId);
+        LienRegistry.Lien memory l = _liveLien(lienId);
         RevenueSplitter(l.payTo).setAccelerated(false);
         registry.setStatus(lienId, LienRegistry.Status.Active, reasonHash);
     }
 
     /// @notice Default is always the curator's call. The written-off principal lowers the share price.
     function markDefault(uint256 lienId, bytes32 reasonHash) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        LienRegistry.Lien memory l = registry.lien(lienId);
+        LienRegistry.Lien memory l = _liveLien(lienId);
         RevenueSplitter(l.payTo).clearOwed();
         l = registry.lien(lienId);
         uint256 principalLeft = l.repaid >= l.principal ? 0 : l.principal - l.repaid;
@@ -294,9 +320,17 @@ contract LenderPoolV2 is ERC4626, AccessControl, Initializable {
         emit LimitsUpdated();
     }
 
-    function setTeller(IUSYCTeller _teller, IERC20 _usyc) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        teller = _teller;
-        usyc = _usyc;
+    /// @notice Where idle cash is parked (a USYC teller whose share token is itself). Protocol-only, and only while
+    ///         nothing is parked, so cash cannot be stranded in or redirected to another contract.
+    function setTeller(address teller_) external onlyRole(PROTOCOL_ROLE) {
+        if (idleDeployed != 0) revert IdleStillDeployed();
+        _setTeller(teller_);
+    }
+
+    function _setTeller(address teller_) internal {
+        teller = IUSYCTeller(teller_);
+        usyc = IERC20(teller_);
+        emit TellerSet(teller_);
     }
 
     // ================================================================ idle capital (USYC)

@@ -15,7 +15,7 @@ const SEEN = "horos.tour.v2";
 const DEMO_SELLER = "/seller/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f";
 const WAIT = { selectorRetryAttempts: 25, selectorRetryDelay: 200 };
 
-const CORE = "/pools/0x4c5e2AE7E0875aC356A40B13D4b0Fa3033326495";
+const CORE = "/pools/0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e";
 
 const STEPS: Tour[] = [
   {

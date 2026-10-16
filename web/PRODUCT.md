@@ -80,7 +80,7 @@ All of this is real and on Arc testnet:
 - **Market scan** via Circle Gateway: 102 sellers.
 - **Real seller** 0xa890…6466 (56 days of history, 14 payers): has a $3 offer outstanding.
 - **Treasury:** parked $4.03 in mock USYC.
-- **Pool marketplace:** PoolFactory 0x73a7…C6E2, "Horos Core" 0x4c5e…6495 (seeded with $5 by the operator), "Steady" 0x8E20…ef8f (opened from a fresh key to show permissionless creation; unfunded).
+- **Pool marketplace:** PoolFactory 0x99Fc…039C, "Horos Core" 0xbb0D…067e (seeded with $5 by the operator), "Steady" 0x6863…25aC (opened from a fresh key to show permissionless creation; unfunded).
 - **Contracts** (verified on Blockscout):
   - LienRegistry 0xD140…906F
   - LenderPool 0x3655…7506

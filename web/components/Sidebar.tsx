@@ -20,7 +20,7 @@ const YOU = [
 
 const LINKS = [
   { href: "https://github.com/sirbadenpowell/horos", label: "Source on GitHub" },
-  { href: "https://explorer.testnet.arc.io/address/0x73a78ceE808221f7fE8731209998A157C98AC6E2", label: "PoolFactory" },
+  { href: "https://explorer.testnet.arc.io/address/0x99Fccc04f51284b9CDe6D3f793CC3430392e039C", label: "PoolFactory" },
   { href: "https://explorer.testnet.arc.io/address/0xD140eED8f20B2157366B36FcC08226d64c16906F", label: "LienRegistry" },
 ];
 

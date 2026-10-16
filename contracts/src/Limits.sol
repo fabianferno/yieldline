@@ -13,3 +13,10 @@ struct Limits {
     uint64 maxTerm;
     uint8 maxRiskScore; // highest underwriting risk score this pool accepts
 }
+
+/// @notice Who controls a new pool: its curator, the protocol admin (agents, teller), and the teller to park idle cash.
+struct PoolSetup {
+    address curator;
+    address protocolAdmin;
+    address teller;
+}
