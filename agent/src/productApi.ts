@@ -13,6 +13,8 @@ import { fundPending, monitorTick, treasuryTick } from "./monitor.js";
 import { allPoolInfo, isV1, pendingProposals, position, protocolCaps, readPool } from "./pools.js";
 import { getDecision, getOffer, listOffers, putOffer, recordDecision } from "./store.js";
 import { underwrite, type Offer } from "./underwriter.js";
+import { checkPublicUrl, UrlError } from "./net.js";
+import { reconcileOffer } from "./lifecycle.js";
 import type { TraceStep } from "./llm.js";
 
 export const productApi = Router();
@@ -71,21 +73,27 @@ function stepSummary(s: TraceStep) {
   return STEP_LABEL[s.tool] ?? s.tool;
 }
 
-/** On the hosted API, refuse URLs that point at private or loopback hosts (we fetch seller-supplied URLs). */
-function assertPublicUrl(url: string) {
+/** On the hosted API, refuse URLs that are not public http(s) endpoints (we fetch seller-supplied URLs). */
+async function assertPublicUrl(url: string) {
   if (!process.env.VERCEL) return;
-  const host = new URL(url).hostname.toLowerCase();
-  const priv =
-    host === "localhost" ||
-    host.endsWith(".local") ||
-    host.endsWith(".internal") ||
-    /^(127\.|10\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
-    host === "[::1]" ||
-    host.startsWith("[fc") ||
-    host.startsWith("[fd") ||
-    host.startsWith("[fe80");
-  if (priv) throw new HttpError(400, "Use your public endpoint URL.");
+  try {
+    await checkPublicUrl(url);
+  } catch (e) {
+    if (e instanceof UrlError) throw new HttpError(400, e.message);
+    throw e;
+  }
 }
+
+/** The seller's live lien, named for people: false when unencumbered. */
+async function encumbrance(seller: Address): Promise<false | { liveLienId: number; pool: string }> {
+  const info = await lienInfo(seller);
+  if (!info.encumbered) return false;
+  const pools = await cached("pools", 5000, allPoolInfo);
+  const name = pools.find((p) => p.address.toLowerCase() === String(info.pool).toLowerCase())?.name ?? `pool ${info.pool}`;
+  return { liveLienId: info.liveLienId, pool: name };
+}
+
+const ip = (req: Request) => String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "?").split(",")[0].trim();
 
 const ACTIVE: Offer["status"][] = ["underwriting", "offered", "accepted", "pending_human"];
 const publicOffer = (o: Offer) => o;
@@ -98,20 +106,32 @@ productApi.post(
     const { endpoint, payout } = req.body ?? {};
     if (typeof endpoint !== "string" || !/^https?:\/\//.test(endpoint)) throw new HttpError(400, "Enter the full URL of your x402 endpoint (https://…).");
     if (typeof payout !== "string" || !isAddress(payout)) throw new HttpError(400, "Enter the address that receives your x402 revenue.");
-    assertPublicUrl(endpoint);
+    await assertPublicUrl(endpoint);
     const applicant = await verifyRequest(req.body, "apply", endpoint);
     const seller = getAddress(payout);
 
-    const existing = (await listOffers()).find((o) => o.seller.toLowerCase() === seller.toLowerCase() && ACTIVE.includes(o.status));
-    if (existing) return { id: existing.id, existing: true };
+    const open = await Promise.all(
+      (await listOffers()).filter((o) => o.seller.toLowerCase() === seller.toLowerCase() && ACTIVE.includes(o.status)).map(reconcileOffer),
+    );
+    const live = open.filter((o) => ACTIVE.includes(o.status));
+    const mine = live.find((o) => o.applicant?.toLowerCase() === applicant.toLowerCase());
+    if (mine) return { id: mine.id, existing: true };
+    if (live.length) throw new HttpError(409, "Another account already has an open application for this revenue address.");
+
+    const enc = await encumbrance(seller);
+    if (enc) throw new HttpError(409, `This revenue address already has live lien #${enc.liveLienId} (${enc.pool}). It can borrow again once that lien closes.`);
 
     if ((await kv.incr(`rl:apply:${applicant}`, 3600)) > 3) throw new HttpError(429, "Three applications per hour per account. Try again later.");
+    if ((await kv.incr(`rl:apply:all`, 3600)) > 30) throw new HttpError(429, "Horos is reviewing a lot of applications right now. Try again within the hour.");
 
     const probe = await probe402(endpoint).catch((e) => ({ ok: false as const, status: 0, error: String(e?.message ?? e) }));
     if (!probe.ok) {
       const why = probe.status ? `HTTP ${probe.status}` : probe.error;
       throw new HttpError(400, `That URL did not return an x402 payment challenge (${why}).`, { probe });
     }
+    // The endpoint must currently pay the address applying: revenue is underwritten, and the advance sent, to payout.
+    if (probe.payTo !== seller.toLowerCase())
+      throw new HttpError(400, `Your endpoint currently asks buyers to pay ${probe.payTo}, not ${seller}. Apply with the address your endpoint pays.`, { probe });
 
     const id = `app_${randomBytes(5).toString("hex")}`;
     const placeholder: Offer = {
@@ -151,14 +171,14 @@ productApi.post(
   }),
 );
 
-productApi.get("/applications/:id", wrap(async (req) => publicOffer(await getOffer(String(req.params.id)))));
+productApi.get("/applications/:id", wrap(async (req) => publicOffer(await reconcileOffer(await getOffer(String(req.params.id))))));
 
 productApi.get(
   "/offers/:id/pools",
   wrap(async (req) => {
     const o = await getOffer(String(req.params.id));
-    const [pools, lien] = await Promise.all([cached("pools", 5000, allPoolInfo), lienInfo(o.seller)]);
-    return { offer: o.id, encumbered: lien.encumbered, matches: match(o, pools, lien.encumbered) };
+    const [pools, enc] = await Promise.all([cached("pools", 5000, allPoolInfo), encumbrance(o.seller)]);
+    return { offer: o.id, encumbered: !!enc, matches: match(o, pools, enc) };
   }),
 );
 
@@ -177,8 +197,8 @@ productApi.post(
     const o = await ownOffer(req, "accept");
     const pool = String(req.body?.pool ?? "");
     if (!isAddress(pool)) throw new HttpError(400, "Choose a pool.");
-    const [pools, lien] = await Promise.all([allPoolInfo(), lienInfo(o.seller)]);
-    const m = match(o, pools, lien.encumbered).find((x) => x.pool.toLowerCase() === pool.toLowerCase());
+    const [pools, enc] = await Promise.all([allPoolInfo(), encumbrance(o.seller)]);
+    const m = match(o, pools, enc).find((x) => x.pool.toLowerCase() === pool.toLowerCase());
     if (!m) throw new HttpError(404, "Unknown pool.");
     if (!m.eligible) throw new HttpError(409, m.reasons[0], { reasons: m.reasons });
     return publicOffer(await acceptOffer(o.id, getAddress(pool)));
@@ -196,7 +216,6 @@ productApi.post(
     const probe = await probe402(o.endpoint).catch((e) => ({ ok: false as const, error: String(e?.message ?? e) }));
     const livePayTo = probe.ok ? probe.payTo : null;
     if (livePayTo !== o.splitter.toLowerCase()) return { offer: o, funded: false, wired: false, livePayTo };
-    if (!(await kv.set(`funding:${o.id}`, 1, { nx: true, exSec: 120 }))) return { offer: o, funded: false, wired: true, busy: true };
     const r = await fundOffer(o.id, { waitSec: 0 });
     return { ...r, wired: true };
   }),
@@ -257,7 +276,7 @@ productApi.get(
     if (!isAddress(a)) throw new HttpError(400, "bad address");
     const me = getAddress(a).toLowerCase();
     const [offers, pools] = await Promise.all([listOffers(), cached("pools", 5000, allPoolInfo)]);
-    const mine = offers.filter((o) => o.applicant?.toLowerCase() === me || o.seller.toLowerCase() === me);
+    const mine = await Promise.all(offers.filter((o) => o.applicant?.toLowerCase() === me || o.seller.toLowerCase() === me).map(reconcileOffer));
     const sellers = [...new Set(mine.map((o) => o.seller))];
     const v2 = pools.filter((p) => p.version === 2);
     const [liens, positions, curated] = await Promise.all([
@@ -284,7 +303,8 @@ productApi.get(
   wrap(async (req) => {
     const url = String(req.query.url ?? "");
     if (!/^https?:\/\//.test(url)) throw new HttpError(400, "Enter the full URL (https://…).");
-    assertPublicUrl(url);
+    if ((await kv.incr(`rl:probe:${ip(req)}`, 600)) > 30) throw new HttpError(429, "Too many checks; wait a few minutes.");
+    await assertPublicUrl(url);
     return probe402(url).catch((e) => ({ ok: false as const, status: 0, error: String(e?.message ?? e) }));
   }),
 );
@@ -300,7 +320,7 @@ productApi.post(
   wrap(async (req) => {
     const { pool, action, reason, lienId, proposalId, txHash } = req.body ?? {};
     if (typeof pool !== "string" || !isAddress(pool)) throw new HttpError(400, "pool required");
-    if (!["default", "approve"].includes(action)) throw new HttpError(400, "action must be default or approve");
+    if (!["default", "approve", "reject"].includes(action)) throw new HttpError(400, "action must be default, approve or reject");
     if (typeof reason !== "string" || reason.trim().length < 10) throw new HttpError(400, "Write a reason of at least a sentence.");
     const account = await verifyRequest(req.body, "curate", getAddress(pool));
     const p = await readPool(getAddress(pool));
@@ -309,7 +329,7 @@ productApi.post(
       agent: "human",
       subject: p.address,
       pool: p.address,
-      action: action === "default" ? "mark_default" : "approve_proposal",
+      action: action === "default" ? "mark_default" : action === "reject" ? "reject_proposal" : "approve_proposal",
       escalated: true,
       inputs: { lienId, proposalId, curator: account, reasonHash: keccak256(toHex(reason)) },
       output: { txHash },

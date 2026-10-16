@@ -7,6 +7,8 @@ import { probe402, tx } from "./chain.js";
 import { isV1, splitterIn } from "./pools.js";
 import { anchorDecision } from "./decisions.js";
 import { getOffer, putOffer, recordDecision } from "./store.js";
+import { kv } from "./kv.js";
+import LenderPoolV2 from "./abi/LenderPoolV2.js";
 
 export { getOffer };
 import type { Offer } from "./underwriter.js";
@@ -14,8 +16,50 @@ import type { Offer } from "./underwriter.js";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 
+/** One accept/fund at a time per offer, across the HTTP checker, the agent tick and the CLI. */
+export async function withOfferLock<T>(id: string, fn: () => Promise<T>): Promise<T> {
+  const key = `lock:offer:${id}`;
+  if (!(await kv.set(key, 1, { nx: true, exSec: 180 }))) throw new Error(`offer ${id} is already being processed; try again shortly`);
+  try {
+    return await fn();
+  } finally {
+    await kv.set(key, 0, { exSec: 1 });
+  }
+}
+
+/** Bring a stored offer up to date with chain and time: a curator-approved proposal becomes funded, a rejected one
+ *  rejected, and an underwriting run that never finished becomes failed. */
+export async function reconcileOffer(o: Offer & { proposalId?: number }): Promise<Offer> {
+  if (o.status === "underwriting" && Date.now() - Date.parse(o.createdAt) > 10 * 60_000) {
+    const failed = { ...o, status: "failed" as const, error: "The review did not finish. Apply again." };
+    await putOffer(failed);
+    return failed;
+  }
+  if (o.status !== "pending_human" || o.proposalId === undefined || !o.pool || isV1(o.pool)) return o;
+  const live = Number(await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }));
+  if (live) {
+    const l = (await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "lien", args: [BigInt(live)] })) as { lender: Address };
+    if (l.lender.toLowerCase() === o.pool.toLowerCase()) {
+      const funded = { ...o, status: "funded" as const, lienId: live };
+      await putOffer(funded);
+      return funded;
+    }
+  }
+  const p = (await publicClient.readContract({ address: o.pool, abi: LenderPoolV2, functionName: "proposals", args: [BigInt(o.proposalId)] })) as readonly unknown[];
+  if (p[p.length - 1] === true && !live) {
+    const rejected = { ...o, status: "rejected" as const, rationale: `${o.rationale}\n\nThe pool's curator declined this advance.` };
+    await putOffer(rejected);
+    return rejected;
+  }
+  return o;
+}
+
 /** Step 1 (seller accepts in a chosen pool): deploy the seller's splitter in that pool so they can point payTo at it. */
 export async function acceptOffer(id: string, pool: Address = ADDR.core) {
+  return withOfferLock(id, () => acceptLocked(id, pool));
+}
+
+async function acceptLocked(id: string, pool: Address) {
   const o = await getOffer(id);
   if (o.status !== "offered" && o.status !== "accepted") throw new Error(`offer ${id} is ${o.status}`);
   let splitter = await splitterIn(pool, o.seller);
@@ -31,6 +75,10 @@ export async function acceptOffer(id: string, pool: Address = ADDR.core) {
 
 /** Step 2: verify the live x402 endpoint now asks buyers to pay the splitter, then disburse. */
 export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
+  return withOfferLock(id, () => fundLocked(id, opts));
+}
+
+async function fundLocked(id: string, opts: { waitSec?: number }) {
   const o = await getOffer(id);
   if (o.status !== "accepted" || !o.splitter) throw new Error(`offer ${id} must be accepted first`);
 

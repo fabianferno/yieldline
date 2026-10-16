@@ -127,7 +127,7 @@ function ProposalRow({ pool, x }: { pool: PoolInfo; x: Proposal }) {
         </Link>
       </div>
       <div className="flex flex-wrap items-start gap-2">
-        <input className="input min-w-[240px] flex-1" placeholder="Why you approve (published with the decision)" value={reason} onChange={(e) => setReason(e.target.value)} />
+        <input className="input min-w-[240px] flex-1" placeholder="Your reason (published with the decision)" value={reason} onChange={(e) => setReason(e.target.value)} />
         <TxButton
           className="w-[200px]"
           label="Approve and fund"
@@ -138,6 +138,20 @@ function ProposalRow({ pool, x }: { pool: PoolInfo; x: Proposal }) {
               "/api/decisions/human",
               { action: "curate", subject: pool.address, account: w.address!, sign: w.signMessage },
               { pool: pool.address, action: "approve", reason, proposalId: x.id, txHash: tx },
+            ).catch(() => {});
+          }}
+        />
+        <TxButton
+          className="w-[140px]"
+          variant="btn-ghost"
+          label="Decline"
+          disabled={reason.trim().length < 10}
+          build={() => calls.rejectProposal(pool.address as Address, x.id, reason)}
+          onDone={async (tx) => {
+            await signedPost(
+              "/api/decisions/human",
+              { action: "curate", subject: pool.address, account: w.address!, sign: w.signMessage },
+              { pool: pool.address, action: "reject", reason, proposalId: x.id, txHash: tx },
             ).catch(() => {});
           }}
         />

@@ -14,6 +14,8 @@ export const poolAbi = parseAbi([
   "function deposit(uint256 assets, address receiver) returns (uint256)",
   "function withdraw(uint256 assets, address receiver, address owner) returns (uint256)",
   "function approveProposal(uint256 pid) returns (uint256)",
+  "function rejectProposal(uint256 pid, bytes32 reasonHash)",
+  "error NotLiveLien()",
   "function markDefault(uint256 lienId, bytes32 reasonHash)",
   "function setLimits((uint128,uint128,uint16,uint16,uint16,uint16,uint64,uint8) l)",
   "error LimitExceeded(string which)",
@@ -57,6 +59,9 @@ export const calls = {
   approveProposal: (pool: Address, pid: number): Call[] => [
     { to: pool, data: encodeFunctionData({ abi: poolAbi, functionName: "approveProposal", args: [BigInt(pid)] }) },
   ],
+  rejectProposal: (pool: Address, pid: number, reason: string): Call[] => [
+    { to: pool, data: encodeFunctionData({ abi: poolAbi, functionName: "rejectProposal", args: [BigInt(pid), keccak256(toHex(reason))] }) },
+  ],
   markDefault: (pool: Address, lienId: number, reason: string): Call[] => [
     { to: pool, data: encodeFunctionData({ abi: poolAbi, functionName: "markDefault", args: [BigInt(lienId), keccak256(toHex(reason))] }) },
   ],
@@ -91,7 +96,8 @@ export function explainError(e: unknown): string {
     if (name === "InsufficientLiquidity") return "The pool does not have enough free cash right now.";
     if (name?.startsWith("ERC4626ExceededMax")) return "That is more than you can withdraw right now: the rest is lent out and returns as sweeps arrive.";
     if (name === "AccessControlUnauthorizedAccount") return "This account is not allowed to do that (curator only).";
-    if (name === "AlreadyExecuted") return "That proposal was already executed.";
+    if (name === "AlreadyExecuted") return "That proposal was already decided.";
+    if (name === "NotLiveLien") return "That lien is closed or belongs to another pool.";
   }
   if (/NotAllowedError|not allowed|denied|cancel/i.test(msg)) return "The passkey prompt was dismissed.";
   if (/insufficient|exceeds balance|transfer amount/i.test(msg)) return "Not enough USDC in your account for this (and its gas).";

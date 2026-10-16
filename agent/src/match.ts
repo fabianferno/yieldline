@@ -34,13 +34,15 @@ export type PoolMatch = {
 
 const pct = (bps: number) => `${bps / 100}%`;
 
-export function match(o: OfferTerms, pools: MatchPool[], encumbered: boolean): PoolMatch[] {
+/** `encumbered`: false, or the seller's live lien (id and the name of the pool holding it). */
+export function match(o: OfferTerms, pools: MatchPool[], encumbered: false | { liveLienId: number; pool: string }): PoolMatch[] {
   return pools
     .map((p) => {
       const l = p.limits;
       const reasons: string[] = [];
       if (p.version === 1) reasons.push("Operator pilot pool, closed to new advances.");
-      if (encumbered) reasons.push("This seller already has a live lien in the registry; a second lender cannot advance against the same revenue.");
+      if (encumbered)
+        reasons.push(`This seller already has live lien #${encumbered.liveLienId} (${encumbered.pool}); no second pool can advance against the same revenue until it closes.`);
       if (o.riskScore > l.maxRiskScore) reasons.push(`Risk score ${o.riskScore} is above this pool's appetite (${l.maxRiskScore}).`);
       if (o.advanceUsdc > l.maxAdvanceUsdc) reasons.push(`Advance $${o.advanceUsdc} is above this pool's max advance ($${l.maxAdvanceUsdc}).`);
       if (o.sweepBps < l.minSweepBps || o.sweepBps > l.maxSweepBps)

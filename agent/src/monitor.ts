@@ -5,7 +5,7 @@
 //   - manages pool idle liquidity in (mock) USYC against forecast advance demand
 import type { Address } from "viem";
 import { allLiens, probe402, splitterStats, tx } from "./chain.js";
-import { fundOffer } from "./lifecycle.js";
+import { fundOffer, reconcileOffer } from "./lifecycle.js";
 import { allPoolInfo, type PoolInfo } from "./pools.js";
 import { ADDR, publicClient, toUnits } from "./config.js";
 import { anchorDecision } from "./decisions.js";
@@ -180,7 +180,8 @@ export async function monitorTick(opts: { force?: boolean; quietMinutes?: number
 
 /** Treasury agent for every pool that has a teller configured. */
 export async function treasuryTick(opts: { force?: boolean } = {}) {
-  const pools = (await allPoolInfo()).filter((p) => p.teller);
+  // Only the protocol's teller: never park pool cash with a contract chosen by anyone else.
+  const pools = (await allPoolInfo()).filter((p) => p.teller?.toLowerCase() === ADDR.teller.toLowerCase());
   const out: Record<string, unknown> = {};
   for (const p of pools) {
     try {
@@ -269,8 +270,13 @@ export async function loop(intervalSec = 30) {
 
 /** Accepted offers whose seller may have switched payTo since the last check: fund the ones that have. */
 export async function fundPending() {
-  const accepted = (await listOffers()).filter((o) => o.status === "accepted");
+  const all = await listOffers();
   const out: unknown[] = [];
+  for (const o of all.filter((o) => o.status === "pending_human" || o.status === "underwriting")) {
+    const r = await reconcileOffer(o).catch(() => o);
+    if (r.status !== o.status) out.push({ offer: o.id, reconciled: r.status });
+  }
+  const accepted = all.filter((o) => o.status === "accepted");
   for (const o of accepted) {
     try {
       // Probe first: only a seller whose live 402 names the splitter gets a funding decision (and its on-chain anchor).

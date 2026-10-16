@@ -45,8 +45,8 @@ test("v1 pool is closed", () => {
 });
 
 test("encumbered seller: nothing eligible", () => {
-  const ms = match(offer, [pool(), pool({ name: "Steady" })], true);
-  assert.ok(ms.every((m) => !m.eligible && m.reasons.some((r) => /already has a live lien/i.test(r))));
+  const ms = match(offer, [pool(), pool({ name: "Steady" })], { liveLienId: 7, pool: "Horos Core" });
+  assert.ok(ms.every((m) => !m.eligible && m.reasons.some((r) => /live lien #7 \(Horos Core\)/i.test(r))));
 });
 
 test("above auto-approve needs curator", () => {
