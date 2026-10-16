@@ -1,2 +1,5 @@
 allowBuilds:
   unrs-resolver: set this to true or false
+
+overrides:
+  viem: 2.57.7
