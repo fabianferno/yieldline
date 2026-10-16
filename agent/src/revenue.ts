@@ -10,6 +10,9 @@ const lc = (a: string) => a.toLowerCase() as Address;
 
 // transferWithAuthorization(v,r,s) = 0xe3ee160e, (bytes signature) = 0xcf092995; Blockscout returns name or selector.
 const X402_METHODS = new Set(["transferwithauthorization", "0xe3ee160e", "0xcf092995"]);
+// Public Circle testnet faucet on Arc: a shared faucet funder is not evidence of related parties.
+export const KNOWN_FAUCETS = new Set(["0xd844ba11f64d23a7481e24474d2f184e350b9b3d"]);
+
 export const isX402 = (t: Transfer) => !!t.method && X402_METHODS.has(t.method.toLowerCase());
 
 async function getJson(url: string) {
@@ -119,12 +122,13 @@ export async function revenueProfile(seller: Address, extraPayTo: Address[] = []
         fundedBy: fs.funder,
         fundedBySeller: sellerFunded.has(payer) || fs.funder === lc(seller),
         fundedByLenderOperator: fs.funder === lc(ADDR.admin),
+        fundedByPublicFaucet: !!fs.funder && KNOWN_FAUCETS.has(fs.funder),
         activity: fs.txCount,
       };
     }),
   );
   const funders = new Map<string, number>();
-  for (const f of forensics) if (f.fundedBy) funders.set(f.fundedBy, (funders.get(f.fundedBy) ?? 0) + 1);
+  for (const f of forensics) if (f.fundedBy && !KNOWN_FAUCETS.has(f.fundedBy)) funders.set(f.fundedBy, (funders.get(f.fundedBy) ?? 0) + 1);
   const commonFunders = [...funders.entries()].filter(([, n]) => n > 1).map(([funder, payers]) => ({ funder, payers }));
 
   const firstReceipt = ts[0] ?? null;
@@ -149,6 +153,8 @@ export async function revenueProfile(seller: Address, extraPayTo: Address[] = []
     avgTicketUsdc: receipts.length ? +(total / receipts.length).toFixed(6) : 0,
     payerForensics: forensics,
     payersFundedBySeller: forensics.filter((f) => f.fundedBySeller).length,
+    payersFundedByLenderOperator: forensics.filter((f) => f.fundedByLenderOperator).length,
+    payersFundedByPublicFaucet: forensics.filter((f) => f.fundedByPublicFaucet).length,
     commonFunders,
   };
 }
