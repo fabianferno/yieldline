@@ -135,6 +135,8 @@ const ACTION_TONE: Record<string, string> = {
   escalate: "text-ochre",
   escalate_default: "text-blood",
   hold: "text-ochre",
+  override_pilot: "text-ochre",
+  human_approved: "text-ochre",
   adjust_sweep: "text-ochre",
   deploy_idle: "text-terra",
   recall_idle: "text-terra",
@@ -146,8 +148,8 @@ export function DecisionCard({ f }: { f: FeedItem }) {
     <article className="rise rounded-sm border border-rule bg-card p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <span className="engraved text-[10px] text-ink-3">{d.agent} agent</span>
-          <span className={`font-serif text-xl font-semibold ${ACTION_TONE[d.action] ?? ""}`}>{d.action.replace("_", " ")}</span>
+          <span className="engraved text-[10px] text-ink-3">{d.agent === "human" ? "operator (human)" : `${d.agent} agent`}</span>
+          <span className={`font-serif text-xl font-semibold ${ACTION_TONE[d.action] ?? ""}`}>{d.action.replaceAll("_", " ")}</span>
           {d.escalated && <span className="engraved rounded-sm bg-ochre/15 px-1.5 text-[10px] text-ochre">human review</span>}
         </div>
         <div className="text-xs text-ink-3">
