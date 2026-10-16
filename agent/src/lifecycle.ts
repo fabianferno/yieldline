@@ -78,7 +78,45 @@ export async function fundOffer(id: string, opts: { waitSec?: number } = {}) {
   const lienId = Number(
     await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }),
   );
+  if (!lienId) {
+    // Above the pool's auto-approve limit: the contract queued it for the human admin.
+    const pid = Number(await publicClient.readContract({ address: ADDR.pool, abi: LenderPool, functionName: "proposalCount" })) - 1;
+    Object.assign(o, { status: "pending_human", proposalId: pid, txs: { ...o.txs, proposal: r.txHash } });
+    saveOffer(o);
+    return { offer: o, funded: false, queuedForHuman: pid, txHash: r.txHash };
+  }
   Object.assign(o, { status: "funded", lienId, txs: { ...o.txs, advance: r.txHash } });
   saveOffer(o);
   return { offer: o, funded: true, probe, txHash: r.txHash };
+}
+
+/** Human sign-off. For an escalated underwriting decision: release it as an offer. For a queued on-chain
+ *  proposal: execute it with the admin key (LenderPool.approveProposal). */
+export async function humanApprove(id: string, note = "approved by operator") {
+  const o = getOffer(id) as Offer & { proposalId?: number };
+  if (o.status === "pending_human" && o.proposalId === undefined) {
+    o.status = "offered";
+    saveOffer(o);
+    recordDecision({ agent: "underwriter", subject: o.seller, action: "human_approved", escalated: true, inputs: { offerId: o.id }, output: { note }, rationale: note });
+    return { offer: o };
+  }
+  if (o.status === "pending_human" && o.proposalId !== undefined) {
+    const { createWalletClient, http } = await import("viem");
+    const { privateKeyToAccount } = await import("viem/accounts");
+    const { arcTestnet } = await import("viem/chains");
+    const admin = createWalletClient({
+      account: privateKeyToAccount(process.env.DEPLOYER_PRIVATE_KEY as `0x${string}`),
+      chain: arcTestnet,
+      transport: http(),
+    });
+    const hash = await admin.writeContract({ address: ADDR.pool, abi: LenderPool, functionName: "approveProposal", args: [BigInt(o.proposalId)] });
+    await publicClient.waitForTransactionReceipt({ hash });
+    const lienId = Number(
+      await publicClient.readContract({ address: ADDR.registry, abi: LienRegistry, functionName: "liveLienOfSeller", args: [o.seller] }),
+    );
+    Object.assign(o, { status: "funded", lienId, txs: { ...o.txs, advance: hash } });
+    saveOffer(o);
+    return { offer: o, txHash: hash };
+  }
+  throw new Error(`offer ${id} is ${o.status}; nothing to approve`);
 }

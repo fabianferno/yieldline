@@ -2,6 +2,7 @@
 //   underwrite <seller> <endpoint>   run the underwriting agent
 //   accept <offerId>                 seller accepts: deploy their splitter
 //   fund <offerId> [waitSec]         verify payTo on the live endpoint, then disburse
+//   approve <offerId> [note]         human sign-off on an escalated offer / queued advance
 //   offers                           list offers
 //   monitor [--force]                one monitoring tick
 //   treasury [--force]               one treasury tick
@@ -9,7 +10,7 @@
 //   divert <address> | restore       (demo) local seller sets/clears a payTo override
 import type { Address } from "viem";
 import { underwrite } from "./underwriter.js";
-import { acceptOffer, fundOffer } from "./lifecycle.js";
+import { acceptOffer, fundOffer, humanApprove } from "./lifecycle.js";
 import { loop, monitorTick, treasuryTick } from "./monitor.js";
 import { readState, writeState } from "./store.js";
 
@@ -28,6 +29,9 @@ switch (cmd) {
     break;
   case "fund":
     out(await fundOffer(args[0], { waitSec: Number(args[1] ?? 120) }));
+    break;
+  case "approve":
+    out(await humanApprove(args[0], args.slice(1).join(" ") || undefined));
     break;
   case "offers":
     out(readState("offers", []));

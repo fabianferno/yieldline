@@ -9,3 +9,4 @@ broadcast/
 .next/
 dist/
 .circle/
+.gstack/
