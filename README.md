@@ -161,3 +161,9 @@ cd ../web && pnpm i && NEXT_PUBLIC_HOROS_API=http://localhost:4021 NEXT_PUBLIC_C
 - USYC is mocked pending allowlisting.
 - `payTo` cannot be enforced on chain; Horos detects, freezes, refuses at the facilitator and publishes. Buyer-side
   clients that check the registry before paying are the natural next step.
+- A seller proves control of their revenue address through their endpoint (its live 402 must pay that address to apply,
+  and must name the splitter before funding), not with a signature from that wallet. Someone running their own endpoint
+  could name another business's address and encumber it, though the advance goes to that address. A payout-wallet
+  signature closes this once sellers can sign with their revenue wallet.
+- Pool share prices count outstanding principal at par until a curator marks a default, so a lender watching a frozen
+  line can exit before the write-off (up to the pool's free cash).
