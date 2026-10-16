@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { EASE, Num, useGrowth } from "./motion";
 import { EXPLORER, ago, short, usd } from "@/lib/api";
 import { IBolt, ICheck, IChart, ICube, IInfo, IUp, IWarn, IX } from "./icons";
 
@@ -90,8 +92,10 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
   const pct = Math.min(100, (l.repaidUsdc / (l.repayCapUsdc || 1)) * 100);
   const sweep = l.splitter?.accelerated ? 100 : l.sweepBps / 100;
   const frozen = l.status === "Frozen";
+  const sweeps = useGrowth(l.repaidUsdc);
+  const m4 = (n: number) => usd(n, 4);
   return (
-    <article className="rise">
+    <article>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 className="text-[18px] font-semibold tracking-tight">Lien #{l.id}</h3>
         <StatusChip status={l.status} />
@@ -111,10 +115,10 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
 
       <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
         <Metric label="Advanced" value={usd(l.principalUsdc, 2)} />
-        <Metric label="Repaid" value={usd(l.repaidUsdc, 4)} tone="cyan" sub={`${pct.toFixed(1)}% of ${usd(l.repayCapUsdc, 2)} cap`} />
-        <Metric label="Still owed" value={usd(Math.max(0, l.repayCapUsdc - l.repaidUsdc), 4)} />
+        <Metric label="Repaid" value={<Num value={l.repaidUsdc} format={m4} />} tone="cyan" sub={`${pct.toFixed(1)}% of ${usd(l.repayCapUsdc, 2)} cap`} />
+        <Metric label="Still owed" value={<Num value={Math.max(0, l.repayCapUsdc - l.repaidUsdc)} format={m4} />} />
         {l.splitter ? (
-          <Metric label="Revenue routed" value={usd(l.splitter.receivedUsdc, 4)} sub="through the splitter" />
+          <Metric label="Revenue routed" value={<Num value={l.splitter.receivedUsdc} format={m4} />} sub="through the splitter" />
         ) : (
           <Metric label="Term" value={termLeft(l)} sub={`${(l.sweepBps / 100).toFixed(0)}% of revenue swept`} />
         )}
@@ -122,7 +126,7 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
 
       <div className="mt-5">
         <div className="track !h-2">
-          <div className={frozen ? "fill-danger" : "fill-cyan"} style={{ width: `${Math.max(pct, 1)}%` }} />
+          <Bar pct={pct} danger={frozen} />
         </div>
       </div>
 
@@ -135,8 +139,9 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
           </span>
         </div>
         <div className="flex h-7 overflow-hidden rounded-md text-[11px] font-medium">
-          <div className="flex items-center justify-center bg-gradient-to-r from-cyan to-cyan-deep text-midnight" style={{ width: `${sweep}%` }}>
-            {sweep}% to pool
+          <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-r from-cyan to-cyan-deep text-midnight" style={{ width: `${sweep}%` }}>
+            {sweeps > 0 && <span key={sweeps} className="sweep-run" />}
+            <span className="relative">{sweep}% to pool</span>
           </div>
           {sweep < 100 && (
             <div className="flex flex-1 items-center justify-center bg-glass text-white/85">{100 - sweep}% to seller</div>
@@ -144,15 +149,27 @@ export function LienCard({ l, sellerLink = true }: { l: Lien; sellerLink?: boole
         </div>
         {l.splitter && <div className="mt-2 flex justify-between text-[12px] text-muted">
           <span>
-            swept <span className="num text-white/85">{usd(l.splitter.sweptUsdc, 4)}</span>
+            swept <span className="num text-white/85"><Num value={l.splitter.sweptUsdc} format={m4} /></span>
           </span>
           <span>
-            forwarded <span className="num text-white/85">{usd(l.splitter.forwardedUsdc, 4)}</span>
+            forwarded <span className="num text-white/85"><Num value={l.splitter.forwardedUsdc} format={m4} /></span>
           </span>
         </div>}
         {l.splitter?.accelerated && <p className="mt-2 text-[12px] text-danger">Frozen by the monitor: sweeping 100% until the seller restores payTo.</p>}
       </div>
     </article>
+  );
+}
+
+/** Progress fill grown with a transform, so it never forces layout. */
+export function Bar({ pct, danger }: { pct: number; danger?: boolean }) {
+  return (
+    <motion.div
+      className={`${danger ? "fill-danger" : "fill-cyan"} origin-left`}
+      initial={{ scaleX: 0 }}
+      animate={{ scaleX: Math.max(pct, 1) / 100 }}
+      transition={{ duration: 0.9, ease: EASE }}
+    />
   );
 }
 
@@ -167,7 +184,7 @@ export function LienRow({ l }: { l: Lien }) {
       </div>
       <div>
         <div className="track">
-          <div className={l.status === "Frozen" ? "fill-danger" : "fill-cyan"} style={{ width: `${Math.max(pct, 1)}%` }} />
+          <Bar pct={pct} danger={l.status === "Frozen"} />
         </div>
         <div className="mt-1 text-[12px] text-muted">
           <span className="num text-white/85">{usd(l.repaidUsdc, 4)}</span> of {usd(l.repayCapUsdc, 2)} · sweep {(l.sweepBps / 100).toFixed(0)}% · {termLeft(l)}
@@ -238,7 +255,14 @@ export function DecisionEntry({ f }: { f: FeedItem }) {
       ]
     : [];
   return (
-    <article className="relative grid grid-cols-[32px_1fr] gap-3 py-4">
+    <motion.article
+      layout="position"
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, transition: { duration: 0.12 } }}
+      transition={{ duration: 0.35, ease: EASE }}
+      className="relative grid grid-cols-[32px_1fr] gap-3 py-4"
+    >
       <span className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full border ${KIND_RING[kind]} ${KIND_TEXT[kind]}`}>
         <Icon size={16} />
       </span>
@@ -271,17 +295,27 @@ export function DecisionEntry({ f }: { f: FeedItem }) {
             {open ? "Show less" : "Full reasoning"}
           </button>
         )}
-        {open && d.flags && d.flags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {d.flags.map((x) => (
-              <span key={x} className="mono rounded-md border border-line bg-midnight/60 px-1.5 py-0.5 text-[11px] text-muted">
-                {x}
-              </span>
-            ))}
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {open && d.flags && d.flags.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: EASE }}
+              className="overflow-hidden"
+            >
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {d.flags.map((x) => (
+                  <span key={x} className="mono rounded-md border border-line bg-midnight/60 px-1.5 py-0.5 text-[11px] text-muted">
+                    {x}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -322,8 +356,17 @@ export function ActivityList({ items, max = 14 }: { items: FeedItem[]; max?: num
   if (!rows.length) return <p className="text-[13px] text-muted">No on-chain events yet. The first advance will appear here.</p>;
   return (
     <ol>
+      <AnimatePresence initial={false}>
       {rows.slice(0, max).map((r: any) => (
-        <li key={r.key} className="flex items-center gap-3 border-b border-line py-2.5 last:border-0">
+        <motion.li
+          key={r.key}
+          layout="position"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: EASE }}
+          className="flex items-center gap-3 border-b border-line py-2.5 last:border-0"
+        >
           <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-glass/60 ${r.count ? "text-cyan" : "text-amber"}`}>{r.icon}</span>
           <span className="min-w-0 flex-1 text-[13px] text-white/85">
             {r.text}
@@ -332,8 +375,9 @@ export function ActivityList({ items, max = 14 }: { items: FeedItem[]; max?: num
           <a href={r.href} target="_blank" className="shrink-0 text-[12px] text-muted hover:text-cyan">
             {ago(r.at)}
           </a>
-        </li>
+        </motion.li>
       ))}
+      </AnimatePresence>
     </ol>
   );
 }
@@ -342,9 +386,14 @@ export function Tabs<T extends string>({ value, options, onChange }: { value: T;
   return (
     <div className="tabs" role="tablist">
       {options.map((o) => (
-        <button key={o.value} role="tab" aria-selected={o.value === value} onClick={() => onChange(o.value)} className={`tab ${o.value === value ? "active edge glow-cyan" : ""}`}>
-          {o.label}
-          {o.count !== undefined && <span className="num ml-1.5 text-[11px] opacity-60">{o.count}</span>}
+        <button key={o.value} role="tab" aria-selected={o.value === value} onClick={() => onChange(o.value)} className={`tab relative ${o.value === value ? "active" : ""}`}>
+          {o.value === value && (
+            <motion.span layoutId={`tab-${options.map((x) => x.value).join("-")}`} className="tab-pill edge glow-cyan" transition={{ type: "spring", stiffness: 420, damping: 36 }} />
+          )}
+          <span className="relative z-[2]">
+            {o.label}
+            {o.count !== undefined && <span className="num ml-1.5 text-[11px] opacity-60">{o.count}</span>}
+          </span>
         </button>
       ))}
     </div>

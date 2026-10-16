@@ -124,57 +124,118 @@ body {
     inset 0 0 18px -8px rgba(255, 182, 92, 0.35);
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons: specular glass ---------- */
+@property --spec-i {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.3;
+}
 .btn {
+  --spec-line: 54 217 232; /* edge light */
+  --spec-base: rgba(141, 154, 170, 0.28);
+  --spec-tint: rgba(54, 217, 232, 0.07);
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   height: 40px;
   padding: 0 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 500;
   color: var(--white);
-  transition:
-    box-shadow 0.2s,
-    transform 0.1s,
-    background 0.2s;
   white-space: nowrap;
+  background:
+    radial-gradient(90px circle at var(--spec-x, 50%) var(--spec-y, -40px), rgb(var(--spec-line) / calc(var(--spec-i) * 0.16)), transparent 70%),
+    linear-gradient(180deg, var(--spec-tint), rgba(8, 11, 16, 0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 20px -12px rgb(var(--spec-line) / calc(var(--spec-i) * 0.7));
+  transition:
+    --spec-i 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s;
 }
-.btn:active {
-  transform: translateY(1px);
+/* lit edge: a conic arc centred on the cursor's bearing, over a faint base line */
+.btn::before,
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background:
+    conic-gradient(
+      from calc(var(--spec-a, 0deg) - 40deg),
+      transparent 0deg,
+      rgb(var(--spec-line) / var(--spec-i)) 34deg,
+      rgb(var(--spec-line) / var(--spec-i)) 46deg,
+      transparent 80deg,
+      transparent 280deg,
+      rgb(var(--spec-line) / calc(var(--spec-i) * 0.35)) 320deg,
+      transparent 360deg
+    ),
+    linear-gradient(var(--spec-base), var(--spec-base));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.btn::after {
+  padding: 2.5px;
+  filter: blur(5px);
+  opacity: calc(var(--spec-i) * 0.9);
+  background: conic-gradient(
+    from calc(var(--spec-a, 0deg) - 40deg),
+    transparent 0deg,
+    rgb(var(--spec-line)) 40deg,
+    transparent 80deg,
+    transparent 360deg
+  );
+}
+.btn:hover:not(:disabled) {
+  --spec-i: 1;
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.08s;
+}
+.btn svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:hover:not(:disabled) svg:last-child {
+  transform: translateX(3px);
 }
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  box-shadow: none;
 }
 .btn-primary {
-  background: linear-gradient(180deg, rgba(20, 74, 92, 0.95), rgba(9, 32, 44, 0.95));
-}
-.btn-primary:hover:not(:disabled) {
-  box-shadow:
-    0 0 28px -2px rgba(54, 217, 232, 0.6),
-    inset 0 0 20px -4px rgba(54, 217, 232, 0.5);
+  --spec-tint: rgba(20, 90, 108, 0.55);
 }
 .btn-secondary {
-  background: linear-gradient(180deg, rgba(44, 38, 34, 0.95), rgba(20, 20, 24, 0.95));
+  --spec-line: 255 182 92;
+  --spec-tint: rgba(255, 158, 11, 0.1);
 }
+.btn-ghost,
 .btn-outline {
-  background: rgba(8, 11, 16, 0.6);
-  border: 1px solid rgba(217, 247, 250, 0.75);
-}
-.btn-ghost {
-  background: rgba(17, 26, 43, 0.6);
-  border: 1px solid var(--line);
-}
-.btn-ghost:hover {
-  background: rgba(20, 52, 78, 0.8);
-  border-color: rgba(54, 217, 232, 0.5);
+  --spec-line: 217 247 250;
+  --spec-tint: rgba(27, 40, 56, 0.5);
 }
 .btn-danger {
-  background: linear-gradient(180deg, rgba(140, 34, 34, 0.95), rgba(80, 18, 20, 0.95));
+  --spec-line: 255 90 95;
+  --spec-tint: rgba(140, 34, 34, 0.5);
+}
+.btn-lg {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 14px;
+  border-radius: 14px;
 }
 
 /* ---------- Inputs ---------- */
@@ -204,14 +265,28 @@ body {
   color: rgba(245, 247, 250, 0.82);
   transition: background 0.2s;
 }
-.nav-item:hover {
+.nav-item:hover:not(.active) {
   background: rgba(27, 40, 56, 0.6);
+}
+.nav-item svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-item:hover svg {
+  transform: translateX(2px);
 }
 .nav-item svg {
   color: rgba(245, 247, 250, 0.8);
 }
+.nav-item {
+  position: relative;
+}
 .nav-item.active {
   color: var(--cyan);
+}
+.nav-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
   background: linear-gradient(90deg, rgba(14, 165, 183, 0.22), rgba(17, 26, 43, 0.6) 60%, rgba(255, 182, 92, 0.12));
 }
 .nav-item.active svg {
@@ -238,8 +313,19 @@ body {
   font-size: 13px;
   color: var(--muted);
 }
+.tab {
+  transition: color 0.2s;
+}
+.tab:hover:not(.active) {
+  color: var(--white);
+}
 .tab.active {
   color: var(--white);
+}
+.tab-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
   background: linear-gradient(180deg, rgba(20, 74, 92, 0.9), rgba(9, 32, 44, 0.9));
 }
 
@@ -300,7 +386,6 @@ body {
   height: 100%;
   background: var(--grad-primary);
   box-shadow: 0 0 12px rgba(54, 217, 232, 0.7);
-  transition: width 0.6s;
 }
 .fill-danger {
   height: 100%;
@@ -322,6 +407,33 @@ body {
   animation: rise 0.4s ease-out both;
 }
 
+@keyframes num-flash {
+  from {
+    color: var(--ice);
+    text-shadow: 0 0 14px rgba(54, 217, 232, 0.8);
+  }
+}
+.num-flash {
+  animation: num-flash 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes sweep-run {
+  from {
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(260%);
+    opacity: 0.2;
+  }
+}
+.sweep-run {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(217, 247, 250, 0.85), transparent);
+  animation: sweep-run 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
 @keyframes pulse {
   0%,
   100% {
@@ -336,7 +448,9 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .pulse,
-  .rise {
+  .rise,
+  .num-flash,
+  .sweep-run {
     animation: none;
   }
 }

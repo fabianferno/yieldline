@@ -37,7 +37,7 @@ export default function Explorer() {
               <ISearch size={18} className="absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-white/80" />
               <input value={a} onChange={(e) => setA(e.target.value)} placeholder="Seller wallet address, 0x…" aria-label="Seller wallet address" className="input mono" />
             </div>
-            <button disabled={!ok} className="btn btn-primary edge glow-cyan h-11">
+            <button disabled={!ok} className="btn btn-primary h-11">
               Look up <IArrow size={16} />
             </button>
           </form>

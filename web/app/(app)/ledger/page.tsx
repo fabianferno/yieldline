@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ago, usePoll, useTick, usd } from "@/lib/api";
 import { ActivityList, Addr, DecisionEntry, LienCard, LienRow, Panel, Skeleton, Tabs, type FeedItem, type Lien } from "@/components/ui";
 import { IArrow, PrismCube } from "@/components/icons";
+import { AnimatePresence, motion } from "motion/react";
+import { Num } from "@/components/motion";
 
 type Overview = {
   addresses: { registry: string; pool: string; teller: string; explorer: string };
@@ -57,7 +59,7 @@ export default function Home() {
               revenue can&apos;t be borrowed against twice.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/explorer" className="btn btn-primary edge glow-cyan">
+              <Link href="/explorer" className="btn btn-primary">
                 Look up a seller <IArrow size={16} />
               </Link>
               <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-ghost">
@@ -71,11 +73,11 @@ export default function Home() {
         </div>
 
         <ol className="grid grid-cols-2 gap-px border-t border-line bg-line md:grid-cols-5">
-          <Step n="Underwrite" value={String(m?.decisions ?? "—")} sub={`decisions · ${m?.rejected ?? 0} rejected · ${m?.escalated ?? 0} to a human`} />
-          <Step n="Advance" value={usd(m?.advancedUsdc, 2)} sub={`${m?.advances ?? 0} advance · ${m?.sellersFinanced ?? 0} seller`} />
-          <Step n="Sweep" value={usd(m?.repaidViaSweepsUsdc, 4)} sub={`repaid from ${usd(m?.revenueRoutedUsdc, 2)} routed`} tone="cyan" />
+          <Step n="Underwrite" value={<Num value={m?.decisions} format={(n) => String(Math.round(n))} />} sub={`decisions · ${m?.rejected ?? 0} rejected · ${m?.escalated ?? 0} to a human`} />
+          <Step n="Advance" value={<Num value={m?.advancedUsdc} format={(n) => usd(n, 2)} />} sub={`${m?.advances ?? 0} advance · ${m?.sellersFinanced ?? 0} seller`} />
+          <Step n="Sweep" value={<Num value={m?.repaidViaSweepsUsdc} format={(n) => usd(n, 4)} />} sub={`repaid from ${usd(m?.revenueRoutedUsdc, 2)} routed`} tone="cyan" />
           <Step n="Watch" value={lastMonitor ? ago(lastMonitor.at) : "—"} sub={`last monitor check · ${m?.freezes ?? 0} freezes`} />
-          <Step n="Park idle cash" value={usd(data?.pool.idleInUsycUsdc, 2)} sub="in USYC (mock teller)" tone="amber" last />
+          <Step n="Park idle cash" value={<Num value={data?.pool.idleInUsycUsdc} format={(n) => usd(n, 2)} />} sub="in USYC (mock teller)" tone="amber" last />
         </ol>
       </section>
 
@@ -133,7 +135,11 @@ export default function Home() {
               {!data ? (
                 <Skeleton rows={4} />
               ) : shown.length ? (
-                shown.slice(0, limit).map((f) => <DecisionEntry key={f.tx + f.at} f={f} />)
+                <AnimatePresence initial={false} mode="popLayout">
+                  {shown.slice(0, limit).map((f) => (
+                    <DecisionEntry key={f.tx + f.at} f={f} />
+                  ))}
+                </AnimatePresence>
               ) : (
                 <p className="py-6 text-[13px] text-muted">No decisions from this agent yet.</p>
               )}
@@ -167,7 +173,7 @@ function LiveBadge({ updatedAt, error }: { updatedAt: number | null; error: bool
   );
 }
 
-function Step({ n, value, sub, tone, last }: { n: string; value: string; sub: string; tone?: "cyan" | "amber"; last?: boolean }) {
+function Step({ n, value, sub, tone, last }: { n: string; value: React.ReactNode; sub: string; tone?: "cyan" | "amber"; last?: boolean }) {
   return (
     <li className={`bg-[#0b111a] px-5 py-4 sm:px-6 ${last ? "max-md:col-span-2" : ""}`}>
       <div className="flex items-center gap-2 text-[12px] font-medium text-white/85">
@@ -192,14 +198,14 @@ function PoolPanel({ data }: { data: Overview | null }) {
     : [];
   const L = p?.limits;
   return (
-    <Panel title="Lender pool" right={<span className="num text-[15px] font-semibold text-white">NAV {usd(p?.navUsdc, 2)}</span>}>
+    <Panel title="Lender pool" right={<span className="num text-[15px] font-semibold text-white">NAV <Num value={p?.navUsdc} format={(n) => usd(n, 2)} /></span>}>
       {!p ? (
         <Skeleton rows={3} />
       ) : (
         <>
           <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
             {parts.map((x) => (
-              <div key={x.k} className={x.c} style={{ width: `${(x.v / nav) * 100}%` }} />
+              <motion.div key={x.k} className={x.c} initial={{ flexGrow: 0 }} animate={{ flexGrow: x.v / nav }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} style={{ flexBasis: 0 }} />
             ))}
           </div>
           <dl className="mt-4 space-y-2 text-[13px]">

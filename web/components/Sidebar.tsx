@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
+import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { IChart, ICube, IExternal, IHome, ILayers, IUsers, PrismCube } from "./icons";
 
 const PRIMARY = [
-  { href: "/", label: "Ledger", icon: IHome },
+  { href: "/ledger", label: "Ledger", icon: IHome },
   { href: "/explorer", label: "Lien explorer", icon: ILayers },
 ];
 
@@ -22,7 +23,7 @@ const LINKS = [
 
 function useActive() {
   const path = usePathname();
-  return (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+  return (href: string) => path === href || path.startsWith(href + "/");
 }
 
 export function Sidebar() {
@@ -38,12 +39,9 @@ export function Sidebar() {
         </Link>
         <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
           {[...PRIMARY, ...SELLERS].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`shrink-0 rounded-lg px-3 py-2 text-[13px] ${isActive(href) ? "edge glow-cyan bg-glass/70 text-cyan" : "text-white/75 hover:bg-glass/60"}`}
-            >
-              {label}
+            <Link key={href} href={href} className={`relative shrink-0 rounded-lg px-3 py-2 text-[13px] ${isActive(href) ? "text-cyan" : "text-white/75"}`}>
+              {isActive(href) && <motion.span layoutId="nav-pill-m" className="nav-pill edge glow-cyan" transition={PILL} />}
+              <span className="relative">{label}</span>
             </Link>
           ))}
         </nav>
@@ -61,21 +59,21 @@ export function Sidebar() {
 
         <nav className="space-y-1">
           {PRIMARY.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} className={`nav-item ${isActive(href) ? "active edge glow-cyan" : ""}`}>
+            <NavItem key={href} href={href} active={isActive(href)}>
               <Icon size={18} />
               <span>{label}</span>
-            </Link>
+            </NavItem>
           ))}
         </nav>
 
         <div className="mb-1.5 mt-6 px-3 text-[12px] font-medium text-muted">Sellers on file</div>
         <nav className="space-y-1">
           {SELLERS.map(({ href, label, note, icon: Icon }) => (
-            <Link key={href} href={href} className={`nav-item ${isActive(href) ? "active edge glow-cyan" : ""}`}>
+            <NavItem key={href} href={href} active={isActive(href)}>
               <Icon size={18} />
               <span className="flex-1 truncate">{label}</span>
               <span className="text-[11px] text-muted">{note}</span>
-            </Link>
+            </NavItem>
           ))}
         </nav>
 
@@ -91,5 +89,17 @@ export function Sidebar() {
         </div>
       </aside>
     </>
+  );
+}
+
+const PILL = { type: "spring", stiffness: 420, damping: 38 } as const;
+
+/** The active pill is one element that glides between items as the route changes. */
+function NavItem({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <Link href={href} className={`nav-item ${active ? "active" : ""}`} aria-current={active ? "page" : undefined}>
+      {active && <motion.span layoutId="nav-pill" className="nav-pill edge glow-cyan" transition={PILL} />}
+      <span className="relative z-[2] flex flex-1 items-center gap-3">{children}</span>
+    </Link>
   );
 }
