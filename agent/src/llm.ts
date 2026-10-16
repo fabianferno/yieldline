@@ -23,6 +23,8 @@ export async function runAgent<T>(opts: {
   tools: Tool[];
   submitTool: string;
   maxTurns?: number;
+  /** Called after each tool call, e.g. to stream investigation progress to the seller. */
+  onStep?: (step: TraceStep) => void | Promise<void>;
 }): Promise<{ result: T; trace: TraceStep[] }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: opts.prompt }];
   const trace: TraceStep[] = [];
@@ -52,6 +54,7 @@ export async function runAgent<T>(opts: {
         output = { error: e?.message ?? String(e) };
       }
       trace.push({ tool: u.name, input: u.input, output });
+      await opts.onStep?.({ tool: u.name, input: u.input, output });
       results.push({ type: "tool_result", tool_use_id: u.id, content: ser(output).slice(0, 12000) });
     }
     messages.push({ role: "user", content: results });

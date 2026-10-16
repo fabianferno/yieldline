@@ -2,9 +2,9 @@
 import type { Address } from "viem";
 import { lienInfo, probe402 } from "./chain.js";
 import { allPoolInfo, protocolCaps } from "./pools.js";
-import { runAgent, MODEL, type Tool } from "./llm.js";
+import { runAgent, MODEL, type Tool, type TraceStep } from "./llm.js";
 import { revenueProfile } from "./revenue.js";
-import { putOffer, recordDecision, type Decision } from "./store.js";
+import { getOffer, putOffer, recordDecision, type Decision } from "./store.js";
 import { anchorDecision } from "./decisions.js";
 
 export type UnderwritingDecision = {
@@ -75,7 +75,14 @@ How to underwrite:
 
 Finish by calling submit_decision exactly once. The rationale must cite the specific numbers you relied on.`;
 
-export async function underwrite(seller: Address, endpoint: string) {
+export type UnderwriteOpts = {
+  /** Product application id: the finished offer replaces this placeholder. */
+  offerId?: string;
+  applicant?: Address;
+  onStep?: (s: TraceStep) => void | Promise<void>;
+};
+
+export async function underwrite(seller: Address, endpoint: string, opts: UnderwriteOpts = {}) {
   const profileCache: { v?: Awaited<ReturnType<typeof revenueProfile>> } = {};
   const tools: Tool[] = [
     {
@@ -137,6 +144,7 @@ export async function underwrite(seller: Address, endpoint: string) {
     prompt: `Underwrite seller ${seller}. Their x402 endpoint: ${endpoint || "none registered (found by market scan of Arc x402 receipts)"}. Investigate, then submit your decision.`,
     tools,
     submitTool: "submit_decision",
+    onStep: opts.onStep,
   });
 
   // Defence in depth: clamp to protocol caps and to what the best open pool could fund, so a bad proposal fails
@@ -167,11 +175,14 @@ export async function underwrite(seller: Address, endpoint: string) {
     rationale: d.rationale,
   });
 
+  const prev = opts.offerId ? await getOffer(opts.offerId).catch(() => null) : null;
   const offer: Offer = {
     ...d,
-    id: rec.id,
+    trace: prev?.trace,
+    id: opts.offerId ?? rec.id,
     seller,
     endpoint,
+    applicant: opts.applicant,
     status: d.decision === "offer" ? "offered" : d.decision === "escalate" ? "pending_human" : "rejected",
     decisionHash: rec.hash,
     createdAt: rec.at,

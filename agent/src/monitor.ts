@@ -273,6 +273,12 @@ export async function fundPending() {
   const out: unknown[] = [];
   for (const o of accepted) {
     try {
+      // Probe first: only a seller whose live 402 names the splitter gets a funding decision (and its on-chain anchor).
+      const probe = await probe402(o.endpoint).catch(() => null);
+      if (!probe?.ok || probe.payTo !== o.splitter?.toLowerCase()) {
+        out.push({ offer: o.id, wired: false });
+        continue;
+      }
       const r = await fundOffer(o.id, { waitSec: 0 });
       out.push({ offer: o.id, funded: r.funded, queued: (r as any).queuedForHuman });
     } catch (e: any) {

@@ -3,6 +3,7 @@ import express from "express";
 import { facilitatorRouter } from "./facilitator.js";
 import { sellerApp } from "./seller.js";
 import { readApi } from "./readApi.js";
+import { productApi } from "./productApi.js";
 
 export const app = express();
 app.use((req, res, next) => {
@@ -13,6 +14,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/facilitator", facilitatorRouter);
+app.use("/api", productApi);
 app.use("/api", readApi);
 app.use(sellerApp);
 app.get("/", (_req, res) => res.redirect("/oracle"));
