@@ -1,0 +1,18 @@
+{
+  "chainId": 5042002,
+  "usdc": "0x3600000000000000000000000000000000000000",
+  "lienRegistry": "0xD140eED8f20B2157366B36FcC08226d64c16906F",
+  "lenderPool": "0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506",
+  "mockUsycTeller": "0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5",
+  "admin": "0xB4f4211A98F3A5eEc1f0a47ee2Fa00a9f0A65Cb0",
+  "circleWallets": {
+    "underwritingAgent": "0x222e79b48fe1a02cf6dc97c32d2f4899bbcf29e7",
+    "monitorAgent": "0x2e7adb46535ec350bdbd5878401094ba6673c2cc",
+    "seller": "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f",
+    "buyers": [
+      "0x5ee825ba848a0f0389f47f960329d5ff0b10429c",
+      "0x26ff20ff04701d124775675d2282a46eca7c3eac",
+      "0x6a2c074215c737c1bd5c2f97312d89d123f3b754"
+    ]
+  }
+}

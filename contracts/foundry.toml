@@ -12,4 +12,4 @@ remappings = ["@openzeppelin/=lib/openzeppelin-contracts/", "forge-std/=lib/forg
 arc_testnet = "https://rpc.testnet.arc.io"
 
 [etherscan]
-arc_testnet = { key = "blockscout", url = "https://explorer.testnet.arc.io/api", chain = 5042002 }
+arc_testnet = { key = "blockscout", url = "https://explorer.testnet.arc.io/api" }
