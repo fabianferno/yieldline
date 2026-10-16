@@ -184,7 +184,8 @@ export const tx = {
 
 /** Fetch a seller's live x402 challenge (unpaid request) and return what it asks buyers to pay. */
 export async function probe402(url: string) {
-  const r = await fetch(url);
+  // No redirects (the URL was checked, its redirect target was not) and a hard timeout.
+  const r = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(8000) });
   const hdr = r.headers.get("PAYMENT-REQUIRED");
   if (r.status !== 402 || !hdr) return { url, status: r.status, ok: false as const, error: "no x402 challenge" };
   const pr = JSON.parse(Buffer.from(hdr, "base64").toString("utf8"));

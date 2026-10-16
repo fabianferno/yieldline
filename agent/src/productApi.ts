@@ -71,6 +71,22 @@ function stepSummary(s: TraceStep) {
   return STEP_LABEL[s.tool] ?? s.tool;
 }
 
+/** On the hosted API, refuse URLs that point at private or loopback hosts (we fetch seller-supplied URLs). */
+function assertPublicUrl(url: string) {
+  if (!process.env.VERCEL) return;
+  const host = new URL(url).hostname.toLowerCase();
+  const priv =
+    host === "localhost" ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal") ||
+    /^(127\.|10\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
+    host === "[::1]" ||
+    host.startsWith("[fc") ||
+    host.startsWith("[fd") ||
+    host.startsWith("[fe80");
+  if (priv) throw new HttpError(400, "Use your public endpoint URL.");
+}
+
 const ACTIVE: Offer["status"][] = ["underwriting", "offered", "accepted", "pending_human"];
 const publicOffer = (o: Offer) => o;
 
@@ -82,6 +98,7 @@ productApi.post(
     const { endpoint, payout } = req.body ?? {};
     if (typeof endpoint !== "string" || !/^https?:\/\//.test(endpoint)) throw new HttpError(400, "Enter the full URL of your x402 endpoint (https://…).");
     if (typeof payout !== "string" || !isAddress(payout)) throw new HttpError(400, "Enter the address that receives your x402 revenue.");
+    assertPublicUrl(endpoint);
     const applicant = await verifyRequest(req.body, "apply", endpoint);
     const seller = getAddress(payout);
 
@@ -258,6 +275,17 @@ productApi.get(
       positions: positions.filter((p) => p.shares > 0).map((p) => ({ ...p, name: v2.find((x) => x.address === p.pool)?.name })),
       curated,
     };
+  }),
+);
+
+/** Unsigned read of a live x402 challenge, for the apply form (shows the payTo before the seller signs). */
+productApi.get(
+  "/probe",
+  wrap(async (req) => {
+    const url = String(req.query.url ?? "");
+    if (!/^https?:\/\//.test(url)) throw new HttpError(400, "Enter the full URL (https://…).");
+    assertPublicUrl(url);
+    return probe402(url).catch((e) => ({ ok: false as const, status: 0, error: String(e?.message ?? e) }));
   }),
 );
 
