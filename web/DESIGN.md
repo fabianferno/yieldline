@@ -1,6 +1,6 @@
 ---
 name: Horos
-description: Prism glass on midnight for a public ledger of revenue liens on Arc.
+description: Red-lit glass on graphite for a public ledger of revenue liens on Arc.
 colors:
   midnight: "#09090b"
   navy: "#16161a"
@@ -14,7 +14,7 @@ colors:
   muted: "#9d9ca3"
   success: "#34d399"
   danger: "#ff5a5f"
-  info: "#3b9cff"
+  info: "#c9c8ce"
   line: "rgba(157, 156, 163, 0.14)"
 typography:
   display:
@@ -153,48 +153,50 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Lit Ledger"**
+**Creative North Star: "The Red-Lit Ledger"**
 
-A dark ledger read through glass. Everything sits on near-black midnight, inside translucent navy panels, and the only light in the room is the money: cyan where USDC moves toward the pool, amber where it belongs to the seller or where a human has to judge. The system's signature is the iridescent edge, a 1px border that runs cyan at the top-left, fades to near-nothing along the sides and turns amber at the bottom-right, so a single panel carries both halves of every split.
+A dark ledger read through glass. Everything sits on near-black graphite, inside translucent graphite panels, and the only light in the room is one red: the accent marks money moving, the system acting and anything that needs attention. The system's signature is the red edge, a 1px border that runs bright red at the top-left, fades to near-nothing along the sides and returns as a deeper red at the bottom-right.
 
-The world is dense but quiet. Numbers are the heroes: tabular, semibold, and alive (they count to their new value and flash ice when they grow). Prose is sentence-case Inter at moderate weight, set narrow (48 to 72ch). Mono is reserved for real protocol text: addresses, `payTo`, HTTP lines, flags. Motion is one curve everywhere (cubic-bezier(0.16, 1, 0.3, 1)) and always means something arrived, moved or settled.
+Token names in code are legacy from the earlier Prism cyan/amber palette: `--cyan` is the accent, `--cyan-deep` the deep accent, `--amber` the lighter red tint, `--amber-deep` the ember red, `--ice` the blush, `--navy` and `--glass` are graphite. Read the names as slots, not hues.
+
+The world is dense but quiet. Numbers are the heroes: tabular, semibold, and alive (they count to their new value and flash blush when they grow). Prose is sentence-case Inter at moderate weight, set narrow (48 to 72ch). Mono is reserved for real protocol text: addresses, `payTo`, HTTP lines, flags. Motion is one curve everywhere (cubic-bezier(0.16, 1, 0.3, 1)) and always means something arrived, moved or settled.
 
 Light follows the pointer. Buttons carry a specular edge whose bright arc points toward the cursor and brightens as it approaches, so the interface feels like a lit object rather than a flat page.
 
 **Key Characteristics:**
-- Midnight ground with two faint fixed radial washes (cyan top-left, amber bottom-right).
-- Translucent navy panels with a hairline border and a soft drop; the iridescent edge on the panel that matters most per view.
-- Cyan = toward the pool / system; amber = seller's share / human judgement. Never swapped.
+- Graphite ground with two faint fixed red radial washes (accent top-left, tint bottom-right).
+- Translucent graphite panels with a hairline border and a soft drop; the red edge on the panel that matters most per view.
+- One accent hue, red. Where two shares must be told apart, the lighter red tint is the second tone; never a second hue.
 - Tabular semibold numbers that animate between values.
 - Mono only for protocol and chain text.
 - One easing curve; motion reports state changes, not decoration.
 
 ## Colors
 
-A cold, near-monochrome night palette split by two warm-and-cool light sources, cyan and amber, plus a small signal set for verdicts.
+A neutral graphite palette with a single red accent in a few strengths, plus green for good verdicts and a red-pink for danger.
 
 ### Primary
-- **Pool Cyan** (cyan): money moving to the pool, active states, the live/active nav and tab, links on hover, focus rings, the repaid figure, the sweep segment of every split bar. Paired with **Deep Cyan** (cyan-deep) as the far stop of the primary gradient (90deg cyan → cyan-deep) on fills and split segments, with midnight text on top.
-- **Ice** (ice): the pale cold highlight. Mono addresses and `payTo` tokens, the flash color when a number grows, the sweep-run light that crosses the bar when a repayment lands.
+- **Signal Red** (cyan, legacy name): the accent. Money moving to the pool, active states, the active nav and tab, links on hover, focus rings, the repaid figure, the pool segment of every split bar. Paired with **Deep Red** (cyan-deep) as the far stop of the primary gradient (90deg accent → deep) on fills and split segments, with graphite text on top.
+- **Blush** (ice, legacy name): the pale warm highlight. Mono addresses and `payTo` tokens, the flash color when a number grows, the sweep-run light that crosses the bar when a repayment lands.
 
 ### Secondary
-- **Seller Amber** (amber), with **Deep Amber** (amber-deep) as its gradient partner: the seller's share in a split, idle cash parked in the treasury, risk scores, the 402 status, "needs a human" chips, operator overrides and warnings. Amber is judgement and the other side of the ledger; it is never a generic accent.
+- **Coral Tint** (amber, legacy name), with **Ember** (amber-deep) as its gradient partner: the second tone of the same red, used only where two things must be told apart beside the accent: the seller's share in a split, idle cash parked in the treasury, risk scores, the 402 status, "needs a human" chips, operator overrides and warnings, and the far end of the edge gradient. It is never a competing accent.
 
-### Tertiary (signal set)
+### Tertiary (verdicts)
 - **Verdict Green** (success): offers, funding, repaid liens, 200 OK, clean revenue.
-- **Freeze Red** (danger): rejections, freezes, defaults, errors, the frozen progress fill (danger → #c2262c).
-- **Monitor Blue** (info): neutral agent actions (continue, deploy idle) and the monitor's verdict.
+- **Freeze Red** (danger): rejections, freezes, defaults, errors, the frozen progress fill (danger → #c2262c). It sits very close to the accent, so danger must always carry a second cue (an X or warning icon, the word Frozen/Rejected, or 100% sweep copy); hue alone does not separate it.
+- **Neutral Verdict** (info): a pale grey for routine agent actions (continue, deploy idle) and the monitor's verdict.
 
 ### Neutral
-- **Midnight** (midnight): page ground, text on cyan fills, inset wells (at 40 to 60%).
-- **Ledger Navy** (navy): panel body (as a 78% translucent gradient to #0a0f17), input fill, chips.
-- **Glass Slate** (glass): the seller segment of split bars, nav hover, skeletons, inactive tracks.
+- **Graphite Black** (midnight): page ground, text on accent fills, inset wells (at 40 to 60%).
+- **Graphite** (navy, legacy name): panel body (as a 78% translucent gradient to #0c0c0e), input fill, chips.
+- **Smoke** (glass): the seller segment of split bars, nav hover, skeletons, inactive tracks.
 - **Paper White** (white): primary text. Secondary text steps down by opacity (85, 75, 70%) rather than by new hues.
 - **Fog** (muted): labels, metadata, timestamps, placeholders.
 - **Hairline** (line): every border and divider.
 
 ### Named Rules
-**The Two Lights Rule.** Cyan means toward the pool or the system acting; amber means the seller's share or a human deciding. A split bar is always cyan then amber/glass, left to right, and the iridescent edge always runs cyan top-left to amber bottom-right.
+**The One Red Rule.** Red is the only accent hue. The full-strength red means toward the pool or the system acting; the lighter coral tint is the second tone of the same red, for the seller's share or a human deciding. A split bar is always accent then smoke (or tint), left to right, and the edge always runs bright red top-left to ember bottom-right. Never introduce a second accent hue.
 
 **The Opacity Ladder Rule.** Secondary text is white at reduced opacity (85 / 75 / 70%) or muted; do not introduce new grey hexes.
 
@@ -235,17 +237,17 @@ A cold, near-monochrome night palette split by two warm-and-cool light sources, 
 
 ## Elevation & Depth
 
-Depth is glass layering plus light, not lift. The page is lit by two fixed radial washes; panels are translucent navy over it with an inner top highlight and a long soft drop; the most important panel per view gets the iridescent edge; active controls glow from inside. Nothing hovers higher on hover except buttons, by 1px.
+Depth is glass layering plus light, not lift. The page is lit by two fixed radial washes; panels are translucent graphite over it with an inner top highlight and a long soft drop; the most important panel per view gets the red edge; active controls glow from inside. Nothing hovers higher on hover except buttons, by 1px.
 
 ### Shadow Vocabulary
 - **Panel** (`box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 40px -24px rgba(0,0,0,0.8)`): every panel. Ambient, structural.
-- **Cyan glow** (`box-shadow: 0 0 0 1px rgba(255,69,69,0.08), 0 0 22px -4px rgba(255,69,69,0.45), inset 0 0 18px -6px rgba(255,69,69,0.35)`): the active nav pill and active tab pill only.
+- **Accent glow** (`box-shadow: 0 0 0 1px rgba(255,69,69,0.08), 0 0 22px -4px rgba(255,69,69,0.45), inset 0 0 18px -6px rgba(255,69,69,0.35)`): the active nav pill and active tab pill only.
 - **Fill glow** (`box-shadow: 0 0 12px rgba(255,69,69,0.7)`): progress fills (red equivalent on frozen).
 - **Alert glow** (`box-shadow: 0 0 18px -8px <signal at 0.6>`): alerts, tinted to their signal.
 - **Button drop** (`box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 20px -12px <edge color × intensity>`): grows with the specular intensity.
 
 ### Named Rules
-**The Iridescent Edge Rule.** The cyan-to-amber 1px edge (masked gradient border) marks the one hero panel per view (landing console and closing panel, ledger intro, explorer search, seller header), the search field, and the active pill. It is a signature, not a default border; ordinary panels use the hairline.
+**The Red Edge Rule.** The accent-to-ember 1px edge (masked gradient border) marks the one hero panel per view (landing console and closing panel, ledger intro, explorer search, seller header), the search field, and the active pill. It is a signature, not a default border; ordinary panels use the hairline.
 
 **The Lit From Within Rule.** Glows are inner-and-outer light in the signal's own color, never a dark offset shadow.
 
@@ -258,50 +260,50 @@ Softly rounded glass slabs, never sharp, never bubbly. Panels and large buttons 
 ### Buttons
 Specular glass: dark, tinted, and lit along the edge by the pointer.
 - **Shape:** gently rounded (12px), 40px tall, 18px side padding; large is 48px, 24px padding, 14px radius.
-- **Primary:** deep-teal tint (rgba(108, 20, 26, 0.55)) fading to midnight, white 13px/500 text, cyan edge light.
-- **Secondary:** amber edge light over a faint amber tint. Used for the alternate action in a pair (e.g. "Read the code" on the closing panel).
-- **Ghost:** ice edge light over translucent glass slate. The quiet partner beside a primary.
-- **Hover / Focus:** a conic arc of the edge color points toward the cursor and its intensity (--spec-i, idle 0.3) rises with proximity, with a blurred halo behind it and a soft radial hotspot inside; on hover the button rises 1px and a trailing icon nudges 3px right. Active presses to scale 0.98 in 80ms. Disabled is 40% opacity. Focus uses the global 2px cyan ring, 2px offset. On coarse pointers the edge rests at idle.
+- **Primary:** deep oxblood tint (rgba(108, 20, 26, 0.55)) fading to graphite black, white 13px/500 text, accent edge light.
+- **Secondary:** coral-tint edge light over a faint ember tint. Used for the alternate action in a pair (e.g. "Read the code" on the closing panel).
+- **Ghost:** blush edge light over translucent smoke. The quiet partner beside a primary.
+- **Hover / Focus:** a conic arc of the edge color points toward the cursor and its intensity (--spec-i, idle 0.3) rises with proximity, with a blurred halo behind it and a soft radial hotspot inside; on hover the button rises 1px and a trailing icon nudges 3px right. Active presses to scale 0.98 in 80ms. Disabled is 40% opacity. Focus uses the global 2px accent ring, 2px offset. On coarse pointers the edge rests at idle.
 
 ### Chips
-- **Style:** 24px full pill, 11px/500 text, hairline border on translucent navy.
-- **State:** status chips tint text and border to the state (Active cyan with a pulsing dot, Frozen and Defaulted red, Repaid green); "needs a human" and override chips are amber.
+- **Style:** 24px full pill, 11px/500 text, hairline border on translucent graphite.
+- **State:** status chips tint text and border to the state (Active in the accent with a pulsing dot, Frozen and Defaulted in danger red, Repaid green); "needs a human" and override chips use the coral tint. Active and Frozen are near the same hue, so the label and the pulsing dot (Active only) carry the difference.
 
 ### Cards / Containers
 - **Corner Style:** 14px.
-- **Background:** vertical gradient from navy at 78% to #0a0f17 at 82%.
+- **Background:** vertical gradient from graphite at 78% to #0c0c0e at 82%.
 - **Shadow Strategy:** Panel shadow (see Elevation).
-- **Border:** 1px hairline; iridescent edge on the hero panel only.
+- **Border:** 1px hairline; red edge on the hero panel only.
 - **Internal Padding:** 16px, 20px from sm. A panel title row (15px/500 title, 12px muted note on the right) sits 16px above content. Inset wells inside panels are midnight at 40 to 50% with a hairline and 12px radius.
 
 ### Inputs / Fields
-- **Style:** 44px tall, 10px radius, navy-to-midnight vertical gradient, 13px text (mono for addresses), muted placeholder, 40px left padding for a leading 18px search icon. The border is the iridescent edge on a wrapping element.
-- **Focus:** the global 2px cyan ring.
+- **Style:** 44px tall, 10px radius, graphite-to-black vertical gradient, 13px text (mono for addresses), muted placeholder, 40px left padding for a leading 18px search icon. The border is the red edge on a wrapping element.
+- **Focus:** the global 2px accent ring.
 
 ### Navigation
-- **Sidebar rail (app):** a sticky panel with the PrismCube mark and wordmark, primary items, then a "Sellers on file" group with a muted status note per item, and chain links at the foot. Items are 40px, 14px text at 82% white, 10px radius; hover fills glass slate at 60% and nudges the icon 2px. The active item turns cyan behind a single shared pill (cyan-to-navy-to-amber gradient, iridescent edge, cyan glow) that glides between items as a shared layout element (spring 420 / 38).
+- **Sidebar rail (app):** a sticky panel with the PrismCube mark and wordmark, primary items, then a "Sellers on file" group with a muted status note per item, and chain links at the foot. Items are 40px, 14px text at 82% white, 10px radius; hover fills smoke at 60% and nudges the icon 2px. The active item turns red behind a single shared pill (deep-red-to-graphite-to-tint gradient, red edge, accent glow) that glides between items as a shared layout element (spring 420 / 38).
 - **Mobile:** the rail becomes a compact header panel with a horizontally scrolling row of the same items and the same gliding pill.
 - **Site nav (landing):** wordmark left, three 13px text links, and a primary "Ledger" button.
 
 ### Tabs
-A segmented track (midnight 60%, hairline, 12px, 4px inset) of 38px tabs in muted 13px text with tabular counts. The active tab is white over a deep-teal pill with the iridescent edge and cyan glow, which slides between tabs as a shared element (spring 420 / 36).
+A segmented track (graphite black 60%, hairline, 12px, 4px inset) of 38px tabs in muted 13px text with tabular counts. The active tab is white over a deep oxblood pill with the red edge and accent glow, which slides between tabs as a shared element (spring 420 / 36).
 
 ### Alerts
 A 10px-radius row with a 1px signal-tinted border, a horizontal gradient from the signal at 14% into midnight, and a matching inner glow.
 
 ### Lien Card (signature)
-The lien as the page's main object: a title with status chip and metadata, a four-figure metric row (Advanced, Repaid in cyan, Still owed, Revenue routed), a cyan progress track, and an inset well showing where one payment goes, as a split bar: cyan-gradient pool segment then glass seller segment. When a repayment lands, a light (sweep-run, ice, 0.9s) crosses the pool segment and the figures count up and flash.
+The lien as the page's main object: a title with status chip and metadata, a four-figure metric row (Advanced, Repaid in the accent, Still owed, Revenue routed), an accent progress track, and an inset well showing where one payment goes, as a split bar: red-gradient pool segment then smoke seller segment. When a repayment lands, a light (sweep-run, blush, 0.9s) crosses the pool segment and the figures count up and flash.
 
 ### Decision Entry (signature)
-Verdict first: a 32px circular icon ringed and tinted by verdict kind, the action in its verdict color, agent name, a mono subject link, an amber "needs a human" chip when escalated, and the timestamp linking to the chain. Terms and risk follow in tabular 12px; the rationale clamps to two lines with a "Full reasoning" toggle that reveals mono flag tags. New entries settle down from 8px above.
+Verdict first: a 32px circular icon ringed and tinted by verdict kind, the action in its verdict color, agent name, a mono subject link, a coral-tint "needs a human" chip when escalated, and the timestamp linking to the chain. Terms and risk follow in tabular 12px; the rationale clamps to two lines with a "Full reasoning" toggle that reveals mono flag tags. New entries settle down from 8px above.
 
 ### The Exchange Console (signature, landing)
-A request/response console in the hero panel playing the real x402 exchange: mono lines that come into focus one by one (opacity 0.12 and 2px blur to sharp, 0.45s, 700ms apart), a decoded challenge in an inset well, then a split bar whose cyan and amber halves grow in turn. It replays on demand and on re-entry.
+A request/response console in the hero panel playing the real x402 exchange: mono lines that come into focus one by one (opacity 0.12 and 2px blur to sharp, 0.45s, 700ms apart), a decoded challenge in an inset well, then a split bar whose accent and coral-tint halves grow in turn. It replays on demand and on re-entry.
 
 ### Motion
 - **Ease:** cubic-bezier(0.16, 1, 0.3, 1) for every authored transition.
 - **Route change:** the new view settles from 10px below out of 5px blur and 35% opacity in 380ms.
-- **Numbers:** count to the new value over 0.9s; on increase they flash from ice with a cyan glow over 1.2s.
+- **Numbers:** count to the new value over 0.9s; on increase they flash from blush with an accent glow over 1.2s.
 - **Pills:** shared-layout springs (stiffness 420, damping 36 to 38).
 - **Progress:** fills grow by scaleX over 0.9 to 1.1s, never by width.
 - **Live dot:** a 2s pulse ring on Active status dots.
@@ -310,8 +312,8 @@ A request/response console in the hero panel playing the real x402 exchange: mon
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep cyan for flows toward the pool and system state, amber for the seller's share and human judgement (The Two Lights Rule).
-- **Do** give exactly one panel per view the iridescent edge; everything else uses the 1px hairline.
+- **Do** keep red as the only accent hue; use the lighter coral tint only as a second tone where two shares must be told apart (The One Red Rule).
+- **Do** give exactly one panel per view the red edge; everything else uses the 1px hairline.
 - **Do** set every changing figure in tabular semibold and animate it with the shared count-up.
 - **Do** use the single ease cubic-bezier(0.16, 1, 0.3, 1) and animate with transform, opacity and filter only.
 - **Do** make active states a single shared pill that glides, rather than per-item highlights.
@@ -322,6 +324,6 @@ A request/response console in the hero panel playing the real x402 exchange: mon
 - **Don't** use JetBrains Mono for anything that isn't protocol or chain text.
 - **Don't** set uppercase, letter-spaced eyebrows or kickers above headings.
 - **Don't** use dark offset drop shadows to lift components; depth comes from glass, the edge and inner glow.
-- **Don't** swap the edge gradient direction or use amber as a generic highlight.
+- **Don't** add a second accent hue, swap the edge gradient direction, or rely on hue alone to tell the accent from danger.
 - **Don't** introduce sharp (0px) corners or new grey hexes outside the neutral set.
 - **Don't** animate width/height for progress; grow fills with scaleX.

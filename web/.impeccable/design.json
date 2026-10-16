@@ -1,135 +1,136 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-16T14:07:47.591406+00:00",
+  "generatedAt": "2026-10-16T14:59:53.195380+00:00",
   "title": "Design System: Horos",
+  "legacyTokenNames": "Token names are legacy from the earlier Prism cyan/amber palette: cyan = accent red, cyan-deep = deep red, amber = coral tint, amber-deep = ember, ice = blush, navy/glass = graphite, info = neutral grey.",
   "extensions": {
     "colorMeta": {
       "midnight": {
         "role": "neutral",
-        "displayName": "Midnight",
-        "purpose": "Page ground; text on cyan fills; inset wells.",
-        "canonical": "oklch(14.9% 0.012 259.7)",
+        "displayName": "Graphite Black",
+        "purpose": "Page ground; text on accent fills; inset wells.",
+        "canonical": "oklch(14.1% 0.004 285.8)",
         "tonalRamp": [
-          "#09090b",
-          "#22252b",
-          "#3e4249",
-          "#5d6168",
-          "#7e838a",
-          "#a1a5ad",
-          "#c5c9d1",
-          "#eceff3"
+          "#0b0b0d",
+          "#252527",
+          "#424244",
+          "#616164",
+          "#828285",
+          "#a5a5a8",
+          "#c9c9cc",
+          "#eeeef0"
         ]
       },
       "navy": {
         "role": "neutral",
-        "displayName": "Ledger Navy",
-        "purpose": "Translucent panel body, input fill, chips.",
-        "canonical": "oklch(21.8% 0.036 262.5)",
+        "displayName": "Graphite",
+        "purpose": "Legacy token name. Translucent panel body, input fill, chips.",
+        "canonical": "oklch(20.2% 0.008 285.7)",
         "tonalRamp": [
-          "#040b1a",
-          "#1b2537",
-          "#384256",
-          "#566276",
-          "#778399",
-          "#99a6bc",
-          "#bdcae1",
-          "#e8effb"
+          "#0b0b0e",
+          "#252529",
+          "#414146",
+          "#616166",
+          "#828287",
+          "#a4a4aa",
+          "#c8c8ce",
+          "#eeeef1"
         ]
       },
       "glass": {
         "role": "neutral",
-        "displayName": "Glass Slate",
+        "displayName": "Smoke",
         "purpose": "Seller segment of split bars, hover fills, skeletons, tracks.",
-        "canonical": "oklch(27.3% 0.035 254.1)",
+        "canonical": "oklch(25.8% 0.007 285.9)",
         "tonalRamp": [
-          "#020b19",
-          "#192636",
-          "#354354",
-          "#546375",
-          "#748497",
-          "#96a7bb",
-          "#bacbe0",
-          "#e7effa"
+          "#0b0b0e",
+          "#252529",
+          "#414146",
+          "#616165",
+          "#828287",
+          "#a4a4aa",
+          "#c8c8ce",
+          "#eeeef1"
         ]
       },
       "cyan": {
         "role": "primary",
-        "displayName": "Pool Cyan",
-        "purpose": "Money toward the pool, active state, focus, repaid figures.",
-        "canonical": "oklch(81.2% 0.128 204.5)",
+        "displayName": "Signal Red",
+        "purpose": "Legacy token name. The single accent: money toward the pool, active state, focus, repaid figures.",
+        "canonical": "oklch(66.5% 0.222 25.7)",
         "tonalRamp": [
-          "#001424",
-          "#003241",
-          "#005261",
-          "#007483",
-          "#0097a6",
-          "#00bbca",
-          "#42e1f0",
-          "#bcfcff"
+          "#360000",
+          "#5c0000",
+          "#83000a",
+          "#c00006",
+          "#ea2c33",
+          "#ff5a57",
+          "#ff837a",
+          "#ffd2c8"
         ]
       },
       "cyan-deep": {
         "role": "primary",
-        "displayName": "Deep Cyan",
+        "displayName": "Deep Red",
         "purpose": "Far stop of the primary gradient on fills and split segments.",
-        "canonical": "oklch(66.1% 0.112 208.7)",
+        "canonical": "oklch(53.6% 0.201 24.8)",
         "tonalRamp": [
-          "#001223",
-          "#003041",
-          "#005061",
-          "#007183",
-          "#0094a6",
-          "#34b8ca",
-          "#62ddf0",
-          "#c3faff"
+          "#360000",
+          "#5c0000",
+          "#82000d",
+          "#b9001c",
+          "#e23d3f",
+          "#ff6562",
+          "#ff8c85",
+          "#ffd5cd"
         ]
       },
       "ice": {
         "role": "primary",
-        "displayName": "Ice",
-        "purpose": "Mono addresses, number flash, sweep-run light.",
-        "canonical": "oklch(95.5% 0.031 204.0)",
+        "displayName": "Blush",
+        "purpose": "Legacy token name. Mono addresses, number flash, sweep-run light.",
+        "canonical": "oklch(93.5% 0.033 27.1)",
         "tonalRamp": [
-          "#000f11",
-          "#102a2c",
-          "#2e474a",
-          "#4c6769",
-          "#6d888b",
-          "#8fabae",
-          "#b2d0d2",
-          "#e3f2f3"
+          "#170605",
+          "#331f1c",
+          "#523c39",
+          "#735a57",
+          "#957b78",
+          "#b99e9a",
+          "#dec2be",
+          "#f9ebe9"
         ]
       },
       "amber": {
         "role": "secondary",
-        "displayName": "Seller Amber",
-        "purpose": "Seller's share, parked cash, risk, human judgement.",
-        "canonical": "oklch(82.8% 0.136 69.6)",
+        "displayName": "Coral Tint",
+        "purpose": "Legacy token name. Lighter second tone of the red, only where two shares must be told apart: seller's share, parked cash, risk, human judgement.",
+        "canonical": "oklch(75.8% 0.145 29.0)",
         "tonalRamp": [
-          "#290000",
-          "#4b0a00",
-          "#6d2e00",
-          "#904f00",
-          "#b57100",
-          "#db9436",
-          "#ffb85e",
-          "#ffe7be"
+          "#330000",
+          "#580000",
+          "#7d0e09",
+          "#a3372d",
+          "#ca5b4d",
+          "#f27e6f",
+          "#ffa392",
+          "#ffddd3"
         ]
       },
       "amber-deep": {
         "role": "secondary",
-        "displayName": "Deep Amber",
-        "purpose": "Far stop of the amber gradient; edge terminus.",
-        "canonical": "oklch(78.1% 0.171 66.7)",
+        "displayName": "Ember",
+        "purpose": "Legacy token name. Far stop of the tint gradient; edge terminus.",
+        "canonical": "oklch(59.6% 0.208 27.7)",
         "tonalRamp": [
-          "#2f0000",
-          "#520000",
-          "#762400",
-          "#9e4400",
-          "#c46700",
-          "#eb8b00",
-          "#ffb032",
-          "#ffe4b1"
+          "#360000",
+          "#5c0000",
+          "#820002",
+          "#bb0005",
+          "#e43a33",
+          "#ff6356",
+          "#ff8a7a",
+          "#ffd4c8"
         ]
       },
       "white": {
@@ -152,16 +153,16 @@
         "role": "neutral",
         "displayName": "Fog",
         "purpose": "Labels, metadata, timestamps, placeholders.",
-        "canonical": "oklch(68.1% 0.028 253.6)",
+        "canonical": "oklch(69.6% 0.010 292.7)",
         "tonalRamp": [
-          "#040c17",
-          "#1b2632",
-          "#384351",
-          "#566271",
-          "#778493",
-          "#99a6b7",
-          "#bdcbdb",
-          "#e8eff8"
+          "#0b0a0f",
+          "#25242a",
+          "#424147",
+          "#616067",
+          "#828188",
+          "#a5a4ab",
+          "#c9c8cf",
+          "#eeeef2"
         ]
       },
       "success": {
@@ -183,7 +184,7 @@
       "danger": {
         "role": "tertiary",
         "displayName": "Freeze Red",
-        "purpose": "Rejections, freezes, defaults, errors.",
+        "purpose": "Rejections, freezes, defaults, errors. Near the accent hue; always pair with an icon or label.",
         "canonical": "oklch(68.9% 0.200 22.4)",
         "tonalRamp": [
           "#360000",
@@ -198,18 +199,18 @@
       },
       "info": {
         "role": "tertiary",
-        "displayName": "Monitor Blue",
-        "purpose": "Neutral agent actions and monitor verdicts.",
-        "canonical": "oklch(68.4% 0.171 252.2)",
+        "displayName": "Neutral Verdict",
+        "purpose": "Pale grey for routine agent actions and monitor verdicts.",
+        "canonical": "oklch(83.5% 0.008 293.9)",
         "tonalRamp": [
-          "#00004b",
-          "#001a6e",
-          "#003e93",
-          "#0060be",
-          "#1b84e4",
-          "#48a8ff",
-          "#6fceff",
-          "#c5f3ff"
+          "#0b0b0e",
+          "#252429",
+          "#424146",
+          "#616066",
+          "#828187",
+          "#a5a4aa",
+          "#c9c8ce",
+          "#eeeef1"
         ]
       },
       "line": {
@@ -268,9 +269,9 @@
         "purpose": "Every panel; ambient and structural."
       },
       {
-        "name": "glow-cyan",
+        "name": "glow-accent",
         "value": "0 0 0 1px rgba(255,69,69,0.08), 0 0 22px -4px rgba(255,69,69,0.45), inset 0 0 18px -6px rgba(255,69,69,0.35)",
-        "purpose": "Active nav pill and active tab pill."
+        "purpose": "Active nav pill and active tab pill (accent red)."
       },
       {
         "name": "fill-glow",
@@ -288,7 +289,7 @@
         "purpose": "Buttons; grows with specular intensity."
       },
       {
-        "name": "iridescent-edge",
+        "name": "red-edge",
         "value": "linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%)",
         "purpose": "1px masked border gradient (not a shadow) on the hero panel per view, search field and active pills."
       }
@@ -316,7 +317,7 @@
       },
       {
         "name": "num-flash",
-        "value": "1200ms from ice + cyan text glow",
+        "value": "1200ms from blush + accent text glow",
         "purpose": "Number increased."
       },
       {
@@ -374,33 +375,33 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Specular glass button with cyan edge light; the main action. In the build the lit arc tracks the cursor bearing (simplified here to a full-edge brighten).",
+      "description": "Specular glass button with accent edge light; the main action. In the build the lit arc tracks the cursor bearing (simplified here to a full-edge brighten).",
       "html": "<button class=\"ds-btn-primary\">Open the live ledger <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-btn-primary{--l:255 69 69;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(108,20,26,0.55),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-primary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-primary:active{transform:scale(0.98)} .ds-btn-primary:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-btn-primary{--l:255 69 69;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(108,20,26,0.55),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-primary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-primary:active{transform:scale(0.98)} .ds-btn-primary:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
     },
     {
       "name": "Ghost Button",
       "kind": "button",
       "refersTo": "button-ghost",
-      "description": "Quiet partner beside a primary; ice edge light over glass slate.",
+      "description": "Quiet partner beside a primary; blush edge light over smoke.",
       "html": "<button class=\"ds-btn-ghost\">Look up a seller</button>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-btn-ghost{--l:255 226 222;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(35,35,39,0.5),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-ghost:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-ghost:active{transform:scale(0.98)} .ds-btn-ghost:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-btn-ghost{--l:255 226 222;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(35,35,39,0.5),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-ghost:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-ghost:active{transform:scale(0.98)} .ds-btn-ghost:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Alternate action with amber edge light.",
+      "description": "Alternate action with coral-tint edge light.",
       "html": "<button class=\"ds-btn-secondary\">Read the code</button>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-btn-secondary{--l:255 138 122;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(224,53,47,0.1),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-secondary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-secondary:active{transform:scale(0.98)} .ds-btn-secondary:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-btn-secondary{--l:255 138 122;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:12px;font:500 13px Inter,system-ui,sans-serif;color:var(--white,#f5f7fa);border:none;cursor:pointer;background:linear-gradient(180deg,rgba(224,53,47,0.1),rgba(9,9,11,0.55));box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.3),0 8px 20px -12px rgb(var(--l) / 0.2);transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .35s cubic-bezier(0.16,1,0.3,1)} .ds-btn-secondary:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 0 0 1.2px rgb(var(--l) / 0.9),0 0 10px -2px rgb(var(--l) / 0.6),0 8px 20px -12px rgb(var(--l) / 0.7)} .ds-btn-secondary:active{transform:scale(0.98)} .ds-btn-secondary:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
     },
     {
       "name": "Search Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Address lookup field with iridescent edge wrapper and leading icon.",
+      "description": "Address lookup field with red edge wrapper and leading icon.",
       "html": "<div class=\"ds-field\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/></svg><input class=\"ds-input\" placeholder=\"Seller wallet address, 0x…\"></div>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-field{position:relative;isolation:isolate} .ds-field::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-field{border-radius:10px;width:360px} .ds-field svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(245,247,250,0.8);z-index:2} .ds-input{height:44px;width:100%;box-sizing:border-box;border:none;border-radius:10px;background:linear-gradient(180deg,rgba(22,22,26,0.9),rgba(9,9,11,0.9));padding:0 14px 0 40px;font:13px 'JetBrains Mono',ui-monospace,monospace;color:#f5f7fa;outline:none} .ds-input::placeholder{color:#9d9ca3} .ds-input:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-field{position:relative;isolation:isolate} .ds-field::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-field{border-radius:10px;width:360px} .ds-field svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(245,247,250,0.8);z-index:2} .ds-input{height:44px;width:100%;box-sizing:border-box;border:none;border-radius:10px;background:linear-gradient(180deg,rgba(22,22,26,0.9),rgba(9,9,11,0.9));padding:0 14px 0 40px;font:13px 'JetBrains Mono',ui-monospace,monospace;color:#f5f7fa;outline:none} .ds-input::placeholder{color:#9d9ca3} .ds-input:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
     },
     {
       "name": "Status Chip",
@@ -408,15 +409,15 @@
       "refersTo": "chip",
       "description": "Lien status pill; Active carries a pulsing dot.",
       "html": "<span class=\"ds-chip ds-chip-active\"><i></i>Active</span> <span class=\"ds-chip ds-chip-human\">needs a human</span>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font:500 11px Inter,system-ui,sans-serif;border:1px solid rgba(157,156,163,0.14);background:rgba(22,22,26,0.8)} .ds-chip i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:ds-pulse 2s ease-out infinite} .ds-chip-active{color:#ff4545;border-color:rgba(255,69,69,0.4)} .ds-chip-human{color:#ff8a7a;border-color:rgba(255,138,122,0.4)} @keyframes ds-pulse{0%,100%{box-shadow:0 0 0 0 currentColor}60%{box-shadow:0 0 0 4px transparent}}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font:500 11px Inter,system-ui,sans-serif;border:1px solid rgba(157,156,163,0.14);background:rgba(22,22,26,0.8)} .ds-chip i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:ds-pulse 2s ease-out infinite} .ds-chip-active{color:#ff4545;border-color:rgba(255,69,69,0.4)} .ds-chip-human{color:#ff8a7a;border-color:rgba(255,138,122,0.4)} @keyframes ds-pulse{0%,100%{box-shadow:0 0 0 0 currentColor}60%{box-shadow:0 0 0 4px transparent}}"
     },
     {
       "name": "Panel",
       "kind": "card",
       "refersTo": "panel",
-      "description": "Translucent navy glass slab; the hero variant adds the iridescent edge.",
+      "description": "Translucent graphite glass slab; the hero variant adds the red edge.",
       "html": "<section class=\"ds-panel ds-edge\"><h2 class=\"ds-panel-title\">Open lien</h2><div class=\"ds-label\">Repaid</div><div class=\"ds-figure\">$0.1842</div></section>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-edge{position:relative;isolation:isolate} .ds-edge::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-panel{border-radius:14px;padding:20px;width:320px;background:linear-gradient(180deg,rgba(22,22,26,0.78),rgba(12,12,14,0.82));border:1px solid rgba(157,156,163,0.14);box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 20px 40px -24px rgba(0,0,0,0.8);font-family:Inter,system-ui,sans-serif;color:#f5f7fa} .ds-panel-title{margin:0 0 16px;font-size:15px;font-weight:500;letter-spacing:0.005em} .ds-label{font-size:12px;color:#9d9ca3} .ds-figure{margin-top:4px;font-size:22px;font-weight:600;letter-spacing:-0.025em;color:#ff4545;font-variant-numeric:tabular-nums}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-edge{position:relative;isolation:isolate} .ds-edge::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-panel{border-radius:14px;padding:20px;width:320px;background:linear-gradient(180deg,rgba(22,22,26,0.78),rgba(12,12,14,0.82));border:1px solid rgba(157,156,163,0.14);box-shadow:inset 0 1px 0 rgba(255,255,255,0.03),0 20px 40px -24px rgba(0,0,0,0.8);font-family:Inter,system-ui,sans-serif;color:#f5f7fa} .ds-panel-title{margin:0 0 16px;font-size:15px;font-weight:500;letter-spacing:0.005em} .ds-label{font-size:12px;color:#9d9ca3} .ds-figure{margin-top:4px;font-size:22px;font-weight:600;letter-spacing:-0.025em;color:#ff4545;font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Sidebar Nav",
@@ -424,32 +425,32 @@
       "refersTo": "nav-item",
       "description": "Rail items; the active pill is one shared element that glides between items.",
       "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-active\" href=\"#\"><span class=\"ds-pill\"></span><span>Ledger</span></a><a class=\"ds-nav-item\" href=\"#\"><span>Lien explorer</span></a></nav>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-pill{position:relative;isolation:isolate} .ds-pill::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-nav{display:flex;flex-direction:column;gap:4px;width:240px;font-family:Inter,system-ui,sans-serif} .ds-nav-item{position:relative;display:flex;align-items:center;height:40px;padding:0 12px;border-radius:10px;font-size:14px;color:rgba(245,247,250,0.82);text-decoration:none;transition:background .2s} .ds-nav-item>span:last-child{position:relative;z-index:2} .ds-nav-item:hover:not(.ds-active){background:rgba(35,35,39,0.6)} .ds-active{color:#ff4545} .ds-pill{position:absolute;inset:0;border-radius:10px;background:linear-gradient(90deg,rgba(200,30,42,0.22),rgba(22,22,26,0.6) 60%,rgba(255,138,122,0.12));box-shadow:0 0 0 1px rgba(255,69,69,0.08),0 0 22px -4px rgba(255,69,69,0.45),inset 0 0 18px -6px rgba(255,69,69,0.35)} .ds-nav-item:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-pill{position:relative;isolation:isolate} .ds-pill::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg, rgba(255,69,69,0.95) 0%, rgba(255,69,69,0.35) 22%, rgba(255,226,222,0.08) 45%, rgba(255,226,222,0.08) 62%, rgba(255,138,122,0.55) 85%, rgba(224,53,47,0.95) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1} .ds-nav{display:flex;flex-direction:column;gap:4px;width:240px;font-family:Inter,system-ui,sans-serif} .ds-nav-item{position:relative;display:flex;align-items:center;height:40px;padding:0 12px;border-radius:10px;font-size:14px;color:rgba(245,247,250,0.82);text-decoration:none;transition:background .2s} .ds-nav-item>span:last-child{position:relative;z-index:2} .ds-nav-item:hover:not(.ds-active){background:rgba(35,35,39,0.6)} .ds-active{color:#ff4545} .ds-pill{position:absolute;inset:0;border-radius:10px;background:linear-gradient(90deg,rgba(200,30,42,0.22),rgba(22,22,26,0.6) 60%,rgba(255,138,122,0.12));box-shadow:0 0 0 1px rgba(255,69,69,0.08),0 0 22px -4px rgba(255,69,69,0.45),inset 0 0 18px -6px rgba(255,69,69,0.35)} .ds-nav-item:focus-visible{outline:2px solid #ff4545;outline-offset:2px}"
     },
     {
       "name": "Split Bar",
       "kind": "custom",
       "refersTo": "lien-split",
-      "description": "Where one payment goes: cyan pool segment, glass seller segment; a light sweeps the pool side when a repayment lands.",
+      "description": "Where one payment goes: red pool segment, smoke seller segment; a light sweeps the pool side when a repayment lands.",
       "html": "<div class=\"ds-split\"><div class=\"ds-pool\"><span class=\"ds-sweep\"></span><span>30% to pool</span></div><div class=\"ds-seller\">70% to seller</div></div>",
-      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#3b9cff;--line:rgba(157,156,163,0.14)} .ds-split{display:flex;width:360px;height:28px;overflow:hidden;border-radius:6px;font:500 11px Inter,system-ui,sans-serif} .ds-pool{position:relative;overflow:hidden;width:30%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#ff4545,#c81e2a);color:#09090b} .ds-pool>span:last-child{position:relative} .ds-seller{flex:1;display:flex;align-items:center;justify-content:center;background:#232327;color:rgba(245,247,250,0.85)} .ds-sweep{position:absolute;inset:0 auto 0 0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,226,222,0.85),transparent);animation:ds-sweep 2.4s cubic-bezier(0.16,1,0.3,1) infinite} @keyframes ds-sweep{from{transform:translateX(-100%);opacity:1}40%,to{transform:translateX(260%);opacity:0.2}}"
+      "css": ":host{--midnight:#09090b;--navy:#16161a;--glass:#232327;--cyan:#ff4545;--cyan-deep:#c81e2a;--ice:#ffe2de;--amber:#ff8a7a;--amber-deep:#e0352f;--white:#f5f7fa;--muted:#9d9ca3;--success:#34d399;--danger:#ff5a5f;--info:#c9c8ce;--line:rgba(157,156,163,0.14)} .ds-split{display:flex;width:360px;height:28px;overflow:hidden;border-radius:6px;font:500 11px Inter,system-ui,sans-serif} .ds-pool{position:relative;overflow:hidden;width:30%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#ff4545,#c81e2a);color:#09090b} .ds-pool>span:last-child{position:relative} .ds-seller{flex:1;display:flex;align-items:center;justify-content:center;background:#232327;color:rgba(245,247,250,0.85)} .ds-sweep{position:absolute;inset:0 auto 0 0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,226,222,0.85),transparent);animation:ds-sweep 2.4s cubic-bezier(0.16,1,0.3,1) infinite} @keyframes ds-sweep{from{transform:translateX(-100%);opacity:1}40%,to{transform:translateX(260%);opacity:0.2}}"
     }
   ],
   "narrative": {
-    "northStar": "The Lit Ledger",
-    "overview": "A dark ledger read through glass. Everything sits on near-black midnight, inside translucent navy panels, and the only light in the room is the money: cyan where USDC moves toward the pool, amber where it belongs to the seller or where a human has to judge. The system's signature is the iridescent edge, a 1px border that runs cyan at the top-left, fades to near-nothing along the sides and turns amber at the bottom-right, so a single panel carries both halves of every split.\n\nThe world is dense but quiet. Numbers are the heroes: tabular, semibold, and alive (they count to their new value and flash ice when they grow). Prose is sentence-case Inter at moderate weight, set narrow (48 to 72ch). Mono is reserved for real protocol text: addresses, `payTo`, HTTP lines, flags. Motion is one curve everywhere (cubic-bezier(0.16, 1, 0.3, 1)) and always means something arrived, moved or settled.\n\nLight follows the pointer. Buttons carry a specular edge whose bright arc points toward the cursor and brightens as it approaches, so the interface feels like a lit object rather than a flat page.",
+    "northStar": "The Red-Lit Ledger",
+    "overview": "A dark ledger read through glass. Everything sits on near-black graphite, inside translucent graphite panels, and the only light in the room is one red: the accent marks money moving, the system acting and anything that needs attention. The system's signature is the red edge, a 1px border that runs bright red at the top-left, fades to near-nothing along the sides and returns as a deeper red at the bottom-right.\n\nToken names in code are legacy from the earlier Prism cyan/amber palette: `--cyan` is the accent, `--cyan-deep` the deep accent, `--amber` the lighter red tint, `--amber-deep` the ember red, `--ice` the blush, `--navy` and `--glass` are graphite. Read the names as slots, not hues.\n\nThe world is dense but quiet. Numbers are the heroes: tabular, semibold, and alive (they count to their new value and flash blush when they grow). Prose is sentence-case Inter at moderate weight, set narrow (48 to 72ch). Mono is reserved for real protocol text: addresses, `payTo`, HTTP lines, flags. Motion is one curve everywhere (cubic-bezier(0.16, 1, 0.3, 1)) and always means something arrived, moved or settled.\n\nLight follows the pointer. Buttons carry a specular edge whose bright arc points toward the cursor and brightens as it approaches, so the interface feels like a lit object rather than a flat page.",
     "keyCharacteristics": [
-      "Midnight ground with two faint fixed radial washes (cyan top-left, amber bottom-right).",
-      "Translucent navy panels with a hairline border and a soft drop; the iridescent edge on the panel that matters most per view.",
-      "Cyan = toward the pool / system; amber = seller's share / human judgement. Never swapped.",
+      "Graphite ground with two faint fixed red radial washes (accent top-left, tint bottom-right).",
+      "Translucent graphite panels with a hairline border and a soft drop; the red edge on the panel that matters most per view.",
+      "One accent hue, red. Where two shares must be told apart, the lighter red tint is the second tone; never a second hue.",
       "Tabular semibold numbers that animate between values.",
       "Mono only for protocol and chain text.",
       "One easing curve; motion reports state changes, not decoration."
     ],
     "rules": [
       {
-        "name": "The Two Lights Rule",
-        "body": "Cyan means toward the pool or the system acting; amber means the seller's share or a human deciding. A split bar is always cyan then amber/glass, left to right, and the iridescent edge always runs cyan top-left to amber bottom-right.",
+        "name": "The One Red Rule",
+        "body": "Red is the only accent hue. The full-strength red means toward the pool or the system acting; the lighter coral tint is the second tone of the same red, for the seller's share or a human deciding. A split bar is always accent then smoke (or tint), left to right, and the edge always runs bright red top-left to ember bottom-right. Never introduce a second accent hue.",
         "section": "colors"
       },
       {
@@ -473,8 +474,8 @@
         "section": "typography"
       },
       {
-        "name": "The Iridescent Edge Rule",
-        "body": "The cyan-to-amber 1px edge (masked gradient border) marks the one hero panel per view (landing console and closing panel, ledger intro, explorer search, seller header), the search field, and the active pill. It is a signature, not a default border; ordinary panels use the hairline.",
+        "name": "The Red Edge Rule",
+        "body": "The accent-to-ember 1px edge (masked gradient border) marks the one hero panel per view (landing console and closing panel, ledger intro, explorer search, seller header), the search field, and the active pill. It is a signature, not a default border; ordinary panels use the hairline.",
         "section": "elevation"
       },
       {
@@ -484,8 +485,8 @@
       }
     ],
     "dos": [
-      "**Do** keep cyan for flows toward the pool and system state, amber for the seller's share and human judgement (The Two Lights Rule).",
-      "**Do** give exactly one panel per view the iridescent edge; everything else uses the 1px hairline.",
+      "**Do** keep red as the only accent hue; use the lighter coral tint only as a second tone where two shares must be told apart (The One Red Rule).",
+      "**Do** give exactly one panel per view the red edge; everything else uses the 1px hairline.",
       "**Do** set every changing figure in tabular semibold and animate it with the shared count-up.",
       "**Do** use the single ease cubic-bezier(0.16, 1, 0.3, 1) and animate with transform, opacity and filter only.",
       "**Do** make active states a single shared pill that glides, rather than per-item highlights.",
@@ -496,7 +497,7 @@
       "**Don't** use JetBrains Mono for anything that isn't protocol or chain text.",
       "**Don't** set uppercase, letter-spaced eyebrows or kickers above headings.",
       "**Don't** use dark offset drop shadows to lift components; depth comes from glass, the edge and inner glow.",
-      "**Don't** swap the edge gradient direction or use amber as a generic highlight.",
+      "**Don't** add a second accent hue, swap the edge gradient direction, or rely on hue alone to tell the accent from danger.",
       "**Don't** introduce sharp (0px) corners or new grey hexes outside the neutral set.",
       "**Don't** animate width/height for progress; grow fills with scaleX."
     ]
