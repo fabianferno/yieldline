@@ -46,7 +46,7 @@ The collateral is the revenue stream itself, enforced by where payments are rout
 - **Payments:** x402 v2 "exact" payments settle on chain. Circle Gateway nanopayments settle in batches, and paid-but-unsettled transfers count as receivables.
 - **Circle Developer-Controlled Wallets** hold the agent wallets.
 - **Live surfaces:**
-  - Dashboard: https://yieldline.vercel.app (`web/`, Next 15)
+  - Dashboard: https://yieldline-app.vercel.app (`web/`, Next 15)
   - API and x402 seller/facilitator: https://yieldline-api.vercel.app (`agent/`)
   - Repo: https://github.com/sirbadenpowell/yieldline
 - **Demo video:** must be under 3 minutes; runbook in `docs/DEMO.md`.
