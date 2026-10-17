@@ -21,7 +21,7 @@ interface ICapsSource {
 /// @title LenderPoolV2
 /// @notice An ERC-4626 lending pool anyone can deposit USDC into. Its curator (DEFAULT_ADMIN_ROLE) sets risk limits
 ///         within the factory's protocol caps, approves or rejects advances above the auto-approve limit, and alone can
-///         mark a default. The Horos agents (AGENT_ROLE) advance, monitor and park idle cash. The curator cannot grant
+///         mark a default. The Yieldline agents (AGENT_ROLE) advance, monitor and park idle cash. The curator cannot grant
 ///         AGENT_ROLE or choose where idle cash is parked: both belong to the protocol (PROTOCOL_ROLE). There is no admin
 ///         withdrawal: depositors' USDC leaves only through redemptions or advances. Deployed as clones by PoolFactory.
 contract LenderPoolV2 is ERC4626, AccessControl, Initializable {

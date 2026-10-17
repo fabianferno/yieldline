@@ -10,7 +10,7 @@ const maxPages = Number(process.argv[3] ?? 150);
 let url = "https://gateway-api-testnet.circle.com/v1/x402/transfers?network=eip155:5042002&pageSize=100";
 const agg = new Map<string, { calls: number; usdc: number; payers: Set<string>; first: string; last: string }>();
 for (let p = 0; p < maxPages && url; p++) {
-  const r = await fetch(url, { headers: { "user-agent": "horos-market-scan" } });
+  const r = await fetch(url, { headers: { "user-agent": "yieldline-market-scan" } });
   if (!r.ok) break;
   const d = await r.json();
   for (const t of d.transfers ?? []) {

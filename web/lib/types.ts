@@ -1,4 +1,4 @@
-// Shapes returned by the Horos API (agent/src/productApi.ts).
+// Shapes returned by the Yieldline API (agent/src/productApi.ts).
 import type { Lien } from "@/components/ui";
 
 export type PoolLimits = {

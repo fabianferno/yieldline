@@ -9,7 +9,7 @@ import {PoolFactory} from "../src/PoolFactory.sol";
 import {Limits} from "../src/Limits.sol";
 
 /// Deploys the pool marketplace against the existing LienRegistry: LenderPoolV2 implementation, PoolFactory
-/// (protocol caps), and the first curated pool, "Horos Core". Seed deposits are made with `cast send` afterwards
+/// (protocol caps), and the first curated pool, "Yieldline Core". Seed deposits are made with `cast send` afterwards
 /// because forge simulation cannot execute Arc's native-USDC precompile.
 contract DeployV2 is Script {
     IERC20 constant USDC = IERC20(0x3600000000000000000000000000000000000000);
@@ -32,11 +32,11 @@ contract DeployV2 is Script {
         PoolFactory factory = new PoolFactory(REGISTRY, address(impl), admin, agents, caps, TELLER);
         REGISTRY.grantRole(REGISTRY.DEFAULT_ADMIN_ROLE(), address(factory));
 
-        address core = factory.createPool("Horos Core", "hCORE", Limits(10e6, 5e6, 4_000, 500, 5_000, 1_500, 14 days, 60));
+        address core = factory.createPool("Yieldline Core", "yCORE", Limits(10e6, 5e6, 4_000, 500, 5_000, 1_500, 14 days, 60));
         vm.stopBroadcast();
 
         console.log("LenderPoolV2 impl", address(impl));
         console.log("PoolFactory", address(factory));
-        console.log("Horos Core", core);
+        console.log("Yieldline Core", core);
     }
 }

@@ -16,7 +16,7 @@ Primary audience was left to the designer to choose (user said "choose the best 
   - **Lenders** (`/markets`, `/lend`): compare pools, deposit USDC for ERC-4626 shares, withdraw free cash.
   - **Curators** (`/curate`): open a pool through the PoolFactory, set its limits and risk appetite within protocol caps, approve advances above the auto-approve limit, and alone mark defaults. Curators cannot withdraw depositors' funds.
   - **Anyone extending credit to an x402 business** (`/lookup`, `/seller/…`, `/activity`): checks whether revenue is pledged and reads every decision.
-  - **The Horos operator** is the curator of Pool v1 (the closed pilot) and of "Horos Core", and approves agent escalations.
+  - **The Yieldline operator** is the curator of Pool v1 (the closed pilot) and of "Yieldline Core", and approves agent escalations.
 
 ## Product Purpose
 
@@ -46,9 +46,9 @@ The collateral is the revenue stream itself, enforced by where payments are rout
 - **Payments:** x402 v2 "exact" payments settle on chain. Circle Gateway nanopayments settle in batches, and paid-but-unsettled transfers count as receivables.
 - **Circle Developer-Controlled Wallets** hold the agent wallets.
 - **Live surfaces:**
-  - Dashboard: https://horos-blue.vercel.app (`web/`, Next 15)
-  - API and x402 seller/facilitator: https://horos-api.vercel.app (`agent/`)
-  - Repo: https://github.com/sirbadenpowell/horos
+  - Dashboard: https://yieldline.vercel.app (`web/`, Next 15)
+  - API and x402 seller/facilitator: https://yieldline-api.vercel.app (`agent/`)
+  - Repo: https://github.com/sirbadenpowell/yieldline
 - **Demo video:** must be under 3 minutes; runbook in `docs/DEMO.md`.
 
 ## Capabilities and Constraints
@@ -68,19 +68,18 @@ The collateral is the revenue stream itself, enforced by where payments are rout
 
 ## Brand Commitments
 
-- "Horos" is a **working title** and may change. Don't build anything that depends on the name being permanent.
-- The ΟΡΟΣ / horos-stone story (Greek boundary stones that marked mortgaged land, i.e. debt recorded in public) is current flavour, not binding.
+- "Yieldline" is a **working title** and may change. Don't build anything that depends on the name being permanent.
 
 ## Evidence on Hand
 
 All of this is real and on Arc testnet:
-- **Lien #1:** a $3 advance on the Horos Lien Oracle seller (0xb6cb…a80f), with a 30% sweep, 5% fee and 7-day term, repaid through sweeps.
+- **Lien #1:** a $3 advance on the Yieldline Lien Oracle seller (0xb6cb…a80f), with a 30% sweep, 5% fee and 7-day term, repaid through sweeps.
 - **The rejection behind it:** the agent rejected that seller first (risk 85) before the operator override.
 - **Wash seller** 0x43f1…8f28: rejected at risk 95, with seller-funded payers.
 - **Market scan** via Circle Gateway: 102 sellers.
 - **Real seller** 0xa890…6466 (56 days of history, 14 payers): has a $3 offer outstanding.
 - **Treasury:** parked $4.03 in mock USYC.
-- **Pool marketplace:** PoolFactory 0x99Fc…039C, "Horos Core" 0xbb0D…067e (seeded with $5 by the operator), "Steady" 0x6863…25aC (opened from a fresh key to show permissionless creation; unfunded).
+- **Pool marketplace:** PoolFactory 0x99Fc…039C, "Yieldline Core" 0xbb0D…067e (seeded with $5 by the operator), "Steady" 0x6863…25aC (opened from a fresh key to show permissionless creation; unfunded).
 - **Contracts** (verified on Blockscout):
   - LienRegistry 0xD140…906F
   - LenderPool 0x3655…7506

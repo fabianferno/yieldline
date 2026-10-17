@@ -1,5 +1,5 @@
 ---
-name: Horos
+name: Yieldline
 description: Red-lit glass on graphite for a public ledger of revenue liens on Arc.
 colors:
   midnight: "#09090b"
@@ -149,7 +149,7 @@ components:
     rounded: "{rounded.tab}"
 ---
 
-# Design System: Horos
+# Design System: Yieldline
 
 ## Overview
 

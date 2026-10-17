@@ -1,10 +1,10 @@
-// Signed requests to the Horos API. The format mirrors agent/src/auth.ts: one passkey signature per action.
+// Signed requests to the Yieldline API. The format mirrors agent/src/auth.ts: one passkey signature per action.
 import { API } from "./api";
 
 type Sign = (message: string) => Promise<`0x${string}`>;
 
 export function buildMessage(f: { action: string; subject: string; account: string; nonce: string; expires: string }) {
-  return ["Horos request", `action: ${f.action}`, `subject: ${f.subject}`, `account: ${f.account}`, `nonce: ${f.nonce}`, `expires: ${f.expires}`].join("\n");
+  return ["Yieldline request", `action: ${f.action}`, `subject: ${f.subject}`, `account: ${f.account}`, `nonce: ${f.nonce}`, `expires: ${f.expires}`].join("\n");
 }
 
 export async function signedPost<T>(

@@ -1,4 +1,4 @@
-# Product brief: Revenue-based financing for x402 sellers (working name: Horos)
+# Product brief: Revenue-based financing for x402 sellers (working name: Yieldline)
 
 ## Context
 - Hackathon: Tameion Agents Hackathon (Canteen × Circle), https://tameion.thecanteenapp.com

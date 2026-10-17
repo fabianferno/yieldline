@@ -21,7 +21,7 @@ export default function Markets() {
       <section className="panel edge p-5 sm:p-7">
         <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]">Lending pools</h1>
         <p className="mt-2 max-w-[66ch] text-[14px] leading-relaxed text-white/75">
-          Each pool is run by a curator who sets its risk limits. Lenders deposit USDC and earn the flat fees sellers pay. The Horos agent
+          Each pool is run by a curator who sets its risk limits. Lenders deposit USDC and earn the flat fees sellers pay. The Yieldline agent
           underwrites every seller once; the seller then picks a pool whose limits fit. All pools share one public lien registry, so no
           seller can borrow from two of them against the same revenue.
         </p>
@@ -41,7 +41,7 @@ export default function Markets() {
         </dl>
       </section>
 
-      {error && !data && <div className="alert alert-error text-[13px]">Can&apos;t reach the Horos API: {error}. Retrying.</div>}
+      {error && !data && <div className="alert alert-error text-[13px]">Can&apos;t reach the Yieldline API: {error}. Retrying.</div>}
 
       <section id="tour-pools" className="panel overflow-hidden">
         <div className="hidden grid-cols-[minmax(0,2.2fr)_repeat(5,minmax(0,1fr))_24px] gap-4 border-b border-line px-5 py-3 text-[12px] text-muted lg:grid">

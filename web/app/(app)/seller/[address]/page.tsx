@@ -88,7 +88,7 @@ export default function SellerPage({ params }: { params: Promise<{ address: stri
           <p className="mt-4 max-w-[72ch] text-[13px] leading-relaxed text-white/75">
             {data.lien.encumbered
               ? `${usd(data.lien.outstandingUsdc, 4)} is outstanding. This seller's revenue is pledged through splitter ${short(data.lien.splitter)}, so no registered lender can advance against it again until this one is repaid.`
-              : "Nothing open in the Horos registry. This seller's revenue is not pledged to any registered lender."}
+              : "Nothing open in the Yieldline registry. This seller's revenue is not pledged to any registered lender."}
           </p>
         )}
       </section>

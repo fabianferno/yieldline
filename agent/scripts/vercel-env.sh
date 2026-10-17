@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# Push the API's runtime secrets from ../.env to the linked Vercel project (horos-api), then deploy.
+# Push the API's runtime secrets from ../.env to the linked Vercel project (yieldline-api), then deploy.
 # Run from agent/:  zsh scripts/vercel-env.sh
 set -e
 set -a; source ../.env; set +a

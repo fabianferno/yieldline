@@ -1,11 +1,11 @@
 {
-  "name": "@horos/agent",
+  "name": "@yieldline/agent",
   "private": true,
   "type": "module",
   "scripts": {
     "circle:setup": "tsx scripts/circle-setup.ts",
     "api": "tsx src/server.ts",
-    "horos": "tsx src/cli.ts",
+    "yieldline": "tsx src/cli.ts",
     "buy": "tsx src/buyer.ts",
     "typecheck": "tsc",
     "test": "node --import tsx --test test/*.test.ts"

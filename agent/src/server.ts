@@ -1,4 +1,4 @@
-// Public Horos API: x402 facilitator (/facilitator/*) + Horos Lien Oracle seller (/v1/*) + read API (/api/*).
+// Public Yieldline API: x402 facilitator (/facilitator/*) + Yieldline Lien Oracle seller (/v1/*) + read API (/api/*).
 import express from "express";
 import { facilitatorRouter } from "./facilitator.js";
 import { sellerApp } from "./seller.js";
@@ -23,5 +23,5 @@ export default app;
 
 if (!process.env.VERCEL) {
   const port = Number(process.env.PORT ?? 4021);
-  app.listen(port, () => console.log(`horos api on :${port}`));
+  app.listen(port, () => console.log(`yieldline api on :${port}`));
 }

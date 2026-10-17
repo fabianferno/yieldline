@@ -1,8 +1,8 @@
 // Self-hosted x402 facilitator for Arc testnet (no public facilitator lists eip155:5042002 for the exact scheme).
-// It settles EIP-3009 transferWithAuthorization straight to payTo, and adds two Horos behaviours:
+// It settles EIP-3009 transferWithAuthorization straight to payTo, and adds two Yieldline behaviours:
 //   1. Lien-aware settlement: a payment routed to a seller's own wallet while that seller has a live lien
 //      is refused, with the splitter address the buyer should be paying instead.
-//   2. Keeper: after settling into a Horos splitter it calls split() so sweeps happen in real time.
+//   2. Keeper: after settling into a Yieldline splitter it calls split() so sweeps happen in real time.
 import express, { Router } from "express";
 import { waitUntil } from "@vercel/functions";
 import type { Address } from "viem";

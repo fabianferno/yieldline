@@ -1,6 +1,6 @@
-// "Horos Lien Oracle" — our own x402 business on Arc testnet, and the first seller financed by Horos.
+// "Yieldline Lien Oracle" — our own x402 business on Arc testnet, and the first seller financed by Yieldline.
 // Other lenders pay per call to check a business's encumbrances before they advance.
-// payTo is resolved per request (see payTo()) so it follows the seller's Horos splitter — and so a seller
+// payTo is resolved per request (see payTo()) so it follows the seller's Yieldline splitter — and so a seller
 // can try to divert revenue back to their own wallet, which the monitoring agent must catch.
 import express from "express";
 import type { Address } from "viem";
@@ -11,7 +11,7 @@ import LienRegistry from "./abi/LienRegistry.js";
 import { ADDR, NETWORK, env, publicClient } from "./config.js";
 import { listOffers, readState } from "./store.js";
 
-const SELLER = env("SELLER_NAME", "horos-api");
+const SELLER = env("SELLER_NAME", "yieldline-api");
 const SELLER_WALLET = env("SELLER_WALLET", ADDR.wallets.seller) as Address;
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -60,7 +60,7 @@ export const sellerApp = express.Router();
 const app = sellerApp;
 app.get("/oracle", async (_req, res) =>
   res.json({
-    service: "Horos Lien Oracle",
+    service: "Yieldline Lien Oracle",
     seller: SELLER,
     sellerWallet: SELLER_WALLET,
     payTo: await payTo(),

@@ -7,7 +7,7 @@ const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], v
 const code = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-code" });
 
 export const metadata: Metadata = {
-  title: "Horos — working capital for x402 sellers",
+  title: "Yieldline — working capital for x402 sellers",
   description:
     "An agent advances USDC against a seller's proven x402 revenue on Arc, sweeps repayment from incoming payments, and publishes every advance as a public on-chain lien.",
 };

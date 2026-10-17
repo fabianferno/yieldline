@@ -1,6 +1,6 @@
-// Horos operator CLI.
+// Yieldline operator CLI.
 //   underwrite <seller> <endpoint>   run the underwriting agent
-//   accept <offerId> [pool]          seller accepts in a pool (default Horos Core): deploy their splitter there
+//   accept <offerId> [pool]          seller accepts in a pool (default Yieldline Core): deploy their splitter there
 //   fund <offerId> [waitSec]         verify payTo on the live endpoint, then disburse
 //   approve <offerId> [note]         human sign-off on an escalated offer / queued advance
 //   override <offerId> <usdc> <sweepBps> <feeBps> <days> <note>   operator pilot over an agent rejection
@@ -61,11 +61,11 @@ switch (cmd) {
     await loop(Number(args[0] ?? 30));
     break;
   case "divert":
-    await writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, { payTo: args[0] });
+    await writeState(`seller-${process.env.SELLER_NAME ?? "yieldline-api"}`, { payTo: args[0] });
     console.log("seller payTo override ->", args[0]);
     break;
   case "restore":
-    await writeState(`seller-${process.env.SELLER_NAME ?? "horos-api"}`, {});
+    await writeState(`seller-${process.env.SELLER_NAME ?? "yieldline-api"}`, {});
     console.log("seller payTo override cleared");
     break;
   default:

@@ -39,7 +39,7 @@ export type Offer = UnderwritingDecision & {
   txs?: Record<string, string>;
 };
 
-const SYSTEM = `You are the Horos underwriting agent. Horos advances USDC working capital to businesses that earn
+const SYSTEM = `You are the Yieldline underwriting agent. Yieldline advances USDC working capital to businesses that earn
 through x402 (pay-per-call APIs) on Arc, against their proven on-chain revenue. Repayment is a percentage sweep of
 future x402 revenue routed through a per-seller RevenueSplitter set as the seller's x402 payTo, until a fixed repay
 cap (principal + flat fee) is reached. Every advance becomes a public lien in the LienRegistry.
@@ -114,7 +114,7 @@ export async function underwrite(seller: Address, endpoint: string, opts: Underw
           ? probe402(endpoint)
           : Promise.resolve({
               ok: false,
-              note: "No endpoint registered: seller was discovered from on-chain x402 receipts (market scan). Any offer is conditional on the seller connecting and pointing payTo at a Horos splitter.",
+              note: "No endpoint registered: seller was discovered from on-chain x402 receipts (market scan). Any offer is conditional on the seller connecting and pointing payTo at a Yieldline splitter.",
             }),
     },
     {

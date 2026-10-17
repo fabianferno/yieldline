@@ -1,4 +1,4 @@
-// Every lending pool Horos knows: the v1 operator pilot plus every pool created through the PoolFactory.
+// Every lending pool Yieldline knows: the v1 operator pilot plus every pool created through the PoolFactory.
 import { getAddress, type Address } from "viem";
 import LenderPool from "./abi/LenderPool.js";
 import LenderPoolV2 from "./abi/LenderPoolV2.js";

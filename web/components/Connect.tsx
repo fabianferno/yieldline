@@ -93,7 +93,7 @@ export function NeedsAccount({ what }: { what: string }) {
     <section className="panel mx-auto max-w-[520px] p-6 text-center">
       <h2 className="text-[20px] font-semibold tracking-tight">Sign in to {what}</h2>
       <p className="mx-auto mt-2 max-w-[42ch] text-[14px] leading-relaxed text-white/75">
-        Horos uses a passkey on this device. It creates a Circle smart account on Arc for you in one step.
+        Yieldline uses a passkey on this device. It creates a Circle smart account on Arc for you in one step.
       </p>
       <div className="mx-auto mt-5 max-w-[360px]">
         <Connect />

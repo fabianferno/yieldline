@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export const API = process.env.NEXT_PUBLIC_HOROS_API ?? "http://localhost:4021";
+export const API = process.env.NEXT_PUBLIC_YIELDLINE_API ?? "http://localhost:4021";
 export const EXPLORER = "https://explorer.testnet.arc.io";
 
 export function usePoll<T>(path: string | null, ms = 6000) {

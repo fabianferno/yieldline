@@ -108,7 +108,7 @@ export const IReplay = (p: P) => (
   </S>
 );
 
-/** The Prism glass cube, as the Horos mark. */
+/** The Prism glass cube, as the Yieldline mark. */
 export function PrismCube({ size = 40 }: { size?: number }) {
   const u = useId().replace(/:/g, "");
   return (

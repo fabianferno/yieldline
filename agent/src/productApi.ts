@@ -123,7 +123,7 @@ productApi.post(
     if (live.length) throw new HttpError(409, "Another account already has an open application for this revenue address.");
 
     if ((await kv.incr(`rl:apply:${applicant}`, 3600)) > 3) throw new HttpError(429, "Three applications per hour per account. Try again later.");
-    if ((await kv.incr(`rl:apply:all`, 3600)) > 30) throw new HttpError(429, "Horos is reviewing a lot of applications right now. Try again within the hour.");
+    if ((await kv.incr(`rl:apply:all`, 3600)) > 30) throw new HttpError(429, "Yieldline is reviewing a lot of applications right now. Try again within the hour.");
 
     const probe = await probe402(endpoint).catch((e) => ({ ok: false as const, status: 0, error: String(e?.message ?? e) }));
     if (!probe.ok) {

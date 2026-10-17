@@ -19,7 +19,7 @@ const YOU = [
 ];
 
 const LINKS = [
-  { href: "https://github.com/sirbadenpowell/horos", label: "Source on GitHub" },
+  { href: "https://github.com/sirbadenpowell/yieldline", label: "Source on GitHub" },
   { href: "https://explorer.testnet.arc.io/address/0x99Fccc04f51284b9CDe6D3f793CC3430392e039C", label: "PoolFactory" },
   { href: "https://explorer.testnet.arc.io/address/0xD140eED8f20B2157366B36FcC08226d64c16906F", label: "LienRegistry" },
 ];
@@ -38,7 +38,7 @@ export function Sidebar() {
         <div className="flex items-center gap-2.5 px-1">
           <Link href="/" className="flex items-center gap-2.5">
             <PrismCube size={30} />
-            <span className="text-[18px] font-semibold tracking-tight">Horos</span>
+            <span className="text-[18px] font-semibold tracking-tight">Yieldline</span>
           </Link>
           <span className="text-[11px] text-muted max-sm:hidden">revenue-based credit on Arc</span>
           <TourButton className="btn btn-ghost ml-auto !h-8 !px-3 text-[12px]" />
@@ -59,8 +59,8 @@ export function Sidebar() {
         <Link href="/" className="flex items-center gap-3 px-2 pb-5 pt-2">
           <PrismCube size={40} />
           <div>
-            <div className="text-[22px] font-semibold leading-none tracking-tight">Horos</div>
-            <div className="mt-1.5 text-[12px] text-muted">ΟΡΟΣ · revenue-based credit on Arc</div>
+            <div className="text-[22px] font-semibold leading-none tracking-tight">Yieldline</div>
+            <div className="mt-1.5 text-[12px] text-muted">revenue-based credit on Arc</div>
           </div>
         </Link>
 

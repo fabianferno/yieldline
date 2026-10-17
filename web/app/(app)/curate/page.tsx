@@ -28,7 +28,7 @@ export default function Curate() {
           you alone can mark a default. You cannot move depositors&apos; money: the contract has no withdrawal for curators.
         </p>
       </section>
-      {error && !acct && <div className="alert alert-error text-[13px]">Can&apos;t reach the Horos API: {error}</div>}
+      {error && !acct && <div className="alert alert-error text-[13px]">Can&apos;t reach the Yieldline API: {error}</div>}
 
       {!acct ? (
         <Panel>
@@ -248,7 +248,7 @@ function CreatePool({ caps, first }: { caps: PoolLimits | null; first: boolean }
             </label>
             <label className="block">
               <span className="text-[12px] text-muted">Share symbol</span>
-              <input className="input mono mt-1 w-full" placeholder="hSTDY" maxLength={8} value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
+              <input className="input mono mt-1 w-full" placeholder="ySTDY" maxLength={8} value={symbol} onChange={(e) => setSymbol(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
             </label>
           </div>
           <div className="mt-4">

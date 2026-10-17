@@ -24,7 +24,7 @@ export default function Activity() {
           hash-anchored on Arc, so the text you read here is the text that was committed.
         </p>
       </section>
-      {error && !data && <div className="alert alert-error text-[13px]">Can&apos;t reach the Horos API: {error}</div>}
+      {error && !data && <div className="alert alert-error text-[13px]">Can&apos;t reach the Yieldline API: {error}</div>}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel title="Decisions">
           <div className="overflow-x-auto">

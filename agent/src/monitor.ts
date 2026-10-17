@@ -23,7 +23,7 @@ type MonitorDecision = {
 
 type TreasuryDecision = { action: "hold" | "deploy_idle" | "recall_idle"; amountUsdc: number; rationale: string };
 
-const MONITOR_SYSTEM = `You are the Horos monitoring agent. Horos has advanced USDC to x402 sellers; each repays through a
+const MONITOR_SYSTEM = `You are the Yieldline monitoring agent. Yieldline has advanced USDC to x402 sellers; each repays through a
 RevenueSplitter that the seller set as their x402 payTo. The splitter sweeps sweepBps of every payment to the pool until
 the repay cap is reached. Sellers control payTo and can divert revenue at any time; your job is to notice and act.
 
@@ -39,7 +39,7 @@ Decide one action per lien and explain it in 2-5 sentences citing the facts:
   outstanding. Only a human can mark default; you recommend it.
 Call submit_decision exactly once.`;
 
-const TREASURY_SYSTEM = `You are the Horos treasury agent for the lender pool. Idle USDC can be parked in USYC (tokenized
+const TREASURY_SYSTEM = `You are the Yieldline treasury agent for the lender pool. Idle USDC can be parked in USYC (tokenized
 T-bill fund; on testnet a mock with the same Teller interface, ~4.5% APR) and recalled when needed for advances.
 Keep enough liquid USDC to fund the expected advance pipeline plus a safety buffer of 20% of NAV; park the rest.
 Recall if liquidity is below the buffer + pipeline. Small moves (< 1 USDC) are not worth the gas: hold.

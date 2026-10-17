@@ -9,9 +9,9 @@ import {RevenueSplitter} from "../src/RevenueSplitter.sol";
 import {LenderPoolV2} from "../src/LenderPoolV2.sol";
 import {PoolFactory} from "../src/PoolFactory.sol";
 import {Limits, PoolSetup} from "../src/Limits.sol";
-import {USDC} from "./Horos.t.sol";
+import {USDC} from "./Yieldline.t.sol";
 
-contract HorosV2Test is Test {
+contract YieldlineV2Test is Test {
     USDC usdc;
     LienRegistry registry;
     PoolFactory factory;
@@ -43,7 +43,7 @@ contract HorosV2Test is Test {
         registry.grantRole(adminRole, address(factory));
 
         vm.prank(curator);
-        pool = LenderPoolV2(factory.createPool("Core", "hCORE", _limits(60)));
+        pool = LenderPoolV2(factory.createPool("Core", "yCORE", _limits(60)));
         _deposit(lp, 50e6);
     }
 
@@ -163,7 +163,7 @@ contract HorosV2Test is Test {
 
     function test_crossPoolSecondLienReverts() public {
         vm.prank(curator);
-        LenderPoolV2 other = LenderPoolV2(factory.createPool("Steady", "hSTDY", _limits(40)));
+        LenderPoolV2 other = LenderPoolV2(factory.createPool("Steady", "ySTDY", _limits(40)));
         usdc.mint(address(this), 50e6);
         usdc.approve(address(other), 50e6);
         other.deposit(50e6, address(this));
@@ -251,7 +251,7 @@ contract HorosV2Test is Test {
 
     function test_actionsOnOtherPoolsLienRevert() public {
         vm.prank(curator);
-        LenderPoolV2 other = LenderPoolV2(factory.createPool("Steady", "hSTDY", _limits(40)));
+        LenderPoolV2 other = LenderPoolV2(factory.createPool("Steady", "ySTDY", _limits(40)));
         uint256 id = _advance(pool, 2e6, 30);
         vm.prank(curator);
         vm.expectRevert(LenderPoolV2.NotLiveLien.selector);

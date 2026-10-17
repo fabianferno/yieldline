@@ -1,4 +1,4 @@
-# ΟΡΟΣ · Horos
+# Yieldline
 
 **Working capital for businesses that earn through x402.** An agent advances USDC against a seller's proven
 x402 revenue on Arc, repayment is swept automatically from every incoming payment, and every advance is published
@@ -7,8 +7,8 @@ as a public on-chain lien so no one can borrow twice against the same revenue.
 Built for the Tameion Agents Hackathon (Canteen × Circle). Runs on **Arc testnet**, settles in **USDC**, and uses
 **Circle Wallets** for every agent action and every buyer signature.
 
-> In ancient Attica a *horos* was a boundary stone set on mortgaged land, recording the debt for any future lender
-> to read. Horos does the same for on-chain revenue (Tameion prior art #04, *Horoi*).
+> Every advance is a public line on Arc: debt recorded in the open for any future lender to read, the idea behind
+> Tameion prior art #04 (*Horoi*, the boundary stones of ancient Attica).
 
 ---
 
@@ -27,14 +27,14 @@ seed phrase. One account can borrow, lend and curate.
 ## Why
 
 x402 sellers (paid APIs, MCP tools, datasets) have revenue that is on-chain, per-call and real-time: the best
-possible data for cash-flow underwriting, and nobody lends against it. Horos lends to businesses that **earn**,
+possible data for cash-flow underwriting, and nobody lends against it. Yieldline lends to businesses that **earn**,
 against what they earn, and makes every lien public so credit can be priced against everything a business owes.
 
 ## The loop
 
 ```
  buyers ──x402──▶ seller endpoint (402: payTo = RevenueSplitter)
-                        │  EIP-3009 transferWithAuthorization, settled by the Horos facilitator
+                        │  EIP-3009 transferWithAuthorization, settled by the Yieldline facilitator
                         ▼
                  RevenueSplitter ── split() ──▶ sweepBps% ─▶ LenderPool (until repay cap)
                         │                    └─▶ rest ─────▶ seller wallet
@@ -76,18 +76,18 @@ treated as neutral.
 
 Real example on Arc testnet: a seller whose three "customers" were funded by the seller itself was rejected at
 risk 95 ("self-dealing rather than arm's-length revenue"). The same agent also refused to advance against
-Horos's own early traffic, because those payers were funded by the lender's operator wallet.
+Yieldline's own early traffic, because those payers were funded by the lender's operator wallet.
 
 ### Diversion (the big risk)
 
-The seller controls `payTo` and can point it back at their own wallet at any time. Horos answers in three layers:
+The seller controls `payTo` and can point it back at their own wallet at any time. Yieldline answers in three layers:
 
 1. **Monitor:** the live 402 challenge is probed every tick. A `payTo` other than the splitter triggers an
    immediate **freeze**: public in the registry, and the splitter sweeps 100% of anything that still arrives.
-2. **Lien-aware facilitator:** the Horos x402 facilitator refuses to verify or settle a payment addressed to a
+2. **Lien-aware facilitator:** the Yieldline x402 facilitator refuses to verify or settle a payment addressed to a
    seller's own wallet while that seller has a live lien, and tells the buyer which splitter to pay instead.
 3. **Public record:** freezes and defaults are permanent entries in the seller's registry record, readable by every
-   other lender (and sold per call by the Horos Lien Oracle).
+   other lender (and sold per call by the Yieldline Lien Oracle).
 
 ## Circle stack
 
@@ -98,14 +98,14 @@ The seller controls `payTo` and can point it back at their own wallet at any tim
 - **USYC:** the treasury agent parks idle pool liquidity via the Teller interface (`deposit` / `redeem`). The pool
   wallet is pending testnet allowlisting, so a `MockUSYCTeller` with the same interface stands in;
   `LenderPool.setTeller` swaps it for the real Teller in one call.
-- **x402 on Arc:** `@x402/*` v2. No public facilitator supports `eip155:5042002` for the exact scheme, so Horos runs its own.
+- **x402 on Arc:** `@x402/*` v2. No public facilitator supports `eip155:5042002` for the exact scheme, so Yieldline runs its own.
 
 ## The pool marketplace
 
 `PoolFactory` lets anyone open a lending pool as its curator. Pools are EIP-1167 clones of `LenderPoolV2`, an ERC-4626
 vault: lenders deposit USDC for shares; fees raise the share price, defaults lower it; withdrawals are capped at free cash.
 The curator holds the human powers for that pool (approve above the auto-approve limit, mark default, set limits within
-the factory's protocol caps) and **cannot withdraw depositors' money**: the contract has no such function. The Horos
+the factory's protocol caps) and **cannot withdraw depositors' money**: the contract has no such function. The Yieldline
 agents hold `AGENT_ROLE` on every pool. Each pool enforces its own **risk appetite** on chain: `advance(...)` reverts if
 the agent's risk score for the seller is above the pool's `maxRiskScore`.
 
@@ -123,7 +123,7 @@ The underwriter decides risk and terms once, pool-agnostic; the seller then sees
 | LenderPool (v1, operator pilot, closed) | [`0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506`](https://explorer.testnet.arc.io/address/0x3655319cf8E43f54E90ffdb7A1CF2627Fdd67506) |
 | PoolFactory | [`0x99Fccc04f51284b9CDe6D3f793CC3430392e039C`](https://explorer.testnet.arc.io/address/0x99Fccc04f51284b9CDe6D3f793CC3430392e039C) |
 | LenderPoolV2 (implementation) | [`0xE9dfFc5d95725EA3Ac0665A7112eD413C98D1Bac`](https://explorer.testnet.arc.io/address/0xE9dfFc5d95725EA3Ac0665A7112eD413C98D1Bac) |
-| Pool "Horos Core" (curator: Horos operator, risk ≤ 60) | [`0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e`](https://explorer.testnet.arc.io/address/0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e) |
+| Pool "Yieldline Core" (curator: Yieldline operator, risk ≤ 60) | [`0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e`](https://explorer.testnet.arc.io/address/0xbb0Defa2dDa7a205FF9f7F9E016097E4Dfe5067e) |
 | Pool "Steady" (second curator account, created from a fresh key to show anyone can open a pool; risk ≤ 40) | [`0x6863ac3db29b682A33312c8c94541DB1011E25aC`](https://explorer.testnet.arc.io/address/0x6863ac3db29b682A33312c8c94541DB1011E25aC) |
 | MockUSYCTeller | [`0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5`](https://explorer.testnet.arc.io/address/0x6be95DA212b7F77C1947b436Be9C5EC35727A4D5) |
 
@@ -133,7 +133,7 @@ Contracts verified on Blockscout; pools are EIP-1167 clones of the verified impl
 
 ```
 contracts/   Foundry: LienRegistry, RevenueSplitter, LenderPoolV2 + PoolFactory, LenderPool (v1), MockUSYCTeller (+ tests)
-agent/       TypeScript: x402 facilitator, Horos Lien Oracle seller, agents, CLI, product + read API
+agent/       TypeScript: x402 facilitator, Yieldline Lien Oracle seller, agents, CLI, product + read API
 web/         Next.js: passkey wallets, pools, borrow / lend / curate, decision feed, public lien explorer
 docs/        brief + verified research notes on x402/Arc/Circle
 ```
@@ -146,12 +146,12 @@ cd contracts && forge test        # 18 tests: v1 loop + v2 pools (shares, defaul
 cd ../agent && pnpm i
 pnpm api                          # facilitator + seller + read API on :4021
 pnpm buy 10                       # paid x402 calls from Circle buyer wallets
-pnpm horos underwrite <seller> <endpoint>
-pnpm horos accept <offerId> && pnpm horos fund <offerId>
-pnpm horos pools                  # every pool with live accounting
-pnpm horos loop                   # fund-pending + monitoring + treasury agents, every pool
+pnpm yieldline underwrite <seller> <endpoint>
+pnpm yieldline accept <offerId> && pnpm yieldline fund <offerId>
+pnpm yieldline pools                  # every pool with live accounting
+pnpm yieldline loop                   # fund-pending + monitoring + treasury agents, every pool
 pnpm test                         # pool matching + signed-request auth
-cd ../web && pnpm i && NEXT_PUBLIC_HOROS_API=http://localhost:4021 NEXT_PUBLIC_CIRCLE_CLIENT_KEY=… pnpm dev
+cd ../web && pnpm i && NEXT_PUBLIC_YIELDLINE_API=http://localhost:4021 NEXT_PUBLIC_CIRCLE_CLIENT_KEY=… pnpm dev
 ```
 
 ## Honest limitations
@@ -159,7 +159,7 @@ cd ../web && pnpm i && NEXT_PUBLIC_HOROS_API=http://localhost:4021 NEXT_PUBLIC_C
 - Testnet only; advances are sized in single-digit USDC because they are sized from real revenue.
 - Revenue history is hours to days old (the hackathon is three weeks long). The agent haircuts short histories.
 - USYC is mocked pending allowlisting.
-- `payTo` cannot be enforced on chain; Horos detects, freezes, refuses at the facilitator and publishes. Buyer-side
+- `payTo` cannot be enforced on chain; Yieldline detects, freezes, refuses at the facilitator and publishes. Buyer-side
   clients that check the registry before paying are the natural next step.
 - A seller proves control of their revenue address through their endpoint (its live 402 must pay that address to apply,
   and must name the splitter before funding), not with a signature from that wallet. Someone running their own endpoint

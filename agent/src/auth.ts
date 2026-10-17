@@ -7,7 +7,7 @@ import { kv } from "./kv.js";
 
 export type Fields = { action: string; subject: string; account: string; nonce: string; expires: string };
 
-const HEADER = "Horos request";
+const HEADER = "Yieldline request";
 const KEYS = ["action", "subject", "account", "nonce", "expires"] as const;
 const MAX_AHEAD_MS = 30 * 60_000;
 
@@ -26,7 +26,7 @@ export function buildMessage(f: Fields) {
 
 export function parseMessage(m: string): Fields {
   const lines = m.split("\n");
-  if (lines[0] !== HEADER) throw new AuthError(401, "not a Horos request");
+  if (lines[0] !== HEADER) throw new AuthError(401, "not a Yieldline request");
   const out: Record<string, string> = {};
   for (const line of lines.slice(1)) {
     const i = line.indexOf(": ");

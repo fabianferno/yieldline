@@ -18,7 +18,7 @@ type Overview = {
 const SUBJECT = "0xa8904aaa5ef379ccad3edad0c8545fb0951d6466";
 const ENDPOINT = `/v1/credit/${SUBJECT}`;
 
-/** Read the real 402 challenge from the Horos Lien Oracle. */
+/** Read the real 402 challenge from the Yieldline Lien Oracle. */
 function useChallenge() {
   const [c, setC] = useState<{ payTo: string; amount: number; network: string; live: boolean } | null>(null);
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
             className="mt-6 max-w-[52ch] text-[16px] leading-relaxed text-white/75"
           >
-            Horos advances USDC against revenue it can verify on Arc. The seller points <span className="mono text-ice">payTo</span> at a splitter,
+            Yieldline advances USDC against revenue it can verify on Arc. The seller points <span className="mono text-ice">payTo</span> at a splitter,
             and every paid call pays down the advance on arrival. Each advance is a public lien, and every agent decision is published with its
             reasoning.
           </motion.p>
@@ -107,12 +107,12 @@ function SiteNav() {
     <header className="relative z-10 mx-auto flex max-w-[1240px] items-center gap-6 px-4 py-5 sm:px-6">
       <Link href="/" className="flex items-center gap-2.5">
         <PrismCube size={34} />
-        <span className="text-[19px] font-semibold tracking-tight">Horos</span>
+        <span className="text-[19px] font-semibold tracking-tight">Yieldline</span>
       </Link>
       <nav className="ml-auto flex items-center gap-1 text-[13px] text-white/75 max-sm:hidden">
         <a href="#loop" className="rounded-lg px-3 py-2 hover:text-white">How it works</a>
         <a href="#limits" className="rounded-lg px-3 py-2 hover:text-white">Limits</a>
-        <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="rounded-lg px-3 py-2 hover:text-white">GitHub</a>
+        <a href="https://github.com/sirbadenpowell/yieldline" target="_blank" className="rounded-lg px-3 py-2 hover:text-white">GitHub</a>
       </nav>
       <Link href="/markets" className="btn btn-primary max-sm:ml-auto">
         Open the app <IArrow size={15} />
@@ -163,7 +163,7 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
   return (
     <div ref={ref} className="panel edge relative overflow-hidden">
       <div className="flex items-center gap-2 border-b border-line px-4 py-3 text-[12px]">
-        <span className="text-white/80">A lender asks the Horos Lien Oracle about a seller</span>
+        <span className="text-white/80">A lender asks the Yieldline Lien Oracle about a seller</span>
         <button onClick={() => setRun((r) => r + 1)} className="btn btn-ghost ml-auto !h-8 !px-3 !text-[12px]" aria-label="Replay the exchange">
           <IReplay size={14} /> Replay
         </button>
@@ -172,7 +172,7 @@ function Exchange({ lien, latestSweep }: { lien?: Lien; latestSweep?: FeedItem }
       <div className="mono space-y-4 p-4 text-[12.5px] leading-relaxed sm:p-5">
         <Line show={step >= 1}>
           <span className="text-cyan">GET</span> {ENDPOINT.replace(SUBJECT, short(SUBJECT))} <span className="text-muted">HTTP/1.1</span>
-          <div className="text-muted">Host: horos-api.vercel.app</div>
+          <div className="text-muted">Host: yieldline-api.vercel.app</div>
         </Line>
 
         <Line show={step >= 2}>
@@ -488,7 +488,7 @@ function Close({ addresses }: { addresses?: Overview["addresses"] }) {
           <Link href="/activity" className="btn btn-primary btn-lg">
             Open the activity feed <IArrow size={17} />
           </Link>
-          <a href="https://github.com/sirbadenpowell/horos" target="_blank" className="btn btn-secondary btn-lg">
+          <a href="https://github.com/sirbadenpowell/yieldline" target="_blank" className="btn btn-secondary btn-lg">
             Read the code
           </a>
         </div>

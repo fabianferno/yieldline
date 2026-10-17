@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-10-16T14:59:53.195380+00:00",
-  "title": "Design System: Horos",
+  "title": "Design System: Yieldline",
   "legacyTokenNames": "Token names are legacy from the earlier Prism cyan/amber palette: cyan = accent red, cyan-deep = deep red, amber = coral tint, amber-deep = ember, ice = blush, navy/glass = graphite, info = neutral grey.",
   "extensions": {
     "colorMeta": {

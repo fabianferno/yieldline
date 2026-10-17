@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { Redis } from "@upstash/redis";
 import { ROOT } from "./config.js";
 
-export const DATA = process.env.VERCEL ? "/tmp/horos" : resolve(ROOT, "agent/data");
+export const DATA = process.env.VERCEL ? "/tmp/yieldline" : resolve(ROOT, "agent/data");
 mkdirSync(DATA, { recursive: true });
 
 const ser = (v: unknown) => JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x));
@@ -24,7 +24,7 @@ export type KV = {
 function redisKV(url: string, token: string): KV {
   const r = new Redis({ url, token, automaticDeserialization: false });
   const parse = <T>(s: unknown): T | null => (s === null || s === undefined ? null : (JSON.parse(String(s)) as T));
-  const ns = (k: string) => `horos:${k}`;
+  const ns = (k: string) => `yieldline:${k}`;
   return {
     backend: "redis",
     get: async (k) => parse(await r.get(ns(k))),

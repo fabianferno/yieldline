@@ -1,4 +1,4 @@
-// One-time: register entity secret, create wallet set + Horos wallets on ARC-TESTNET.
+// One-time: register entity secret, create wallet set + Yieldline wallets on ARC-TESTNET.
 import "dotenv/config";
 import { config } from "dotenv";
 import { writeFileSync, existsSync, readFileSync } from "node:fs";
@@ -30,9 +30,9 @@ async function main() {
     console.log("already set up:", readFileSync(out, "utf8"));
     return;
   }
-  const ws = await c.createWalletSet({ name: "Horos" });
+  const ws = await c.createWalletSet({ name: "Yieldline" });
   const walletSetId = ws.data!.walletSet!.id;
-  const names = ["pool-operator", "underwriting-agent", "monitor-agent", "seller-horos-api", "buyer-1", "buyer-2", "buyer-3"];
+  const names = ["pool-operator", "underwriting-agent", "monitor-agent", "seller-yieldline-api", "buyer-1", "buyer-2", "buyer-3"];
   const res = await c.createWallets({
     blockchains: ["ARC-TESTNET"],
     count: names.length,

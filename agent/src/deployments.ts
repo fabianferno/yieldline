@@ -45,7 +45,7 @@ export const circleWalletSet = {
       "address": "0x2e7adb46535ec350bdbd5878401094ba6673c2cc"
     },
     {
-      "name": "seller-horos-api",
+      "name": "seller-yieldline-api",
       "id": "2f6be543-d6d7-5d8d-9125-e854e98f40de",
       "address": "0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f"
     },

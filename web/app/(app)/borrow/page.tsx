@@ -28,13 +28,13 @@ export default function Borrow() {
       <section className="panel edge p-5 sm:p-7">
         <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]">Working capital for your x402 business</h1>
         <p className="mt-2 max-w-[66ch] text-[14px] leading-relaxed text-white/75">
-          The Horos agent reads your x402 revenue on Arc and offers an advance in USDC. You repay with a fixed share of each incoming payment,
+          The Yieldline agent reads your x402 revenue on Arc and offers an advance in USDC. You repay with a fixed share of each incoming payment,
           automatically, until the advance plus a flat fee is paid. No credit check, no collateral beyond the revenue itself.
         </p>
         <Steps current={showApply ? 0 : stepOf(current?.status)} />
       </section>
 
-      {error && !acct && <div className="alert alert-error text-[13px]">Can&apos;t reach the Horos API: {error}</div>}
+      {error && !acct && <div className="alert alert-error text-[13px]">Can&apos;t reach the Yieldline API: {error}</div>}
       {!acct ? (
         <Panel>
           <Skeleton rows={3} />
@@ -384,7 +384,7 @@ function WireSplitter({ o }: { o: Offer }) {
     };
   }, [o.id]);
 
-  const snippet = `// @x402/express: point payTo at your Horos splitter
+  const snippet = `// @x402/express: point payTo at your Yieldline splitter
 paymentMiddleware(
   {
     "GET /your-paid-route": {
@@ -449,7 +449,7 @@ function Line({ o, acct }: { o: Offer; acct: Account }) {
     <Panel title="Your line" right={o.txs?.advance && <a className="underline underline-offset-4" href={`${EXPLORER}/tx/${o.txs.advance}`} target="_blank">advance transaction</a>}>
       {lien ? <LienCard l={lien} sellerLink={false} /> : <Skeleton rows={2} />}
       <p className="mt-4 text-[12px] text-muted">
-        The Horos monitor checks your endpoint and repayment pace. If payTo stops naming the splitter, the line is frozen and 100% of anything that
+        The Yieldline monitor checks your endpoint and repayment pace. If payTo stops naming the splitter, the line is frozen and 100% of anything that
         still arrives repays the advance. Public record:{" "}
         <Link className="text-cyan underline underline-offset-4" href={`/seller/${o.seller}`}>
           {short(o.seller)}

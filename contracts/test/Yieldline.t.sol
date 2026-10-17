@@ -21,7 +21,7 @@ contract USDC is ERC20 {
     }
 }
 
-contract HorosTest is Test {
+contract YieldlineTest is Test {
     USDC usdc;
     LienRegistry registry;
     LenderPool pool;

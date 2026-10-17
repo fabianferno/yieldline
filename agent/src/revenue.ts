@@ -23,7 +23,7 @@ export async function gatewayTransfers(addr: Address, maxPages = 30): Promise<Tr
   const out: Transfer[] = [];
   let url = `${GATEWAY}?network=eip155:5042002&to=${addr}&pageSize=100`;
   for (let p = 0; p < maxPages && url; p++) {
-    const r = await fetch(url, { headers: { "user-agent": "horos-underwriter" } });
+    const r = await fetch(url, { headers: { "user-agent": "yieldline-underwriter" } });
     if (!r.ok) break;
     const d = await r.json();
     for (const i of d.transfers ?? []) {

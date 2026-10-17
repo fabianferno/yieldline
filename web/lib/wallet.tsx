@@ -31,7 +31,7 @@ type Wallet = {
 };
 
 const Ctx = createContext<Wallet | null>(null);
-const STORE = "horos.passkey";
+const STORE = "yieldline.passkey";
 
 type Stored = { id: string; publicKey: Hex; username?: string };
 
@@ -101,7 +101,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         const credential = await toWebAuthnCredential({
           transport: toPasskeyTransport(CLIENT_URL, CLIENT_KEY),
           mode: mode === "register" ? WebAuthnMode.Register : WebAuthnMode.Login,
-          ...(mode === "register" ? { username: username || `horos-${Date.now().toString(36)}` } : {}),
+          ...(mode === "register" ? { username: username || `yieldline-${Date.now().toString(36)}` } : {}),
         } as any);
         const stored: Stored = { id: credential.id, publicKey: credential.publicKey, username };
         try {

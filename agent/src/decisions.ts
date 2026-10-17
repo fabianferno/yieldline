@@ -1,5 +1,5 @@
 // Agent decisions are published on chain: LenderPool.logDecision(subject, kind, hash, uri) where uri carries a
-// compact JSON summary ("horos:v1:" + JSON) and hash = keccak of the full local record (inputs + investigation trace).
+// compact JSON summary ("yieldline:v1:" + JSON) and hash = keccak of the full local record (inputs + investigation trace).
 import { decodeEventLog, type Address } from "viem";
 import LenderPool from "./abi/LenderPool.js";
 import LienRegistry from "./abi/LienRegistry.js";
@@ -9,7 +9,8 @@ import { ADDR, EXPLORER } from "./config.js";
 import { tx } from "./chain.js";
 import { patchDecision, type Decision } from "./store.js";
 
-const PREFIX = "horos:v1:";
+const PREFIX = "yieldline:v1:";
+const LEGACY_PREFIX = "horos:v1:"; // decisions anchored before the rename
 
 export function summarize(d: Decision) {
   const out = (d.output ?? {}) as Record<string, unknown>;
@@ -32,7 +33,7 @@ export function summarize(d: Decision) {
   };
 }
 
-/** Anchor on the pool the decision concerns; pool-agnostic underwriting decisions anchor on Horos Core. */
+/** Anchor on the pool the decision concerns; pool-agnostic underwriting decisions anchor on Yieldline Core. */
 export async function anchorDecision(
   d: Decision,
   who: "underwriter" | "monitor" = d.agent === "underwriter" ? "underwriter" : "monitor",
@@ -97,9 +98,11 @@ export async function activity() {
     .filter((r) => r.ev && !["RoleGranted", "LimitsUpdated", "Transfer", "Approval", "Initialized"].includes(r.ev.name))
     .map(({ l, ev, src, pool }: { l: any; ev: ReturnType<typeof decode>; src: string; pool?: Address }) => {
       let summary: unknown;
-      if (ev!.name === "Decision" && typeof ev!.args.uri === "string" && ev!.args.uri.startsWith(PREFIX)) {
+      const uri = ev!.name === "Decision" && typeof ev!.args.uri === "string" ? ev!.args.uri : "";
+      const prefix = [PREFIX, LEGACY_PREFIX].find((x) => uri.startsWith(x));
+      if (prefix) {
         try {
-          summary = JSON.parse(ev!.args.uri.slice(PREFIX.length));
+          summary = JSON.parse(uri.slice(prefix.length));
         } catch {}
       }
       return {

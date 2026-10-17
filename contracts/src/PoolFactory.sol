@@ -9,7 +9,7 @@ import {Limits, PoolSetup} from "./Limits.sol";
 
 /// @title PoolFactory
 /// @notice Anyone can open a lending pool as its curator. Pools are EIP-1167 clones of one LenderPoolV2
-///         implementation, bounded by protocol caps, underwritten by the Horos agents, and registered as
+///         implementation, bounded by protocol caps, underwritten by the Yieldline agents, and registered as
 ///         lenders in the shared LienRegistry, so a seller with a live lien in any pool cannot borrow from another.
 contract PoolFactory is AccessControl {
     LienRegistry public immutable registry;

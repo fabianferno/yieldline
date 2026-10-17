@@ -11,7 +11,7 @@ import { IArrow, IX, PrismCube } from "./icons";
  * Every target is an `id="tour-…"` on the page itself; steps that wait on API data retry the selector.
  */
 const TOUR = "loop";
-const SEEN = "horos.tour.v2";
+const SEEN = "yieldline.tour.v2";
 const DEMO_SELLER = "/seller/0xb6cb2d219abbf11ce61525d35b49513d9a2fa80f";
 const WAIT = { selectorRetryAttempts: 25, selectorRetryDelay: 200 };
 
@@ -26,7 +26,7 @@ const STEPS: Tour[] = [
         title: "Working capital, repaid by the sales it funds",
         content: (
           <>
-            Horos lends USDC to businesses that get paid per call over x402. An agent checks the revenue is real, lenders fund it through
+            Yieldline lends USDC to businesses that get paid per call over x402. An agent checks the revenue is real, lenders fund it through
             pools, and every later payment pays a slice back automatically. Seven stops, about a minute.
           </>
         ),
