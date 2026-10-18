@@ -140,10 +140,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 18px;
+  height: 48px;
+  padding: 0 22px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--white);
   white-space: nowrap;
@@ -232,9 +232,9 @@ body {
   --spec-tint: rgba(140, 34, 34, 0.5);
 }
 .btn-lg {
-  height: 48px;
-  padding: 0 24px;
-  font-size: 14px;
+  height: 56px;
+  padding: 0 28px;
+  font-size: 15px;
   border-radius: 14px;
 }
 
